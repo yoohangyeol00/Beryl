@@ -1,0 +1,332 @@
+<!DOCTYPE html><html class="light" lang="ko"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>BERYL - Sign Up</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Work+Sans:wght@400;500&amp;family=IBM+Plex+Sans:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary": "#006d43",
+                      "on-secondary-fixed-variant": "#084f4d",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed": "#002111",
+                      "surface-variant": "#dfe3e1",
+                      "on-surface-variant": "#3d4a41",
+                      "secondary": "#2a6865",
+                      "on-secondary-fixed": "#00201f",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-fixed": "#002117",
+                      "inverse-on-surface": "#eef2f0",
+                      "secondary-fixed": "#b1eeea",
+                      "surface-dim": "#d7dbd9",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#59de9b",
+                      "background": "#f6faf8",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary": "#006c52",
+                      "on-primary-container": "#00331d",
+                      "error": "#ba1a1a",
+                      "surface-tint": "#006d43",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#f0f4f2",
+                      "outline": "#6d7a70",
+                      "on-tertiary-container": "#003326",
+                      "tertiary-container": "#00a782",
+                      "surface-container-high": "#e5e9e7",
+                      "on-error": "#ffffff",
+                      "surface": "#f6faf8",
+                      "on-surface": "#181d1c",
+                      "surface-container-highest": "#dfe3e1",
+                      "primary-fixed": "#78fbb6",
+                      "secondary-fixed-dim": "#95d1ce",
+                      "tertiary-fixed": "#79f9ce",
+                      "on-tertiary-fixed-variant": "#00513d",
+                      "outline-variant": "#bccabe",
+                      "secondary-container": "#b1eeea",
+                      "inverse-surface": "#2d3130",
+                      "tertiary-fixed-dim": "#5adcb3",
+                      "surface-container": "#ebefed",
+                      "primary-container": "#00a86b",
+                      "on-background": "#181d1c",
+                      "on-secondary-container": "#316e6b",
+                      "on-primary-fixed-variant": "#005232",
+                      "surface-bright": "#f6faf8",
+                      "on-tertiary": "#ffffff",
+                      "primary-fixed-dim": "#59de9b"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "margin-desktop": "48px",
+                      "gutter": "24px",
+                      "container-max": "1280px",
+                      "unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Manrope"],
+                      "label-sm": ["IBM Plex Sans"],
+                      "headline-xl": ["Manrope"],
+                      "body-lg": ["Work Sans"],
+                      "label-md": ["IBM Plex Sans"],
+                      "headline-lg": ["Manrope"],
+                      "headline-lg-mobile": ["Manrope"],
+                      "body-md": ["Work Sans"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #f6faf8;
+            color: #181d1c;
+            overflow-x: hidden;
+        }
+        .form-card {
+            box-shadow: 0 4px 6px -1px rgba(0, 36, 27, 0.05), 0 2px 4px -1px rgba(0, 36, 27, 0.03);
+            border: 1px solid #D1E3DC;
+        }
+        .step-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hidden-step {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .active-step {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .emerald-focus:focus {
+            border-color: #00A86B;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 168, 107, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row">
+<!-- Left Side: Branding and Visuals (Desktop) -->
+<section class="hidden md:flex w-1/2 bg-surface-container-low relative overflow-hidden items-center justify-center p-margin-desktop border-r border-outline-variant">
+<div class="z-10 max-w-lg text-left">
+<div class="mb-12">
+<div class="h-12 mb-2">https://lh3.googleusercontent.com/aida-public/AB6AXuA1VIlvE-BEgpZkJB_LIuHNK9FSHZRU0FNvXDZ4GKgEMJCHYtV88P2zZSgzoF0jUUCvmHkYdcGPPruD_C39ZH70I6ixoKyc5nwEUohPB3TTdePOCqm9rvLni8DrUvgaWeipw5xTf0uEGPU5QqWoxqhymZl0nmuDZiG6k6BjEbs6g6tHYJBkzERMG5DenDZ1p0L4ktSDOZt1Rc89uLBuKcJA-Czvp3gixLEYsuPqXPbDcBUpiDzIXvAnqAE0RIBbGzAjf45SFE7FMZh5</div>
+<p class="font-label-md text-label-md text-on-surface-variant mt-2 tracking-widest uppercase">BERYL Ecosystem</p>
+</div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-6">
+                Connect to the largest institutional bidding network.
+            </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8 leading-relaxed">
+                Join a platform where institutional authority meets modern procurement efficiency. BERYL provides a secure, transparent, and authoritative digital vault for your bidding activities.
+            </p>
+<div class="grid grid-cols-2 gap-gutter">
+<div class="p-6 bg-white border border-outline-variant rounded-xl">
+<span class="material-symbols-outlined text-primary-container mb-3" data-icon="verified_user">verified_user</span>
+<h3 class="font-label-md text-label-md text-on-surface">Secure Transactions</h3>
+<p class="font-body-md text-label-sm text-on-surface-variant mt-1">End-to-end encrypted procurement workflows.</p>
+</div>
+<div class="p-6 bg-white border border-outline-variant rounded-xl">
+<span class="material-symbols-outlined text-primary-container mb-3" data-icon="query_stats">query_stats</span>
+<h3 class="font-label-md text-label-md text-on-surface">Data Precision</h3>
+<p class="font-body-md text-label-sm text-on-surface-variant mt-1">Advanced RFP analysis and yield reporting.</p>
+</div>
+</div>
+</div>
+<!-- Decorative background element -->
+<div class="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
+<div class="w-full h-full bg-cover" data-alt="A sophisticated architectural pattern consisting of clean, interlocking geometric lines and emerald-tinted translucent glass surfaces. The lighting is cold and professional, highlighting the structural integrity of the design. The palette is dominated by whites, light greys, and deep forest green accents, reflecting a sense of permanent institutional authority and modern corporate precision." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCrQS_Aush9vTgc7KSJi-8kG-e-H19a3TKGIRSxnh2WXe7QJ7js8ZUWR4oxUs8LHQyMX5ioS_UEvXYUp6Oe8geU5jeoJFRIBVvkrEdHh9stZnpdxTuNZ--F12pzrsPX-itfeuqLhWHc5TAGlLIzWtIQN7N4-f7SKrTOriM1UEsWuRo4mA_FzN6Y_kzPNtrqX6UtOPHiBkyTG0XzZCIyyrifJbOOnjvnqxgDb09AxIU1I7Ge5rU0efDKj_K5e4zddnP1wdn9ixcBXtyT')"></div>
+</div>
+</section>
+<!-- Right Side: Sign Up Form -->
+<main class="w-full md:w-1/2 flex items-center justify-center p-margin-mobile md:p-margin-desktop bg-surface">
+<div class="w-full max-w-md">
+<!-- Mobile Logo -->
+<div class="md:hidden mb-8 text-center">
+<div class="h-10 flex justify-center">https://lh3.googleusercontent.com/aida-public/AB6AXuA1VIlvE-BEgpZkJB_LIuHNK9FSHZRU0FNvXDZ4GKgEMJCHYtV88P2zZSgzoF0jUUCvmHkYdcGPPruD_C39ZH70I6ixoKyc5nwEUohPB3TTdePOCqm9rvLni8DrUvgaWeipw5xTf0uEGPU5QqWoxqhymZl0nmuDZiG6k6BjEbs6g6tHYJBkzERMG5DenDZ1p0L4ktSDOZt1Rc89uLBuKcJA-Czvp3gixLEYsuPqXPbDcBUpiDzIXvAnqAE0RIBbGzAjf45SFE7FMZh5</div>
+</div>
+<div class="mb-8">
+<h2 class="font-headline-lg text-headline-lg text-on-surface" id="step-title">Create Account</h2>
+<p class="font-body-md text-body-md text-on-surface-variant" id="step-desc">Enter your personal details to begin.</p>
+</div>
+<!-- Stepper Progress -->
+<div class="flex items-center mb-8 space-x-4">
+<div class="flex-1 h-1 bg-primary-container rounded-full" id="bar-1"></div>
+<div class="flex-1 h-1 bg-surface-container-highest rounded-full" id="bar-2"></div>
+</div>
+<form class="space-y-6" id="signup-form">
+<!-- Step 1: Personal Info -->
+<div class="step-transition active-step space-y-5" id="step-1">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface" for="fullName">Full Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="person">person</span>
+<input class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg font-body-md emerald-focus" id="fullName" placeholder="John Doe" required="" type="text">
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface" for="workEmail">Work Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="mail">mail</span>
+<input class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg font-body-md emerald-focus" id="workEmail" placeholder="john@company.com" required="" type="email">
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface" for="password">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="lock">lock</span>
+<input class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg font-body-md emerald-focus" id="password" placeholder="••••••••" required="" type="password">
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface" for="passwordConfirm">Confirm Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="lock_reset">lock_reset</span>
+<input class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg font-body-md emerald-focus" id="passwordConfirm" placeholder="••••••••" required="" type="password">
+</div>
+</div>
+<button class="w-full py-4 bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md rounded-lg transition-all flex items-center justify-center gap-2 group" onclick="nextStep()" type="button">
+                        Next: Organization Details
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Step 2: Company Info -->
+<div class="step-transition hidden-step space-y-6" id="step-2">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface" for="orgSearch">Company/Organization Search</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg font-body-md emerald-focus" id="orgSearch" placeholder="Search for your company..." type="text">
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">We'll link you to your organization's existing portal if found.</p>
+</div>
+<div class="p-4 bg-surface-container-low border border-outline-variant rounded-lg">
+<p class="font-label-sm text-label-sm text-on-surface-variant mb-3">Popular matches nearby:</p>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-2 hover:bg-white rounded cursor-pointer transition-colors border border-transparent hover:border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary/10 flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="business">business</span>
+</div>
+<span class="font-label-md text-on-surface">Global Tech Logistics</span>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="add_circle">add_circle</span>
+</div>
+<div class="flex items-center justify-between p-2 hover:bg-white rounded cursor-pointer transition-colors border border-transparent hover:border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary/10 flex items-center justify-center rounded">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="apartment">apartment</span>
+</div>
+<span class="font-label-md text-on-surface">Metropolitan Infrastructure</span>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="add_circle">add_circle</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<input class="w-5 h-5 text-primary border-outline-variant rounded focus:ring-primary" id="terms" required="" type="checkbox">
+<label class="font-body-md text-label-sm text-on-surface-variant" for="terms">
+                            I agree to the <a class="text-primary hover:underline" href="#">Terms of Service</a> and <a class="text-primary hover:underline" href="#">Privacy Policy</a>.
+                        </label>
+</div>
+<div class="flex gap-4">
+<button class="flex-1 py-4 border border-outline-variant text-on-surface-variant font-label-md text-label-md rounded-lg hover:bg-surface-container transition-colors" onclick="prevStep()" type="button">
+                            Back
+                        </button>
+<button class="flex-[2] py-4 bg-primary-container hover:bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-sm transition-all" type="submit">
+                            Create Account
+                        </button>
+</div>
+</div>
+</form>
+<div class="mt-12 text-center">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                    Already have an account? 
+                    <a class="text-primary font-bold hover:underline ml-1" href="#">Back to Login</a>
+</p>
+</div>
+<!-- Footer Meta -->
+<div class="mt-24 pt-8 border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-4 opacity-60">
+<p class="font-label-sm text-label-sm">© 2024 BERYL Institutional Group</p>
+<div class="flex gap-6">
+<a class="font-label-sm text-label-sm hover:text-primary" href="#">Help Center</a>
+<a class="font-label-sm text-label-sm hover:text-primary" href="#">System Status</a>
+</div>
+</div>
+</div>
+</main>
+<script>
+        function nextStep() {
+            const s1 = document.getElementById('step-1');
+            const s2 = document.getElementById('step-2');
+            const bar2 = document.getElementById('bar-2');
+            const title = document.getElementById('step-title');
+            const desc = document.getElementById('step-desc');
+
+            s1.classList.remove('active-step');
+            s1.classList.add('hidden-step');
+            
+            setTimeout(() => {
+                s2.classList.remove('hidden-step');
+                s2.classList.add('active-step');
+                bar2.classList.remove('bg-surface-container-highest');
+                bar2.classList.add('bg-primary-container');
+                title.innerText = "Organization Details";
+                desc.innerText = "Link your account to an existing organization.";
+            }, 200);
+        }
+
+        function prevStep() {
+            const s1 = document.getElementById('step-1');
+            const s2 = document.getElementById('step-2');
+            const bar2 = document.getElementById('bar-2');
+            const title = document.getElementById('step-title');
+            const desc = document.getElementById('step-desc');
+
+            s2.classList.remove('active-step');
+            s2.classList.add('hidden-step');
+
+            setTimeout(() => {
+                s1.classList.remove('hidden-step');
+                s1.classList.add('active-step');
+                bar2.classList.remove('bg-primary-container');
+                bar2.classList.add('bg-surface-container-highest');
+                title.innerText = "Create Account";
+                desc.innerText = "Enter your personal details to begin.";
+            }, 200);
+        }
+
+        document.getElementById('signup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Account registration initiated in the BERYL ecosystem.');
+        });
+    </script>
+
+
+</body></html>

@@ -1,13 +1,61 @@
-import './App.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Navigate, RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { AuthLayout } from './layouts/AuthLayout';
+import { MainLayout } from './layouts/MainLayout';
+import { LoginPage } from './features/auth/pages/LoginPage';
+import { SignupPage } from './features/auth/pages/SignupPage';
+import { AgenciesPage } from './features/agencies/pages/AgenciesPage';
+import { AgencyFormPage } from './features/agencies/pages/AgencyFormPage';
+import { AgencyDashboardPage } from './features/dashboards/pages/AgencyDashboardPage';
+import { SupplierDashboardPage } from './features/dashboards/pages/SupplierDashboardPage';
+import { JobDetailPage } from './features/jobs/pages/JobDetailPage';
+import { JobListPage } from './features/jobs/pages/JobListPage';
+import { ManpowerPage } from './features/manpower/pages/ManpowerPage';
+import { OfferAnalysisPage } from './features/offers/pages/OfferAnalysisPage';
+import { WonProjectsPage } from './features/projects/pages/WonProjectsPage';
+import { ResumeDetailPage } from './features/resumes/pages/ResumeDetailPage';
+import { SupplierFormPage } from './features/suppliers/pages/SupplierFormPage';
+import { SuppliersPage } from './features/suppliers/pages/SuppliersPage';
+
+const queryClient = new QueryClient();
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <AuthLayout />,
+    children: [
+      { path: 'login', element: <LoginPage /> },
+      { path: 'signup', element: <SignupPage /> }
+    ]
+  },
+  {
+    path: '/',
+    element: <MainLayout />,
+    children: [
+      { index: true, element: <Navigate to="/jobs" replace /> },
+      { path: 'jobs', element: <JobListPage /> },
+      { path: 'jobs/:jobId', element: <JobDetailPage /> },
+      { path: 'resumes/:resumeId', element: <ResumeDetailPage /> },
+      { path: 'offers/:offerId/analysis', element: <OfferAnalysisPage /> },
+      { path: 'dashboard', element: <Navigate to="/dashboard/agency" replace /> },
+      { path: 'dashboard/agency', element: <AgencyDashboardPage /> },
+      { path: 'dashboard/supplier', element: <SupplierDashboardPage /> },
+      { path: 'agencies', element: <AgenciesPage /> },
+      { path: 'agencies/new', element: <AgencyFormPage /> },
+      { path: 'agencies/:agencyId/edit', element: <AgencyFormPage /> },
+      { path: 'suppliers', element: <SuppliersPage /> },
+      { path: 'suppliers/new', element: <SupplierFormPage /> },
+      { path: 'suppliers/:supplierId/edit', element: <SupplierFormPage /> },
+      { path: 'projects/won', element: <WonProjectsPage /> },
+      { path: 'manpower', element: <ManpowerPage /> }
+    ]
+  }
+]);
 
 export function App() {
   return (
-    <main className="app">
-      <section className="panel">
-        <p className="eyebrow">Beryl</p>
-        <h1>React, Vite, TypeScript</h1>
-        <p>Frontend is ready. API requests under <code>/api</code> are proxied to the Express server.</p>
-      </section>
-    </main>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   );
 }

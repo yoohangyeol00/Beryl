@@ -1,0 +1,416 @@
+﻿{
+    "id":  31,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"name\":\"projects/12282738876199046513\",\"title\":\"Remix of Smart Public Procurement System\",\"visibility\":\"PRIVATE\",\"createTime\":\"2026-06-25T08:34:50.095758Z\",\"updateTime\":\"2026-06-26T00:10:28.263164Z\",\"projectType\":\"TEXT_TO_UI_PRO\",\"thumbnailScreenshot\":{\"name\":\"projects/12282738876199046513/files/f33311ef7c4a48bba17126fb93d3aa6a\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvZFgTg7j5kz0J5zxwWkRp-t3QH2Bq1AOXipSAf6INkIJ8r6QMcT5zQqziKx3VBd-ZTZkkzwU8lDMjgprKyHky2jS9-9_1DOq3zy3a9WNWvxI3DN-DlxdFtYAsSeE1N7i00Fln22M5ZFAENZBw5BUu7o9mYDsFK96Hfk8-lQ5dgmhGQZQBBJI27TLvle49cOdnvdDmkFU4XwyACRNPODq2pgWg6RFWlUK_UPP1Y8HsMh6-Ob0I-1pr4MZyx\"},\"origin\":\"STITCH\",\"deviceType\":\"DESKTOP\",\"designTheme\":{\"colorMode\":\"LIGHT\",\"font\":\"NOTO_SANS\",\"roundness\":\"ROUND_FOUR\",\"customColor\":\"#1a73e8\",\"headlineFont\":\"NOTO_SANS\",\"bodyFont\":\"NOTO_SANS\",\"labelFont\":\"NOTO_SANS\",\"namedColors\":{\"background\":\"#f4faff\",\"error\":\"#ba1a1a\",\"error_container\":\"#ffdad6\",\"inverse_on_surface\":\"#e0f4ff\",\"inverse_primary\":\"#adc7ff\",\"inverse_surface\":\"#163440\",\"on_background\":\"#001f2a\",\"on_error\":\"#ffffff\",\"on_error_container\":\"#93000a\",\"on_primary\":\"#ffffff\",\"on_primary_container\":\"#ffffff\",\"on_primary_fixed\":\"#001a41\",\"on_primary_fixed_variant\":\"#004493\",\"on_secondary\":\"#ffffff\",\"on_secondary_container\":\"#566475\",\"on_secondary_fixed\":\"#0f1c2c\",\"on_secondary_fixed_variant\":\"#3a4859\",\"on_surface\":\"#001f2a\",\"on_surface_variant\":\"#414754\",\"on_tertiary\":\"#ffffff\",\"on_tertiary_container\":\"#0e0200\",\"on_tertiary_fixed\":\"#341100\",\"on_tertiary_fixed_variant\":\"#783100\",\"outline\":\"#727785\",\"outline_variant\":\"#c1c6d6\",\"primary\":\"#005bbf\",\"primary_container\":\"#1a73e8\",\"primary_fixed\":\"#d8e2ff\",\"primary_fixed_dim\":\"#adc7ff\",\"secondary\":\"#525f71\",\"secondary_container\":\"#d3e1f6\",\"secondary_fixed\":\"#d6e4f9\",\"secondary_fixed_dim\":\"#bac8dc\",\"surface\":\"#f4faff\",\"surface_bright\":\"#f4faff\",\"surface_container\":\"#d9f2ff\",\"surface_container_high\":\"#ceedfd\",\"surface_container_highest\":\"#c9e7f7\",\"surface_container_low\":\"#e6f6ff\",\"surface_container_lowest\":\"#ffffff\",\"surface_dim\":\"#c0dfee\",\"surface_tint\":\"#005bc0\",\"surface_variant\":\"#c9e7f7\",\"tertiary\":\"#9e4300\",\"tertiary_container\":\"#c55500\",\"tertiary_fixed\":\"#ffdbcb\",\"tertiary_fixed_dim\":\"#ffb691\"},\"designMd\":\"---\\nname: Institutional Authority\\ncolors:\\n  surface: \u0027#f4faff\u0027\\n  surface-dim: \u0027#c0dfee\u0027\\n  surface-bright: \u0027#f4faff\u0027\\n  surface-container-lowest: \u0027#ffffff\u0027\\n  surface-container-low: \u0027#e6f6ff\u0027\\n  surface-container: \u0027#d9f2ff\u0027\\n  surface-container-high: \u0027#ceedfd\u0027\\n  surface-container-highest: \u0027#c9e7f7\u0027\\n  on-surface: \u0027#001f2a\u0027\\n  on-surface-variant: \u0027#414754\u0027\\n  inverse-surface: \u0027#163440\u0027\\n  inverse-on-surface: \u0027#e0f4ff\u0027\\n  outline: \u0027#727785\u0027\\n  outline-variant: \u0027#c1c6d6\u0027\\n  surface-tint: \u0027#005bc0\u0027\\n  primary: \u0027#005bbf\u0027\\n  on-primary: \u0027#ffffff\u0027\\n  primary-container: \u0027#1a73e8\u0027\\n  on-primary-container: \u0027#ffffff\u0027\\n  inverse-primary: \u0027#adc7ff\u0027\\n  secondary: \u0027#525f71\u0027\\n  on-secondary: \u0027#ffffff\u0027\\n  secondary-container: \u0027#d3e1f6\u0027\\n  on-secondary-container: \u0027#566475\u0027\\n  tertiary: \u0027#9e4300\u0027\\n  on-tertiary: \u0027#ffffff\u0027\\n  tertiary-container: \u0027#c55500\u0027\\n  on-tertiary-container: \u0027#0e0200\u0027\\n  error: \u0027#ba1a1a\u0027\\n  on-error: \u0027#ffffff\u0027\\n  error-container: \u0027#ffdad6\u0027\\n  on-error-container: \u0027#93000a\u0027\\n  primary-fixed: \u0027#d8e2ff\u0027\\n  primary-fixed-dim: \u0027#adc7ff\u0027\\n  on-primary-fixed: \u0027#001a41\u0027\\n  on-primary-fixed-variant: \u0027#004493\u0027\\n  secondary-fixed: \u0027#d6e4f9\u0027\\n  secondary-fixed-dim: \u0027#bac8dc\u0027\\n  on-secondary-fixed: \u0027#0f1c2c\u0027\\n  on-secondary-fixed-variant: \u0027#3a4859\u0027\\n  tertiary-fixed: \u0027#ffdbcb\u0027\\n  tertiary-fixed-dim: \u0027#ffb691\u0027\\n  on-tertiary-fixed: \u0027#341100\u0027\\n  on-tertiary-fixed-variant: \u0027#783100\u0027\\n  background: \u0027#f4faff\u0027\\n  on-background: \u0027#001f2a\u0027\\n  surface-variant: \u0027#c9e7f7\u0027\\ntypography:\\n  display-lg:\\n    fontFamily: Noto Sans\\n    fontSize: 32px\\n    fontWeight: \u0027700\u0027\\n    lineHeight: \u00271.2\u0027\\n    letterSpacing: -0.02em\\n  headline-md:\\n    fontFamily: Noto Sans\\n    fontSize: 24px\\n    fontWeight: \u0027600\u0027\\n    lineHeight: \u00271.3\u0027\\n    letterSpacing: -0.01em\\n  headline-sm:\\n    fontFamily: Noto Sans\\n    fontSize: 20px\\n    fontWeight: \u0027600\u0027\\n    lineHeight: \u00271.4\u0027\\n  body-lg:\\n    fontFamily: Noto Sans\\n    fontSize: 16px\\n    fontWeight: \u0027400\u0027\\n    lineHeight: \u00271.6\u0027\\n  body-md:\\n    fontFamily: Noto Sans\\n    fontSize: 14px\\n    fontWeight: \u0027400\u0027\\n    lineHeight: \u00271.5\u0027\\n  body-sm:\\n    fontFamily: Noto Sans\\n    fontSize: 13px\\n    fontWeight: \u0027400\u0027\\n    lineHeight: \u00271.5\u0027\\n  label-md:\\n    fontFamily: Noto Sans\\n    fontSize: 12px\\n    fontWeight: \u0027600\u0027\\n    lineHeight: \u00271\u0027\\n    letterSpacing: 0.02em\\n  label-sm:\\n    fontFamily: Noto Sans\\n    fontSize: 11px\\n    fontWeight: \u0027500\u0027\\n    lineHeight: \u00271\u0027\\n  headline-md-mobile:\\n    fontFamily: Noto Sans\\n    fontSize: 20px\\n    fontWeight: \u0027600\u0027\\n    lineHeight: \u00271.3\u0027\\nrounded:\\n  sm: 0.125rem\\n  DEFAULT: 0.25rem\\n  md: 0.375rem\\n  lg: 0.5rem\\n  xl: 0.75rem\\n  full: 9999px\\nspacing:\\n  unit: 4px\\n  gutter: 16px\\n  margin: 24px\\n  container-max-width: 1440px\\n  stack-sm: 8px\\n  stack-md: 16px\\n  stack-lg: 24px\\n---\\n\\n## Brand \u0026 Style\\nThe design system is engineered for public procurement and tender management, prioritizing **reliability, precision, and institutional trust**. The aesthetic follows a **Corporate/Modern** approach, blending the efficiency of a high-density dashboard with the clarity of a government-grade interface.\\n\\nThe visual language is characterized by:\\n- **Systematic Order:** Rigorous alignment and structured information hierarchies to reduce cognitive load during complex bidding processes.\\n- **Data Clarity:** High-density layouts that do not sacrifice readability, utilizing subtle tonal shifts rather than decorative elements.\\n- **Operational Confidence:** A professional color palette that evokes a sense of security and official oversight.\\n\\n## Colors\\nThe palette is rooted in professional stability. \\n\\n- **Primary (Google Cloud Blue):** Used for primary actions, active states, and navigational focus. It signals technological modernity.\\n- **Secondary (Deep Navy):** Reserved for headers, sidebars, and structural elements to provide a \\\"weighted\\\" institutional feel.\\n- **Semantic Colors:** \\n    - **Success (Green):** Specifically for \\\"Tender Won\\\" (낙찰) and completed milestones.\\n    - **Error (Red):** Specifically for deadlines (마감), \\\"Tender Lost\\\" (유찰), and critical alerts.\\n- **Neutral Surface:** A range of cool grays (from #F8F9FA to #ECEFF1) are used to differentiate workspace areas from background canvas.\\n\\n## Typography\\nThe design system utilizes **Noto Sans** to ensure maximum legibility across all data-dense environments. \\n\\n- **Hierarchy:** Use `display-lg` for dashboard summaries and `headline-md` for section titles.\\n- **Data Tables:** Body-sm (13px) is the standard for table cells to allow for maximum horizontal information density without compromising character recognition.\\n- **Captions:** Label-md (12px) in SemiBold should be used for table headers and status badge text to differentiate them from interactive data.\\n\\n## Layout \u0026 Spacing\\nThe system employs a **Fixed Grid** for internal dashboards to maintain predictable data visualization layouts.\\n\\n- **Grid System:** A 12-column grid with a 16px gutter. \\n- **Density:** We utilize an 8px base unit, but allow for 4px increments in \\\"Compact Mode\\\" components like data tables.\\n- **Breakpoints:**\\n    - **Desktop (1200px+):** 12 columns, 24px margins.\\n    - **Tablet (768px - 1199px):** 6 columns, 16px margins, sidebars collapse to icons.\\n    - **Mobile (\\u003c767px):** 1 column, 12px margins. Horizontal scrolling is permitted for large data tables.\\n\\n## Elevation \u0026 Depth\\nDepth is created through **Tonal Layering** and **Low-Contrast Outlines** rather than heavy shadows, maintaining a clean, \\\"flat\\\" professional look.\\n\\n- **Level 0 (Background):** #F4F7F9 — The main canvas.\\n- **Level 1 (Cards/Widgets):** White (#FFFFFF) with a 1px border in #E0E4E8. No shadow. Used for dashboard widgets and table containers.\\n- **Level 2 (Dropdowns/Modals):** White with a soft ambient shadow (0px 4px 12px rgba(13, 27, 42, 0.08)) to indicate temporary interaction.\\n- **Interactive States:** Hovering over a table row or a list item should trigger a subtle background tint (#F1F5F9) rather than an elevation lift.\\n\\n## Shapes\\nThis design system uses **Soft (Level 1)** rounding to reflect a precise, \\\"engineered\\\" feel suitable for government and enterprise software.\\n\\n- **Components:** 0.25rem (4px) corner radius for buttons, input fields, and status badges.\\n- **Containers:** 0.5rem (8px) for dashboard widgets and manpower cards.\\n- **Tables:** Outer containers should have an 8px radius, while internal row selections remain sharp to maintain grid alignment.\\n\\n## Components\\n\\n### Data Tables\\n- **Header:** Background #F8F9FA, uppercase Label-md text, 1px border-bottom.\\n- **Rows:** 48px height for standard density, 40px for compact. Zebra striping is discouraged; use subtle hover states instead.\\n- **Alignment:** Numerical data is right-aligned; text data is left-aligned.\\n\\n### Status Badges\\n- **General:** Pill-shaped with a light background tint and dark text (e.g., Success Green background at 10% opacity with 100% opacity Green text).\\n- **Ongoing (진행중):** Primary Blue.\\n- **Won (낙찰):** Success Green.\\n- **Failed (유찰):** Neutral Slate.\\n- **Deadline (마감임박):** Error Red.\\n\\n### Analysis Dashboard Widgets\\n- **Structure:** 8px rounded corners, 1px border.\\n- **Header:** Includes a title (Headline-sm) and an optional icon or \\\"View All\\\" text button.\\n- **Visuals:** Charts should use the Primary Blue and Secondary Navy as the core data colors to maintain brand alignment.\\n\\n### Manpower Status Cards\\n- **Layout:** Vertical stack. Top section shows name/role; middle section shows \\\"Current Project\\\" utilizing a Status Badge; bottom section shows \\\"Availability Date.\\\"\\n- **Visual Cue:** Use a small circular avatar (40px) or initials to humanize the data.\\n\\n### Input Fields\\n- **Default:** 1px border (#CFD8DC), 4px radius.\\n- **Focus:** 2px border using Primary Blue (#1A73E8).\\n- **Label:** Small, bolded text placed above the field, not inside as a placeholder, to ensure persistent context.\",\"colorVariant\":\"FIDELITY\",\"overridePrimaryColor\":\"#1a73e8\",\"overrideSecondaryColor\":\"#0d1b2a\",\"overrideNeutralColor\":\"#607d8b\",\"typography\":{\"body-lg\":{\"fontFamily\":\"Noto Sans\",\"fontSize\":\"16px\",\"fontWeight\":\"400\",\"lineHeight\":\"1.6\"},\"body-md\":{\"fontFamily\":\"Noto Sans\",\"fontSize\":\"14px\",\"fontWeight\":\"400\",\"lineHeight\":\"1.5\"},\"body-sm\":{\"fontFamily\":\"Noto Sans\",\"fontSize\":\"13px\",\"fontWeight\":\"400\",\"lineHeight\":\"1.5\"},\"display-lg\":{\"fontFamily\":\"Noto Sans\",\"fontSize\":\"32px\",\"fontWeight\":\"700\",\"lineHeight\":\"1.2\",\"letterSpacing\":\"-0.02em\"},\"headline-md\":{\"fontFamily\":\"Noto Sans\",\"fontSize\":\"24px\",\"fontWeight\":\"600\",\"lineHeight\":\"1.3\",\"letterSpacing\":\"-0.01em\"},\"headline-md-mobile\":{\"fontFamily\":\"Noto Sans\",\"fontSize\":\"20px\",\"fontWeight\":\"600\",\"lineHeight\":\"1.3\"},\"headline-sm\":{\"fontFamily\":\"Noto Sans\",\"fontSize\":\"20px\",\"fontWeight\":\"600\",\"lineHeight\":\"1.4\"},\"label-md\":{\"fontFamily\":\"Noto Sans\",\"fontSize\":\"12px\",\"fontWeight\":\"600\",\"lineHeight\":\"1\",\"letterSpacing\":\"0.02em\"},\"label-sm\":{\"fontFamily\":\"Noto Sans\",\"fontSize\":\"11px\",\"fontWeight\":\"500\",\"lineHeight\":\"1\"}},\"spacing\":{\"container-max-width\":\"1440px\",\"gutter\":\"16px\",\"margin\":\"24px\",\"stack-lg\":\"24px\",\"stack-md\":\"16px\",\"stack-sm\":\"8px\",\"unit\":\"4px\"},\"headlineFontFamily\":\"Noto Sans\",\"bodyFontFamily\":\"Noto Sans\",\"labelFontFamily\":\"Noto Sans\"},\"screenInstances\":[{\"id\":\"099bab0b71154bf08c664887938ec0bb\",\"sourceScreen\":\"projects/12282738876199046513/screens/099bab0b71154bf08c664887938ec0bb\",\"x\":17839,\"y\":4557,\"width\":1280,\"height\":1024},{\"id\":\"104be3535eb74b3488729d0ac7ecf59e\",\"sourceScreen\":\"projects/12282738876199046513/screens/104be3535eb74b3488729d0ac7ecf59e\",\"x\":21871,\"y\":4557,\"width\":1280,\"height\":1122},{\"id\":\"1cd2a3fb9e02407f803b68cc54c34244\",\"sourceScreen\":\"projects/12282738876199046513/screens/1cd2a3fb9e02407f803b68cc54c34244\",\"x\":2366,\"y\":5037,\"width\":1280,\"height\":1599},{\"id\":\"3221387eb3c94aa788cab79c139d6a6c\",\"sourceScreen\":\"projects/12282738876199046513/screens/3221387eb3c94aa788cab79c139d6a6c\",\"x\":28152,\"y\":2013,\"width\":512,\"height\":512,\"hidden\":true},{\"id\":\"3e341e4941ff4fb2ab1ed78dd19fc81e\",\"sourceScreen\":\"projects/12282738876199046513/screens/3e341e4941ff4fb2ab1ed78dd19fc81e\",\"x\":22776,\"y\":2013,\"width\":1280,\"height\":1164},{\"id\":\"407e79f9713e4f22a258c94dd4f55911\",\"sourceScreen\":\"projects/12282738876199046513/screens/407e79f9713e4f22a258c94dd4f55911\",\"x\":995,\"y\":3714,\"width\":1280,\"height\":1024},{\"id\":\"439bf090620f4612ad43559811ca6d78\",\"sourceScreen\":\"projects/12282738876199046513/screens/439bf090620f4612ad43559811ca6d78\",\"x\":-62,\"y\":2820,\"width\":600,\"height\":600},{\"id\":\"4bc69bda45274fd0b2bf48cc9ca5cadc\",\"sourceScreen\":\"projects/12282738876199046513/screens/4bc69bda45274fd0b2bf48cc9ca5cadc\",\"x\":24120,\"y\":2013,\"width\":1280,\"height\":1024},{\"id\":\"4be019a996ba43c7bdcf3ff9e4034867\",\"sourceScreen\":\"projects/12282738876199046513/screens/4be019a996ba43c7bdcf3ff9e4034867\",\"x\":1024,\"y\":2002,\"width\":1280,\"height\":1024},{\"id\":\"5e3baf426c3b4079a7fa5542e570ce48\",\"sourceScreen\":\"projects/12282738876199046513/screens/5e3baf426c3b4079a7fa5542e570ce48\",\"x\":19183,\"y\":4557,\"width\":1280,\"height\":1872},{\"id\":\"633cc4e3-8c2a-47e2-97a7-98f60bf6e863\",\"sourceScreen\":\"projects/12282738876199046513/screens/13534851180327242825\",\"y\":7205,\"width\":512,\"height\":384,\"type\":\"SCREEN_INSTANCE\"},{\"id\":\"73ccc0bf8028434196cbced243eead50\",\"sourceScreen\":\"projects/12282738876199046513/screens/73ccc0bf8028434196cbced243eead50\",\"x\":3750,\"y\":3728,\"width\":1280,\"height\":1024},{\"id\":\"7bbfd413a6cd4ffc9298a643c9369f45\",\"sourceScreen\":\"projects/12282738876199046513/screens/7bbfd413a6cd4ffc9298a643c9369f45\",\"x\":25464,\"y\":2013,\"width\":1280,\"height\":1024},{\"id\":\"8422dafa76dc4d72a045c33a31936b83\",\"sourceScreen\":\"projects/12282738876199046513/screens/8422dafa76dc4d72a045c33a31936b83\",\"x\":2335,\"y\":2002,\"width\":1280,\"height\":1188},{\"id\":\"90c87ecef2dd40b6afbb20f1fdc7f814\",\"sourceScreen\":\"projects/12282738876199046513/screens/90c87ecef2dd40b6afbb20f1fdc7f814\",\"x\":3646,\"y\":2002,\"width\":1280,\"height\":1024},{\"id\":\"90eef49b461e47f88ea05a5cd09f4d90\",\"sourceScreen\":\"projects/12282738876199046513/screens/90eef49b461e47f88ea05a5cd09f4d90\",\"x\":5195,\"y\":5070,\"width\":1280,\"height\":1024},{\"id\":\"9543d3c334da49559fab03c2285ccef1\",\"sourceScreen\":\"projects/12282738876199046513/screens/9543d3c334da49559fab03c2285ccef1\",\"x\":16056,\"y\":2013,\"width\":1280,\"height\":1024},{\"id\":\"9c500639c6ab49aeb32c89ba174a9faf\",\"sourceScreen\":\"projects/12282738876199046513/screens/9c500639c6ab49aeb32c89ba174a9faf\",\"x\":995,\"y\":5029,\"width\":1280,\"height\":1155},{\"id\":\"a232d007f4184bb79c3e6cf6b9532dcc\",\"sourceScreen\":\"projects/12282738876199046513/screens/a232d007f4184bb79c3e6cf6b9532dcc\",\"x\":5160,\"y\":3739,\"width\":1280,\"height\":1024},{\"id\":\"a82ef1f661d34e33a9039e139264fd39\",\"sourceScreen\":\"projects/12282738876199046513/screens/a82ef1f661d34e33a9039e139264fd39\",\"x\":26808,\"y\":2013,\"width\":1280,\"height\":909},{\"id\":\"ac44042b0d9e4aa4b510d9d4ae27aac5\",\"sourceScreen\":\"projects/12282738876199046513/screens/ac44042b0d9e4aa4b510d9d4ae27aac5\",\"x\":3790,\"y\":5037,\"width\":1280,\"height\":1912},{\"id\":\"assets-d2745d89122f4708b6b3d62735aa7596-1779073826454\",\"y\":2002,\"width\":960,\"height\":540,\"sourceAsset\":\"assets/d2745d89122f4708b6b3d62735aa7596\",\"type\":\"DESIGN_SYSTEM_INSTANCE\"},{\"id\":\"assets_ae72cac7bacf47efa6240b05168c658c\",\"x\":15032,\"y\":2013,\"width\":960,\"height\":540,\"sourceAsset\":\"assets/ae72cac7bacf47efa6240b05168c658c\",\"type\":\"DESIGN_SYSTEM_INSTANCE\"},{\"id\":\"b7ab51d69aa44cf48da8dba1cefe5910\",\"sourceScreen\":\"projects/12282738876199046513/screens/b7ab51d69aa44cf48da8dba1cefe5910\",\"x\":16495,\"y\":4557,\"width\":1280,\"height\":1330},{\"id\":\"ba719db813764ef5960fccd538c98146\",\"sourceScreen\":\"projects/12282738876199046513/screens/ba719db813764ef5960fccd538c98146\",\"x\":2359,\"y\":3714,\"width\":1280,\"height\":1059},{\"id\":\"bad1c361d193465fabba1ef78dfe2e91\",\"sourceScreen\":\"projects/12282738876199046513/screens/bad1c361d193465fabba1ef78dfe2e91\",\"x\":18744,\"y\":2013,\"width\":1280,\"height\":1024},{\"id\":\"e114164f28014c37b9cabaf8bb8f8922\",\"sourceScreen\":\"projects/12282738876199046513/screens/e114164f28014c37b9cabaf8bb8f8922\",\"x\":20088,\"y\":2013,\"width\":1280,\"height\":1024},{\"id\":\"e534e80da3d24fcf96c9baeaff9fa23e\",\"sourceScreen\":\"projects/12282738876199046513/screens/e534e80da3d24fcf96c9baeaff9fa23e\",\"x\":4978,\"y\":2018,\"width\":1280,\"height\":1024},{\"id\":\"ea7eb4e38a1f4549a8432c7077892b93\",\"sourceScreen\":\"projects/12282738876199046513/screens/ea7eb4e38a1f4549a8432c7077892b93\",\"x\":20527,\"y\":4557,\"width\":1280,\"height\":1290},{\"id\":\"ec43ebf33f22417eaa9cb921e2277124\",\"sourceScreen\":\"projects/12282738876199046513/screens/ec43ebf33f22417eaa9cb921e2277124\",\"x\":21432,\"y\":2013,\"width\":1280,\"height\":1461},{\"id\":\"f5f14d8c9c9d4bc08fa6ce2d2e87bdbd\",\"sourceScreen\":\"projects/12282738876199046513/screens/f5f14d8c9c9d4bc08fa6ce2d2e87bdbd\",\"x\":17400,\"y\":2013,\"width\":1280,\"height\":1616}],\"metadata\":{\"userRole\":\"OWNER\",\"isRemixed\":true}}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "createTime":  "2026-06-25T08:34:50.095758Z",
+                                             "designTheme":  {
+                                                                 "bodyFont":  "NOTO_SANS",
+                                                                 "bodyFontFamily":  "Noto Sans",
+                                                                 "colorMode":  "LIGHT",
+                                                                 "colorVariant":  "FIDELITY",
+                                                                 "customColor":  "#1a73e8",
+                                                                 "designMd":  "---\nname: Institutional Authority\ncolors:\n  surface: \u0027#f4faff\u0027\n  surface-dim: \u0027#c0dfee\u0027\n  surface-bright: \u0027#f4faff\u0027\n  surface-container-lowest: \u0027#ffffff\u0027\n  surface-container-low: \u0027#e6f6ff\u0027\n  surface-container: \u0027#d9f2ff\u0027\n  surface-container-high: \u0027#ceedfd\u0027\n  surface-container-highest: \u0027#c9e7f7\u0027\n  on-surface: \u0027#001f2a\u0027\n  on-surface-variant: \u0027#414754\u0027\n  inverse-surface: \u0027#163440\u0027\n  inverse-on-surface: \u0027#e0f4ff\u0027\n  outline: \u0027#727785\u0027\n  outline-variant: \u0027#c1c6d6\u0027\n  surface-tint: \u0027#005bc0\u0027\n  primary: \u0027#005bbf\u0027\n  on-primary: \u0027#ffffff\u0027\n  primary-container: \u0027#1a73e8\u0027\n  on-primary-container: \u0027#ffffff\u0027\n  inverse-primary: \u0027#adc7ff\u0027\n  secondary: \u0027#525f71\u0027\n  on-secondary: \u0027#ffffff\u0027\n  secondary-container: \u0027#d3e1f6\u0027\n  on-secondary-container: \u0027#566475\u0027\n  tertiary: \u0027#9e4300\u0027\n  on-tertiary: \u0027#ffffff\u0027\n  tertiary-container: \u0027#c55500\u0027\n  on-tertiary-container: \u0027#0e0200\u0027\n  error: \u0027#ba1a1a\u0027\n  on-error: \u0027#ffffff\u0027\n  error-container: \u0027#ffdad6\u0027\n  on-error-container: \u0027#93000a\u0027\n  primary-fixed: \u0027#d8e2ff\u0027\n  primary-fixed-dim: \u0027#adc7ff\u0027\n  on-primary-fixed: \u0027#001a41\u0027\n  on-primary-fixed-variant: \u0027#004493\u0027\n  secondary-fixed: \u0027#d6e4f9\u0027\n  secondary-fixed-dim: \u0027#bac8dc\u0027\n  on-secondary-fixed: \u0027#0f1c2c\u0027\n  on-secondary-fixed-variant: \u0027#3a4859\u0027\n  tertiary-fixed: \u0027#ffdbcb\u0027\n  tertiary-fixed-dim: \u0027#ffb691\u0027\n  on-tertiary-fixed: \u0027#341100\u0027\n  on-tertiary-fixed-variant: \u0027#783100\u0027\n  background: \u0027#f4faff\u0027\n  on-background: \u0027#001f2a\u0027\n  surface-variant: \u0027#c9e7f7\u0027\ntypography:\n  display-lg:\n    fontFamily: Noto Sans\n    fontSize: 32px\n    fontWeight: \u0027700\u0027\n    lineHeight: \u00271.2\u0027\n    letterSpacing: -0.02em\n  headline-md:\n    fontFamily: Noto Sans\n    fontSize: 24px\n    fontWeight: \u0027600\u0027\n    lineHeight: \u00271.3\u0027\n    letterSpacing: -0.01em\n  headline-sm:\n    fontFamily: Noto Sans\n    fontSize: 20px\n    fontWeight: \u0027600\u0027\n    lineHeight: \u00271.4\u0027\n  body-lg:\n    fontFamily: Noto Sans\n    fontSize: 16px\n    fontWeight: \u0027400\u0027\n    lineHeight: \u00271.6\u0027\n  body-md:\n    fontFamily: Noto Sans\n    fontSize: 14px\n    fontWeight: \u0027400\u0027\n    lineHeight: \u00271.5\u0027\n  body-sm:\n    fontFamily: Noto Sans\n    fontSize: 13px\n    fontWeight: \u0027400\u0027\n    lineHeight: \u00271.5\u0027\n  label-md:\n    fontFamily: Noto Sans\n    fontSize: 12px\n    fontWeight: \u0027600\u0027\n    lineHeight: \u00271\u0027\n    letterSpacing: 0.02em\n  label-sm:\n    fontFamily: Noto Sans\n    fontSize: 11px\n    fontWeight: \u0027500\u0027\n    lineHeight: \u00271\u0027\n  headline-md-mobile:\n    fontFamily: Noto Sans\n    fontSize: 20px\n    fontWeight: \u0027600\u0027\n    lineHeight: \u00271.3\u0027\nrounded:\n  sm: 0.125rem\n  DEFAULT: 0.25rem\n  md: 0.375rem\n  lg: 0.5rem\n  xl: 0.75rem\n  full: 9999px\nspacing:\n  unit: 4px\n  gutter: 16px\n  margin: 24px\n  container-max-width: 1440px\n  stack-sm: 8px\n  stack-md: 16px\n  stack-lg: 24px\n---\n\n## Brand \u0026 Style\nThe design system is engineered for public procurement and tender management, prioritizing **reliability, precision, and institutional trust**. The aesthetic follows a **Corporate/Modern** approach, blending the efficiency of a high-density dashboard with the clarity of a government-grade interface.\n\nThe visual language is characterized by:\n- **Systematic Order:** Rigorous alignment and structured information hierarchies to reduce cognitive load during complex bidding processes.\n- **Data Clarity:** High-density layouts that do not sacrifice readability, utilizing subtle tonal shifts rather than decorative elements.\n- **Operational Confidence:** A professional color palette that evokes a sense of security and official oversight.\n\n## Colors\nThe palette is rooted in professional stability. \n\n- **Primary (Google Cloud Blue):** Used for primary actions, active states, and navigational focus. It signals technological modernity.\n- **Secondary (Deep Navy):** Reserved for headers, sidebars, and structural elements to provide a \"weighted\" institutional feel.\n- **Semantic Colors:** \n    - **Success (Green):** Specifically for \"Tender Won\" (낙찰) and completed milestones.\n    - **Error (Red):** Specifically for deadlines (마감), \"Tender Lost\" (유찰), and critical alerts.\n- **Neutral Surface:** A range of cool grays (from #F8F9FA to #ECEFF1) are used to differentiate workspace areas from background canvas.\n\n## Typography\nThe design system utilizes **Noto Sans** to ensure maximum legibility across all data-dense environments. \n\n- **Hierarchy:** Use `display-lg` for dashboard summaries and `headline-md` for section titles.\n- **Data Tables:** Body-sm (13px) is the standard for table cells to allow for maximum horizontal information density without compromising character recognition.\n- **Captions:** Label-md (12px) in SemiBold should be used for table headers and status badge text to differentiate them from interactive data.\n\n## Layout \u0026 Spacing\nThe system employs a **Fixed Grid** for internal dashboards to maintain predictable data visualization layouts.\n\n- **Grid System:** A 12-column grid with a 16px gutter. \n- **Density:** We utilize an 8px base unit, but allow for 4px increments in \"Compact Mode\" components like data tables.\n- **Breakpoints:**\n    - **Desktop (1200px+):** 12 columns, 24px margins.\n    - **Tablet (768px - 1199px):** 6 columns, 16px margins, sidebars collapse to icons.\n    - **Mobile (\u003c767px):** 1 column, 12px margins. Horizontal scrolling is permitted for large data tables.\n\n## Elevation \u0026 Depth\nDepth is created through **Tonal Layering** and **Low-Contrast Outlines** rather than heavy shadows, maintaining a clean, \"flat\" professional look.\n\n- **Level 0 (Background):** #F4F7F9 — The main canvas.\n- **Level 1 (Cards/Widgets):** White (#FFFFFF) with a 1px border in #E0E4E8. No shadow. Used for dashboard widgets and table containers.\n- **Level 2 (Dropdowns/Modals):** White with a soft ambient shadow (0px 4px 12px rgba(13, 27, 42, 0.08)) to indicate temporary interaction.\n- **Interactive States:** Hovering over a table row or a list item should trigger a subtle background tint (#F1F5F9) rather than an elevation lift.\n\n## Shapes\nThis design system uses **Soft (Level 1)** rounding to reflect a precise, \"engineered\" feel suitable for government and enterprise software.\n\n- **Components:** 0.25rem (4px) corner radius for buttons, input fields, and status badges.\n- **Containers:** 0.5rem (8px) for dashboard widgets and manpower cards.\n- **Tables:** Outer containers should have an 8px radius, while internal row selections remain sharp to maintain grid alignment.\n\n## Components\n\n### Data Tables\n- **Header:** Background #F8F9FA, uppercase Label-md text, 1px border-bottom.\n- **Rows:** 48px height for standard density, 40px for compact. Zebra striping is discouraged; use subtle hover states instead.\n- **Alignment:** Numerical data is right-aligned; text data is left-aligned.\n\n### Status Badges\n- **General:** Pill-shaped with a light background tint and dark text (e.g., Success Green background at 10% opacity with 100% opacity Green text).\n- **Ongoing (진행중):** Primary Blue.\n- **Won (낙찰):** Success Green.\n- **Failed (유찰):** Neutral Slate.\n- **Deadline (마감임박):** Error Red.\n\n### Analysis Dashboard Widgets\n- **Structure:** 8px rounded corners, 1px border.\n- **Header:** Includes a title (Headline-sm) and an optional icon or \"View All\" text button.\n- **Visuals:** Charts should use the Primary Blue and Secondary Navy as the core data colors to maintain brand alignment.\n\n### Manpower Status Cards\n- **Layout:** Vertical stack. Top section shows name/role; middle section shows \"Current Project\" utilizing a Status Badge; bottom section shows \"Availability Date.\"\n- **Visual Cue:** Use a small circular avatar (40px) or initials to humanize the data.\n\n### Input Fields\n- **Default:** 1px border (#CFD8DC), 4px radius.\n- **Focus:** 2px border using Primary Blue (#1A73E8).\n- **Label:** Small, bolded text placed above the field, not inside as a placeholder, to ensure persistent context.",
+                                                                 "font":  "NOTO_SANS",
+                                                                 "headlineFont":  "NOTO_SANS",
+                                                                 "headlineFontFamily":  "Noto Sans",
+                                                                 "labelFont":  "NOTO_SANS",
+                                                                 "labelFontFamily":  "Noto Sans",
+                                                                 "namedColors":  {
+                                                                                     "background":  "#f4faff",
+                                                                                     "error":  "#ba1a1a",
+                                                                                     "error_container":  "#ffdad6",
+                                                                                     "inverse_on_surface":  "#e0f4ff",
+                                                                                     "inverse_primary":  "#adc7ff",
+                                                                                     "inverse_surface":  "#163440",
+                                                                                     "on_background":  "#001f2a",
+                                                                                     "on_error":  "#ffffff",
+                                                                                     "on_error_container":  "#93000a",
+                                                                                     "on_primary":  "#ffffff",
+                                                                                     "on_primary_container":  "#ffffff",
+                                                                                     "on_primary_fixed":  "#001a41",
+                                                                                     "on_primary_fixed_variant":  "#004493",
+                                                                                     "on_secondary":  "#ffffff",
+                                                                                     "on_secondary_container":  "#566475",
+                                                                                     "on_secondary_fixed":  "#0f1c2c",
+                                                                                     "on_secondary_fixed_variant":  "#3a4859",
+                                                                                     "on_surface":  "#001f2a",
+                                                                                     "on_surface_variant":  "#414754",
+                                                                                     "on_tertiary":  "#ffffff",
+                                                                                     "on_tertiary_container":  "#0e0200",
+                                                                                     "on_tertiary_fixed":  "#341100",
+                                                                                     "on_tertiary_fixed_variant":  "#783100",
+                                                                                     "outline":  "#727785",
+                                                                                     "outline_variant":  "#c1c6d6",
+                                                                                     "primary":  "#005bbf",
+                                                                                     "primary_container":  "#1a73e8",
+                                                                                     "primary_fixed":  "#d8e2ff",
+                                                                                     "primary_fixed_dim":  "#adc7ff",
+                                                                                     "secondary":  "#525f71",
+                                                                                     "secondary_container":  "#d3e1f6",
+                                                                                     "secondary_fixed":  "#d6e4f9",
+                                                                                     "secondary_fixed_dim":  "#bac8dc",
+                                                                                     "surface":  "#f4faff",
+                                                                                     "surface_bright":  "#f4faff",
+                                                                                     "surface_container":  "#d9f2ff",
+                                                                                     "surface_container_high":  "#ceedfd",
+                                                                                     "surface_container_highest":  "#c9e7f7",
+                                                                                     "surface_container_low":  "#e6f6ff",
+                                                                                     "surface_container_lowest":  "#ffffff",
+                                                                                     "surface_dim":  "#c0dfee",
+                                                                                     "surface_tint":  "#005bc0",
+                                                                                     "surface_variant":  "#c9e7f7",
+                                                                                     "tertiary":  "#9e4300",
+                                                                                     "tertiary_container":  "#c55500",
+                                                                                     "tertiary_fixed":  "#ffdbcb",
+                                                                                     "tertiary_fixed_dim":  "#ffb691"
+                                                                                 },
+                                                                 "overrideNeutralColor":  "#607d8b",
+                                                                 "overridePrimaryColor":  "#1a73e8",
+                                                                 "overrideSecondaryColor":  "#0d1b2a",
+                                                                 "roundness":  "ROUND_FOUR",
+                                                                 "spacing":  {
+                                                                                 "container-max-width":  "1440px",
+                                                                                 "gutter":  "16px",
+                                                                                 "margin":  "24px",
+                                                                                 "stack-lg":  "24px",
+                                                                                 "stack-md":  "16px",
+                                                                                 "stack-sm":  "8px",
+                                                                                 "unit":  "4px"
+                                                                             },
+                                                                 "typography":  {
+                                                                                    "body-lg":  {
+                                                                                                    "fontFamily":  "Noto Sans",
+                                                                                                    "fontSize":  "16px",
+                                                                                                    "fontWeight":  "400",
+                                                                                                    "lineHeight":  "1.6"
+                                                                                                },
+                                                                                    "body-md":  {
+                                                                                                    "fontFamily":  "Noto Sans",
+                                                                                                    "fontSize":  "14px",
+                                                                                                    "fontWeight":  "400",
+                                                                                                    "lineHeight":  "1.5"
+                                                                                                },
+                                                                                    "body-sm":  {
+                                                                                                    "fontFamily":  "Noto Sans",
+                                                                                                    "fontSize":  "13px",
+                                                                                                    "fontWeight":  "400",
+                                                                                                    "lineHeight":  "1.5"
+                                                                                                },
+                                                                                    "display-lg":  {
+                                                                                                       "fontFamily":  "Noto Sans",
+                                                                                                       "fontSize":  "32px",
+                                                                                                       "fontWeight":  "700",
+                                                                                                       "letterSpacing":  "-0.02em",
+                                                                                                       "lineHeight":  "1.2"
+                                                                                                   },
+                                                                                    "headline-md":  {
+                                                                                                        "fontFamily":  "Noto Sans",
+                                                                                                        "fontSize":  "24px",
+                                                                                                        "fontWeight":  "600",
+                                                                                                        "letterSpacing":  "-0.01em",
+                                                                                                        "lineHeight":  "1.3"
+                                                                                                    },
+                                                                                    "headline-md-mobile":  {
+                                                                                                               "fontFamily":  "Noto Sans",
+                                                                                                               "fontSize":  "20px",
+                                                                                                               "fontWeight":  "600",
+                                                                                                               "lineHeight":  "1.3"
+                                                                                                           },
+                                                                                    "headline-sm":  {
+                                                                                                        "fontFamily":  "Noto Sans",
+                                                                                                        "fontSize":  "20px",
+                                                                                                        "fontWeight":  "600",
+                                                                                                        "lineHeight":  "1.4"
+                                                                                                    },
+                                                                                    "label-md":  {
+                                                                                                     "fontFamily":  "Noto Sans",
+                                                                                                     "fontSize":  "12px",
+                                                                                                     "fontWeight":  "600",
+                                                                                                     "letterSpacing":  "0.02em",
+                                                                                                     "lineHeight":  "1"
+                                                                                                 },
+                                                                                    "label-sm":  {
+                                                                                                     "fontFamily":  "Noto Sans",
+                                                                                                     "fontSize":  "11px",
+                                                                                                     "fontWeight":  "500",
+                                                                                                     "lineHeight":  "1"
+                                                                                                 }
+                                                                                }
+                                                             },
+                                             "deviceType":  "DESKTOP",
+                                             "metadata":  {
+                                                              "isRemixed":  true,
+                                                              "userRole":  "OWNER"
+                                                          },
+                                             "name":  "projects/12282738876199046513",
+                                             "origin":  "STITCH",
+                                             "projectType":  "TEXT_TO_UI_PRO",
+                                             "screenInstances":  [
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "099bab0b71154bf08c664887938ec0bb",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/099bab0b71154bf08c664887938ec0bb",
+                                                                         "width":  1280,
+                                                                         "x":  17839,
+                                                                         "y":  4557
+                                                                     },
+                                                                     {
+                                                                         "height":  1122,
+                                                                         "id":  "104be3535eb74b3488729d0ac7ecf59e",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/104be3535eb74b3488729d0ac7ecf59e",
+                                                                         "width":  1280,
+                                                                         "x":  21871,
+                                                                         "y":  4557
+                                                                     },
+                                                                     {
+                                                                         "height":  1599,
+                                                                         "id":  "1cd2a3fb9e02407f803b68cc54c34244",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/1cd2a3fb9e02407f803b68cc54c34244",
+                                                                         "width":  1280,
+                                                                         "x":  2366,
+                                                                         "y":  5037
+                                                                     },
+                                                                     {
+                                                                         "height":  512,
+                                                                         "hidden":  true,
+                                                                         "id":  "3221387eb3c94aa788cab79c139d6a6c",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/3221387eb3c94aa788cab79c139d6a6c",
+                                                                         "width":  512,
+                                                                         "x":  28152,
+                                                                         "y":  2013
+                                                                     },
+                                                                     {
+                                                                         "height":  1164,
+                                                                         "id":  "3e341e4941ff4fb2ab1ed78dd19fc81e",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/3e341e4941ff4fb2ab1ed78dd19fc81e",
+                                                                         "width":  1280,
+                                                                         "x":  22776,
+                                                                         "y":  2013
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "407e79f9713e4f22a258c94dd4f55911",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/407e79f9713e4f22a258c94dd4f55911",
+                                                                         "width":  1280,
+                                                                         "x":  995,
+                                                                         "y":  3714
+                                                                     },
+                                                                     {
+                                                                         "height":  600,
+                                                                         "id":  "439bf090620f4612ad43559811ca6d78",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/439bf090620f4612ad43559811ca6d78",
+                                                                         "width":  600,
+                                                                         "x":  -62,
+                                                                         "y":  2820
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "4bc69bda45274fd0b2bf48cc9ca5cadc",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/4bc69bda45274fd0b2bf48cc9ca5cadc",
+                                                                         "width":  1280,
+                                                                         "x":  24120,
+                                                                         "y":  2013
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "4be019a996ba43c7bdcf3ff9e4034867",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/4be019a996ba43c7bdcf3ff9e4034867",
+                                                                         "width":  1280,
+                                                                         "x":  1024,
+                                                                         "y":  2002
+                                                                     },
+                                                                     {
+                                                                         "height":  1872,
+                                                                         "id":  "5e3baf426c3b4079a7fa5542e570ce48",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/5e3baf426c3b4079a7fa5542e570ce48",
+                                                                         "width":  1280,
+                                                                         "x":  19183,
+                                                                         "y":  4557
+                                                                     },
+                                                                     {
+                                                                         "height":  384,
+                                                                         "id":  "633cc4e3-8c2a-47e2-97a7-98f60bf6e863",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/13534851180327242825",
+                                                                         "type":  "SCREEN_INSTANCE",
+                                                                         "width":  512,
+                                                                         "y":  7205
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "73ccc0bf8028434196cbced243eead50",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/73ccc0bf8028434196cbced243eead50",
+                                                                         "width":  1280,
+                                                                         "x":  3750,
+                                                                         "y":  3728
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "7bbfd413a6cd4ffc9298a643c9369f45",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/7bbfd413a6cd4ffc9298a643c9369f45",
+                                                                         "width":  1280,
+                                                                         "x":  25464,
+                                                                         "y":  2013
+                                                                     },
+                                                                     {
+                                                                         "height":  1188,
+                                                                         "id":  "8422dafa76dc4d72a045c33a31936b83",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/8422dafa76dc4d72a045c33a31936b83",
+                                                                         "width":  1280,
+                                                                         "x":  2335,
+                                                                         "y":  2002
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "90c87ecef2dd40b6afbb20f1fdc7f814",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/90c87ecef2dd40b6afbb20f1fdc7f814",
+                                                                         "width":  1280,
+                                                                         "x":  3646,
+                                                                         "y":  2002
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "90eef49b461e47f88ea05a5cd09f4d90",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/90eef49b461e47f88ea05a5cd09f4d90",
+                                                                         "width":  1280,
+                                                                         "x":  5195,
+                                                                         "y":  5070
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "9543d3c334da49559fab03c2285ccef1",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/9543d3c334da49559fab03c2285ccef1",
+                                                                         "width":  1280,
+                                                                         "x":  16056,
+                                                                         "y":  2013
+                                                                     },
+                                                                     {
+                                                                         "height":  1155,
+                                                                         "id":  "9c500639c6ab49aeb32c89ba174a9faf",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/9c500639c6ab49aeb32c89ba174a9faf",
+                                                                         "width":  1280,
+                                                                         "x":  995,
+                                                                         "y":  5029
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "a232d007f4184bb79c3e6cf6b9532dcc",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/a232d007f4184bb79c3e6cf6b9532dcc",
+                                                                         "width":  1280,
+                                                                         "x":  5160,
+                                                                         "y":  3739
+                                                                     },
+                                                                     {
+                                                                         "height":  909,
+                                                                         "id":  "a82ef1f661d34e33a9039e139264fd39",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/a82ef1f661d34e33a9039e139264fd39",
+                                                                         "width":  1280,
+                                                                         "x":  26808,
+                                                                         "y":  2013
+                                                                     },
+                                                                     {
+                                                                         "height":  1912,
+                                                                         "id":  "ac44042b0d9e4aa4b510d9d4ae27aac5",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/ac44042b0d9e4aa4b510d9d4ae27aac5",
+                                                                         "width":  1280,
+                                                                         "x":  3790,
+                                                                         "y":  5037
+                                                                     },
+                                                                     {
+                                                                         "height":  540,
+                                                                         "id":  "assets-d2745d89122f4708b6b3d62735aa7596-1779073826454",
+                                                                         "sourceAsset":  "assets/d2745d89122f4708b6b3d62735aa7596",
+                                                                         "type":  "DESIGN_SYSTEM_INSTANCE",
+                                                                         "width":  960,
+                                                                         "y":  2002
+                                                                     },
+                                                                     {
+                                                                         "height":  540,
+                                                                         "id":  "assets_ae72cac7bacf47efa6240b05168c658c",
+                                                                         "sourceAsset":  "assets/ae72cac7bacf47efa6240b05168c658c",
+                                                                         "type":  "DESIGN_SYSTEM_INSTANCE",
+                                                                         "width":  960,
+                                                                         "x":  15032,
+                                                                         "y":  2013
+                                                                     },
+                                                                     {
+                                                                         "height":  1330,
+                                                                         "id":  "b7ab51d69aa44cf48da8dba1cefe5910",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/b7ab51d69aa44cf48da8dba1cefe5910",
+                                                                         "width":  1280,
+                                                                         "x":  16495,
+                                                                         "y":  4557
+                                                                     },
+                                                                     {
+                                                                         "height":  1059,
+                                                                         "id":  "ba719db813764ef5960fccd538c98146",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/ba719db813764ef5960fccd538c98146",
+                                                                         "width":  1280,
+                                                                         "x":  2359,
+                                                                         "y":  3714
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "bad1c361d193465fabba1ef78dfe2e91",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/bad1c361d193465fabba1ef78dfe2e91",
+                                                                         "width":  1280,
+                                                                         "x":  18744,
+                                                                         "y":  2013
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "e114164f28014c37b9cabaf8bb8f8922",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/e114164f28014c37b9cabaf8bb8f8922",
+                                                                         "width":  1280,
+                                                                         "x":  20088,
+                                                                         "y":  2013
+                                                                     },
+                                                                     {
+                                                                         "height":  1024,
+                                                                         "id":  "e534e80da3d24fcf96c9baeaff9fa23e",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/e534e80da3d24fcf96c9baeaff9fa23e",
+                                                                         "width":  1280,
+                                                                         "x":  4978,
+                                                                         "y":  2018
+                                                                     },
+                                                                     {
+                                                                         "height":  1290,
+                                                                         "id":  "ea7eb4e38a1f4549a8432c7077892b93",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/ea7eb4e38a1f4549a8432c7077892b93",
+                                                                         "width":  1280,
+                                                                         "x":  20527,
+                                                                         "y":  4557
+                                                                     },
+                                                                     {
+                                                                         "height":  1461,
+                                                                         "id":  "ec43ebf33f22417eaa9cb921e2277124",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/ec43ebf33f22417eaa9cb921e2277124",
+                                                                         "width":  1280,
+                                                                         "x":  21432,
+                                                                         "y":  2013
+                                                                     },
+                                                                     {
+                                                                         "height":  1616,
+                                                                         "id":  "f5f14d8c9c9d4bc08fa6ce2d2e87bdbd",
+                                                                         "sourceScreen":  "projects/12282738876199046513/screens/f5f14d8c9c9d4bc08fa6ce2d2e87bdbd",
+                                                                         "width":  1280,
+                                                                         "x":  17400,
+                                                                         "y":  2013
+                                                                     }
+                                                                 ],
+                                             "thumbnailScreenshot":  {
+                                                                         "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvZFgTg7j5kz0J5zxwWkRp-t3QH2Bq1AOXipSAf6INkIJ8r6QMcT5zQqziKx3VBd-ZTZkkzwU8lDMjgprKyHky2jS9-9_1DOq3zy3a9WNWvxI3DN-DlxdFtYAsSeE1N7i00Fln22M5ZFAENZBw5BUu7o9mYDsFK96Hfk8-lQ5dgmhGQZQBBJI27TLvle49cOdnvdDmkFU4XwyACRNPODq2pgWg6RFWlUK_UPP1Y8HsMh6-Ob0I-1pr4MZyx",
+                                                                         "name":  "projects/12282738876199046513/files/f33311ef7c4a48bba17126fb93d3aa6a"
+                                                                     },
+                                             "title":  "Remix of Smart Public Procurement System",
+                                             "updateTime":  "2026-06-26T00:10:28.263164Z",
+                                             "visibility":  "PRIVATE"
+                                         }
+               }
+}

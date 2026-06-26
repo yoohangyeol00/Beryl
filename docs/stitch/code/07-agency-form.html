@@ -1,0 +1,271 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>BERYL - 발주기관 등록/수정</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<!-- Google Fonts: Manrope (Headline), Work Sans (Body), IBM Plex Sans (Label) -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600&amp;family=Manrope:wght@600;700&amp;family=Work+Sans:wght@400&amp;family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#2a6865",
+                        "surface-variant": "#dfe3e1",
+                        "surface": "#f6faf8",
+                        "background": "#f6faf8",
+                        "secondary-fixed-dim": "#95d1ce",
+                        "surface-bright": "#f6faf8",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#5adcb3",
+                        "inverse-on-surface": "#eef2f0",
+                        "surface-container": "#ebefed",
+                        "on-primary-fixed-variant": "#005232",
+                        "tertiary-fixed": "#79f9ce",
+                        "on-secondary-container": "#316e6b",
+                        "secondary-fixed": "#b1eeea",
+                        "inverse-surface": "#2d3130",
+                        "on-tertiary-container": "#003326",
+                        "inverse-primary": "#59de9b",
+                        "on-surface-variant": "#3d4a41",
+                        "surface-tint": "#006d43",
+                        "on-primary-fixed": "#002111",
+                        "primary": "#006d43",
+                        "tertiary": "#006c52",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#002117",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d7dbd9",
+                        "on-background": "#181d1c",
+                        "on-secondary-fixed": "#00201f",
+                        "primary-fixed": "#78fbb6",
+                        "surface-container-high": "#e5e9e7",
+                        "surface-container-highest": "#dfe3e1",
+                        "primary-fixed-dim": "#59de9b",
+                        "secondary-container": "#b1eeea",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f0f4f2",
+                        "on-primary-container": "#00331d",
+                        "outline-variant": "#bccabe",
+                        "on-tertiary-fixed-variant": "#00513d",
+                        "tertiary-container": "#00a782",
+                        "on-secondary-fixed-variant": "#084f4d",
+                        "outline": "#6d7a70",
+                        "primary-container": "#00a86b",
+                        "on-surface": "#181d1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "margin-desktop": "48px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Manrope", "Noto Sans KR", "sans-serif"],
+                        "headline-lg": ["Manrope", "Noto Sans KR", "sans-serif"],
+                        "body-md": ["Work Sans", "Noto Sans KR", "sans-serif"],
+                        "label-md": ["IBM Plex Sans", "Noto Sans KR", "sans-serif"],
+                        "label-sm": ["IBM Plex Sans", "Noto Sans KR", "sans-serif"],
+                        "headline-xl": ["Manrope", "Noto Sans KR", "sans-serif"],
+                        "body-lg": ["Work Sans", "Noto Sans KR", "sans-serif"],
+                        "headline-lg-mobile": ["Manrope", "Noto Sans KR", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background min-h-screen text-on-surface font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- Header with BERYL Branding -->
+<nav class="fixed top-0 left-0 right-0 h-[64px] bg-surface-container-lowest border-b border-outline-variant z-50 flex items-center px-margin-desktop">
+<div class="flex items-center gap-2"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1VIlvE-BEgpZkJB_LIuHNK9FSHZRU0FNvXDZ4GKgEMJCHYtV88P2zZSgzoF0jUUCvmHkYdcGPPruD_C39ZH70I6ixoKyc5nwEUohPB3TTdePOCqm9rvLni8DrUvgaWeipw5xTf0uEGPU5QqWoxqhymZl0nmuDZiG6k6BjEbs6g6tHYJBkzERMG5DenDZ1p0L4ktSDOZt1Rc89uLBuKcJA-Czvp3gixLEYsuPqXPbDcBUpiDzIXvAnqAE0RIBbGzAjf45SFE7FMZh5" alt="BERYL Emerald Logo" class="h-8 w-auto object-contain"></div>
+</nav>
+<main class="w-full max-w-[800px] mx-auto pt-[112px] pb-margin-desktop px-margin-mobile md:px-0">
+<!-- Contextual Header -->
+<header class="mb-gutter flex flex-col gap-unit">
+<a class="inline-flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md w-fit" href="#">
+<span class="material-symbols-outlined text-[16px]">arrow_back</span>
+<span class="">목록으로 돌아가기</span>
+</a>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined fill text-[28px]">domain</span>
+</div>
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">발주기관 등록</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">새로운 공공 발주기관의 기본 정보와 담당자 연락처를 시스템에 등록합니다.</p>
+</div>
+</div>
+</header>
+<!-- Main Form Container -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<form action="#" method="POST">
+<!-- Section: Basic Information -->
+<div class="p-gutter border-b border-outline-variant/50">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-gutter flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-secondary">info</span>
+                        기본 정보
+                    </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Agency Name -->
+<div class="md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface mb-unit" for="agencyName">
+                                기관명 <span class="text-error">*</span>
+</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" id="agencyName" name="agencyName" placeholder="정확한 공식 기관명을 입력하세요 (예: 한국도로공사)" required="" type="text">
+</div>
+<!-- Agency Type -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-unit" for="agencyType">
+                                기관 유형 <span class="text-error">*</span>
+</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface-container-lowest border border-outline-variant rounded-lg pl-4 pr-10 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" id="agencyType" name="agencyType" required="">
+<option disabled="" selected="" value="">유형 선택</option>
+<option value="central">중앙행정기관</option>
+<option value="local">지방자치단체</option>
+<option value="public_enterprise">공기업</option>
+<option value="quasi_gov">준정부기관</option>
+<option value="other">기타 공공기관</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-on-surface-variant">
+<span class="material-symbols-outlined">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Business Registration Number -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-unit flex justify-between" for="bizRegNum">
+<span class="">사업자등록번호</span>
+<span class="text-on-surface-variant font-normal opacity-70">선택</span>
+</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" id="bizRegNum" name="bizRegNum" placeholder="000-00-00000" type="text">
+</div>
+<!-- Address -->
+<div class="md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface mb-unit" for="address">
+                                소재지 주소 <span class="text-error">*</span>
+</label>
+<div class="flex gap-2 mb-3">
+<input class="w-32 bg-surface-container border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface cursor-not-allowed" id="zipcode" name="zipcode" placeholder="우편번호" readonly="" required="" type="text">
+<button class="bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed transition-colors px-5 py-3 rounded-lg font-label-md text-label-md flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-[18px]">search</span>
+                                    주소 검색
+                                </button>
+</div>
+<input class="w-full bg-surface-container border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface mb-3 cursor-not-allowed" id="address" name="address" placeholder="기본 주소" readonly="" required="" type="text">
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" id="addressDetail" name="addressDetail" placeholder="상세 주소를 입력하세요" type="text">
+</div>
+<!-- Website URL -->
+<div class="md:col-span-2">
+<label class="block font-label-md text-label-md text-on-surface mb-unit flex justify-between" for="website">
+<span class="">웹사이트 주소</span>
+<span class="text-on-surface-variant font-normal opacity-70">선택</span>
+</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[18px]">link</span>
+</div>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-11 pr-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" id="website" name="website" placeholder="https://www.example.go.kr" type="url">
+</div>
+</div>
+</div>
+</div>
+<!-- Section: Primary Contact Information -->
+<div class="p-gutter bg-surface-container-low/30">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-gutter flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-secondary">contact_page</span>
+                        담당자 정보
+                    </h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Contact Name -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-unit" for="contactName">
+                                담당자명 <span class="text-error">*</span>
+</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" id="contactName" name="contactName" placeholder="이름 및 직급 (예: 홍길동 주무관)" required="" type="text">
+</div>
+<!-- Contact Phone -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-unit" for="contactPhone">
+                                연락처 <span class="text-error">*</span>
+</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[18px]">call</span>
+</div>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg pl-11 pr-4 py-3 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all" id="contactPhone" name="contactPhone" placeholder="02-000-0000" required="" type="tel">
+</div>
+</div>
+<!-- Contact Email -->
+<div class="md:col-span-2">
+<label class="block font-label-md text-label-md text-error mb-unit" for="contactEmail">
+                                이메일 <span class="text-error">*</span>
+</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-error text-[18px]">mail</span>
+</div>
+<input aria-describedby="email-error" aria-invalid="true" class="w-full bg-error-container/10 border border-error rounded-lg pl-11 pr-11 py-3 font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-error transition-all" id="contactEmail" name="contactEmail" required="" type="email" value="invalid-email-format">
+<div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-error">error</span>
+</div>
+</div>
+<p class="font-label-sm text-label-sm text-error mt-1 flex items-center gap-1" id="email-error">
+                                유효한 공식 이메일 주소 형식이 아닙니다. (@korea.kr 등)
+                            </p>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="p-gutter border-t border-outline-variant flex items-center justify-end gap-4 bg-surface-container-lowest">
+<button class="px-8 py-3 border border-outline-variant rounded-lg font-label-md text-label-md text-on-surface hover:bg-surface-container-low focus:ring-2 focus:ring-primary focus:ring-offset-1 transition-colors" type="button">
+                        취소
+                    </button>
+<button class="px-8 py-3 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 active:scale-[0.98] focus:ring-2 focus:ring-primary focus:ring-offset-1 shadow-sm transition-all flex items-center gap-2" type="submit">
+<span class="material-symbols-outlined text-[20px]">save</span>
+                        저장하기
+                    </button>
+</div>
+</form>
+</div>
+</main>
+
+
+</body></html>

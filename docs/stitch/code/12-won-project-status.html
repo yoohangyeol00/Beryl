@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BERYL - 낙찰 프로젝트 관리</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Work+Sans:wght@400;500&amp;family=IBM+Plex+Sans:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#2a6865",
+                    "surface-variant": "#dfe3e1",
+                    "surface": "#f6faf8",
+                    "background": "#f6faf8",
+                    "secondary-fixed-dim": "#95d1ce",
+                    "surface-bright": "#f6faf8",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#5adcb3",
+                    "inverse-on-surface": "#eef2f0",
+                    "surface-container": "#ebefed",
+                    "on-primary-fixed-variant": "#005232",
+                    "tertiary-fixed": "#79f9ce",
+                    "on-secondary-container": "#316e6b",
+                    "secondary-fixed": "#b1eeea",
+                    "inverse-surface": "#2d3130",
+                    "on-tertiary-container": "#003326",
+                    "inverse-primary": "#59de9b",
+                    "on-surface-variant": "#3d4a41",
+                    "surface-tint": "#006d43",
+                    "on-primary-fixed": "#002111",
+                    "primary": "#006d43",
+                    "tertiary": "#006c52",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed": "#002117",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-error-container": "#93000a",
+                    "error": "#ba1a1a",
+                    "surface-dim": "#d7dbd9",
+                    "on-background": "#181d1c",
+                    "on-secondary-fixed": "#00201f",
+                    "primary-fixed": "#78fbb6",
+                    "surface-container-high": "#e5e9e7",
+                    "surface-container-highest": "#dfe3e1",
+                    "primary-fixed-dim": "#59de9b",
+                    "secondary-container": "#b1eeea",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#f0f4f2",
+                    "on-primary-container": "#00331d",
+                    "outline-variant": "#bccabe",
+                    "on-tertiary-fixed-variant": "#00513d",
+                    "tertiary-container": "#00a782",
+                    "on-secondary-fixed-variant": "#084f4d",
+                    "outline": "#6d7a70",
+                    "primary-container": "#00a86b",
+                    "on-surface": "#181d1c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "gutter": "24px",
+                    "container-max": "1280px",
+                    "margin-desktop": "48px",
+                    "unit": "8px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "body-md": ["Work Sans"],
+                    "label-md": ["IBM Plex Sans"],
+                    "label-sm": ["IBM Plex Sans"],
+                    "headline-xl": ["Manrope"],
+                    "body-lg": ["Work Sans"],
+                    "headline-lg-mobile": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Work Sans', sans-serif; }
+        h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- SideNavBar Component -->
+<aside class="bg-surface-container-lowest dark:bg-inverse-surface h-screen w-64 fixed left-0 top-0 border-r border-outline-variant dark:border-outline flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<h1 class="font-headline-md text-headline-md font-bold text-primary-container dark:text-primary-fixed-dim tracking-tight">BERYL</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant opacity-70 leading-tight">Business E-bidding &amp; Resource Yield Link</p>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<div class="flex items-center px-3 py-3 font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container transition-colors duration-200 cursor-pointer active:opacity-80 rounded-lg">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+            Dashboard
+        </div>
+<!-- Active Tab -->
+<div class="flex items-center px-3 py-3 font-label-md text-label-md text-primary-container dark:text-primary-fixed-dim font-bold border-r-4 border-primary-container dark:border-primary-fixed-dim bg-primary-container/10 dark:bg-on-secondary-fixed-variant cursor-pointer active:opacity-80 rounded-lg">
+<span class="material-symbols-outlined mr-3" data-icon="description">description</span>
+            Bid Notices
+        </div>
+<div class="flex items-center px-3 py-3 font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container transition-colors duration-200 cursor-pointer active:opacity-80 rounded-lg">
+<span class="material-symbols-outlined mr-3" data-icon="analytics">analytics</span>
+            RFP Analysis
+        </div>
+<div class="flex items-center px-3 py-3 font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container transition-colors duration-200 cursor-pointer active:opacity-80 rounded-lg">
+<span class="material-symbols-outlined mr-3" data-icon="groups">groups</span>
+            Manpower Status
+        </div>
+<div class="flex items-center px-3 py-3 font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container transition-colors duration-200 cursor-pointer active:opacity-80 rounded-lg">
+<span class="material-symbols-outlined mr-3" data-icon="account_tree">account_tree</span>
+            Resource Allocation
+        </div>
+</nav>
+<div class="px-6 mt-4">
+<button class="w-full bg-primary-container text-on-primary py-3 rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 hover:opacity-90 transition-opacity shadow-sm shadow-primary-container/20">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+            New Tender
+        </button>
+</div>
+<div class="mt-auto px-3 space-y-1">
+<div class="flex items-center px-3 py-3 font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container transition-colors duration-200 cursor-pointer rounded-lg">
+<span class="material-symbols-outlined mr-3" data-icon="settings">settings</span>
+            Settings
+        </div>
+<div class="flex items-center px-3 py-3 font-label-md text-label-md text-on-surface-variant dark:text-outline-variant hover:bg-surface-container transition-colors duration-200 cursor-pointer rounded-lg">
+<span class="material-symbols-outlined mr-3" data-icon="help">help</span>
+            Support
+        </div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopAppBar Component -->
+<header class="fixed top-0 right-0 w-[calc(100%-16rem)] h-16 bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant dark:border-outline flex justify-between items-center px-6 z-40">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-2 focus:ring-primary-container focus:outline-none font-body-md text-body-md" placeholder="프로젝트 또는 공급업체 검색..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary-container transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-container transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary-container transition-all duration-200">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="font-label-md text-label-md text-on-surface font-bold uppercase">Admin User</p>
+<p class="text-[10px] text-on-surface-variant">BERYL System Admin</p>
+</div>
+<img alt="User Profile Avatar" class="w-10 h-10 rounded-full border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCopnQsg7eV29zt_UpKgHXcXiu4AJFgZnZjeLYwZa4Im3oaqcaJYZs8RGaStdPjZIUr-XJvnbA82zUhfUwi-VatjIlop5og9s1CUuu4jMfbp-J36AtK0QXNDT2bKu_b2PBrph2PenPevQK-PzhRHrGbihue_4l1gLuPU6vwvJ216_0B8DMPHO8-WnBe3SP8gbKTUPZ8UzECMjffwREOx_c_ZYtm21uvY4ZJBAMHhlzOXu0Gii5UyUu4fEyBp-2HtoDnNHl1ghY9Wxk"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Content -->
+<section class="pt-24 px-8 pb-8 flex-1">
+<div class="mb-8">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-1">낙찰 프로젝트 현황 관리</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">공급업체별 낙찰 프로젝트의 진행 상황과 계약 금액을 모니터링합니다.</p>
+</div>
+<!-- Summary Cards (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant flex flex-col justify-between shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="p-3 bg-primary-container/10 text-primary-container rounded-lg">
+<span class="material-symbols-outlined" data-icon="assignment_turned_in">assignment_turned_in</span>
+</span>
+<span class="text-primary-container font-label-md text-label-md">+12% vs 지난달</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">총 낙찰 프로젝트 수</p>
+<h3 class="text-[32px] font-bold text-on-surface">1,284 <small class="text-body-md font-normal text-on-surface-variant">건</small></h3>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant flex flex-col justify-between shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="p-3 bg-secondary-container/30 text-secondary rounded-lg">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+</span>
+<span class="text-on-surface-variant font-label-md text-label-md">누적 데이터</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">총 계약 금액 (KRW)</p>
+<h3 class="text-[32px] font-bold text-on-surface">45.2 <small class="text-body-md font-normal text-on-surface-variant">조 원</small></h3>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant flex flex-col justify-between shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="p-3 bg-tertiary-container/10 text-tertiary-container rounded-lg">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+</span>
+<span class="bg-primary-container text-on-primary px-2 py-1 rounded text-[10px] font-bold">LIVE</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">현재 활성 프로젝트</p>
+<h3 class="text-[32px] font-bold text-on-surface">156 <small class="text-body-md font-normal text-on-surface-variant">건</small></h3>
+</div>
+</div>
+</div>
+<!-- Table Section -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-sm">
+<!-- Filters & Actions -->
+<div class="p-4 border-b border-outline-variant flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 border border-outline-variant rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+                        전체 상태
+                        <span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+<button class="px-4 py-2 border border-outline-variant rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-surface-container transition-colors">
+                        발주 기관
+                        <span class="material-symbols-outlined text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:text-primary-container hover:bg-surface-container rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="file_download">file_download</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary-container hover:bg-surface-container rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="print">print</span>
+</button>
+</div>
+</div>
+<!-- Table Content -->
+<div class="overflow-x-auto">
+<table class="w-full border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-left border-b border-outline-variant">
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">프로젝트 명</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">발주 기관</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">낙찰 공급업체</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">계약 금액</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">사업 기간</th>
+<th class="px-6 py-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">진행 상태</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="px-6 py-5">
+<p class="font-body-md text-body-md text-on-surface font-semibold">2024 지능형 전자정부 인프라 고도화 사업</p>
+<p class="text-[11px] text-on-surface-variant mt-1">ID: B2024-AD-0012</p>
+</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface">행정안전부</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-primary-container/10 flex items-center justify-center text-primary-container font-bold text-xs">KT</div>
+<span class="font-body-md text-body-md text-on-surface">(주)케이티</span>
+</div>
+</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface text-right">₩15,400,000,000</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface">2024.03 - 2025.12</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-primary-container/10 text-primary-container font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-primary-container mr-2"></span>
+                                    진행중
+                                </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="px-6 py-5">
+<p class="font-body-md text-body-md text-on-surface font-semibold">차세대 통합 재난 안전 관리 시스템 구축</p>
+<p class="text-[11px] text-on-surface-variant mt-1">ID: B2023-DR-9821</p>
+</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface">소방청</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-secondary-container/40 flex items-center justify-center text-secondary font-bold text-xs">SK</div>
+<span class="font-body-md text-body-md text-on-surface">SK C&amp;C</span>
+</div>
+</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface text-right">₩8,900,000,000</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface">2023.01 - 2024.02</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-surface-variant text-on-surface-variant font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-outline mr-2"></span>
+                                    완료
+                                </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="px-6 py-5">
+<p class="font-body-md text-body-md text-on-surface font-semibold">전국 초중고 AI 디지털 교과서 클라우드 운영</p>
+<p class="text-[11px] text-on-surface-variant mt-1">ID: B2024-ED-0433</p>
+</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface">한국지능정보사회진흥원</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-tertiary-container/10 flex items-center justify-center text-tertiary-container font-bold text-xs">NHN</div>
+<span class="font-body-md text-body-md text-on-surface">NHN 클라우드</span>
+</div>
+</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface text-right">₩4,250,000,000</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface">2024.05 - 2024.12</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-error-container/50 text-error font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-error mr-2"></span>
+                                    마감임박
+                                </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer">
+<td class="px-6 py-5">
+<p class="font-body-md text-body-md text-on-surface font-semibold">국가 물류 데이터 센터 통합 보안 관제 시스템</p>
+<p class="text-[11px] text-on-surface-variant mt-1">ID: B2023-LG-7712</p>
+</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface">해양수산부</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-primary-container/10 flex items-center justify-center text-primary-container font-bold text-xs">A</div>
+<span class="font-body-md text-body-md text-on-surface">안랩</span>
+</div>
+</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface text-right">₩2,100,000,000</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface">2023.11 - 2024.11</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-primary-container/10 text-primary-container font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-primary-container mr-2"></span>
+                                    진행중
+                                </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors group cursor-pointer border-none">
+<td class="px-6 py-5">
+<p class="font-body-md text-body-md text-on-surface font-semibold">범정부 데이터 분석 공통 기반 시스템 증설</p>
+<p class="text-[11px] text-on-surface-variant mt-1">ID: B2023-DA-0922</p>
+</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface">행정안전부</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-secondary-container/40 flex items-center justify-center text-secondary font-bold text-xs">LG</div>
+<span class="font-body-md text-body-md text-on-surface">LG CNS</span>
+</div>
+</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface text-right">₩11,200,000,000</td>
+<td class="px-6 py-5 font-body-md text-body-md text-on-surface">2023.08 - 2024.08</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-error-container/50 text-error font-label-md text-label-md">
+<span class="w-2 h-2 rounded-full bg-error mr-2"></span>
+                                    지연됨
+                                </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="p-6 border-t border-outline-variant flex items-center justify-between">
+<p class="font-body-md text-body-md text-on-surface-variant">총 1,284개 중 1-10 표시 중</p>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary-container text-on-primary font-label-md text-label-md">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant font-label-md text-label-md hover:bg-surface-container">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant font-label-md text-label-md hover:bg-surface-container">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Manpower Status & Resource Cards (Secondary Bento Row) -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-10">
+<div class="lg:col-span-1 bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline-sm text-[18px] font-bold text-on-surface">최근 이슈 공급업체</h4>
+<span class="material-symbols-outlined text-error" data-icon="warning">warning</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<img alt="Company Logo" class="w-10 h-10 rounded-lg border border-outline-variant/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLygH2DlU3T-b8jc7ntNa96P-WUAYaN-CXaqiT5UB2VYSUxdVJLnO4Tay5FHb7wQAmH9qMfvjLAGS5DWMiwFcM12oLqHQEDRtMhxj4FktHZczdQZ3R1aSq2Te1MLV0lU7OoxTBwp9SQQ4I2o-h0JiR91nQMYmLwQb2-OeqiAvG5HjSt7lZpSRi8focq7MGobPTGSQpeG0NnKWJ_va5Yokm4Jki5KSOUazYz2Kr_8Bakz588FxaUXyX6y_MsY9o1a2rYFQqkWTRerY"/>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-on-surface font-semibold">대림정보통신</p>
+<p class="text-[10px] text-error font-bold uppercase">인력 수급 지연</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<img alt="Company Logo" class="w-10 h-10 rounded-lg border border-outline-variant/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwU4C-WSOqjCHlHHhHGniSYiotyA3b-ZjyCGVHyaE8DjU23A1xnL8ErpdvmVkoIAWBCX3BTcxTe8sB7o-VBqoA0YszgOBAuaCBM4dZwLQAqEIeCzhSdl6G3xZxdgZCG-SBI98DFEuLsaIwSJeKvjw9t47-Xny70Xje8Hnn3MUADBqixvqnsYpP82OZQAAjzCik158rMnosV6A_0bg4uf0pzctt98CPxsNFPorxPCI1hAL9yGTBln6P0FwmW_BJgopvTimTkQZY_24"/>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-on-surface font-semibold">현대글로비스</p>
+<p class="text-[10px] text-primary-container font-bold uppercase">계약 변경 검토 중</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-2 border border-outline-variant rounded-lg font-label-md text-label-md hover:bg-surface-container transition-colors text-on-surface-variant">전체 로그 확인</button>
+</div>
+<div class="lg:col-span-3 bg-surface-container-lowest p-6 rounded-xl border border-outline-variant overflow-hidden relative shadow-sm">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline-sm text-[18px] font-bold text-on-surface">분기별 낙찰 트렌드</h4>
+<div class="flex gap-4">
+<span class="flex items-center gap-1 font-label-md text-label-md text-on-surface-variant"><span class="w-3 h-3 rounded-full bg-primary-container"></span> 공공 IT</span>
+<span class="flex items-center gap-1 font-label-md text-label-md text-on-surface-variant"><span class="w-3 h-3 rounded-full bg-secondary"></span> SOC 인프라</span>
+</div>
+</div>
+<div class="h-48 flex items-end justify-between gap-4 px-4 border-b border-outline-variant pb-2">
+<!-- Simulated Chart Bars (Beryl Emerald Palette) -->
+<div class="flex-1 flex flex-col items-center gap-1">
+<div class="w-full flex gap-1 items-end h-full">
+<div class="bg-primary-container/30 h-[60%] w-full rounded-t-sm"></div>
+<div class="bg-secondary/30 h-[40%] w-full rounded-t-sm"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant font-medium">1Q</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-1">
+<div class="w-full flex gap-1 items-end h-full">
+<div class="bg-primary-container/60 h-[75%] w-full rounded-t-sm"></div>
+<div class="bg-secondary/60 h-[55%] w-full rounded-t-sm"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant font-medium">2Q</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-1">
+<div class="w-full flex gap-1 items-end h-full">
+<div class="bg-primary-container h-[90%] w-full rounded-t-sm"></div>
+<div class="bg-secondary h-[65%] w-full rounded-t-sm"></div>
+</div>
+<span class="text-[10px] text-primary-container font-bold">3Q(현재)</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-1 opacity-30">
+<div class="w-full flex gap-1 items-end h-full">
+<div class="bg-outline h-[30%] w-full rounded-t-sm"></div>
+<div class="bg-outline-variant h-[20%] w-full rounded-t-sm"></div>
+</div>
+<span class="text-[10px] text-on-surface-variant font-medium">4Q(예측)</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Institutional Footer -->
+<footer class="mt-auto px-8 py-6 border-t border-outline-variant bg-surface-container-low">
+<div class="flex justify-between items-center opacity-60">
+<p class="font-label-sm text-label-sm">© 2024 BERYL Administration System. All Rights Reserved.</p>
+<div class="flex gap-6 font-label-sm text-label-sm">
+<a class="hover:text-primary-container hover:underline" href="#">이용약관</a>
+<a class="hover:text-primary-container hover:underline" href="#">개인정보처리방침</a>
+<a class="hover:text-primary-container hover:underline" href="#">BERYL 안내</a>
+</div>
+</div>
+</footer>
+</main>
+</body></html>

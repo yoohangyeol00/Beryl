@@ -1,0 +1,243 @@
+<!DOCTYPE html><html class="light" lang="ko"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>ProcurePro | BERYL - Secure Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Work+Sans:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#006d43",
+                        "on-secondary-fixed-variant": "#084f4d",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#002111",
+                        "surface-variant": "#dfe3e1",
+                        "on-surface-variant": "#3d4a41",
+                        "secondary": "#2a6865",
+                        "on-secondary-fixed": "#00201f",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed": "#002117",
+                        "inverse-on-surface": "#eef2f0",
+                        "secondary-fixed": "#b1eeea",
+                        "surface-dim": "#d7dbd9",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#59de9b",
+                        "background": "#f6faf8",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary": "#006c52",
+                        "on-primary-container": "#00331d",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#006d43",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f0f4f2",
+                        "outline": "#6d7a70",
+                        "on-tertiary-container": "#003326",
+                        "tertiary-container": "#00a782",
+                        "surface-container-high": "#e5e9e7",
+                        "on-error": "#ffffff",
+                        "surface": "#f6faf8",
+                        "on-surface": "#181d1c",
+                        "surface-container-highest": "#dfe3e1",
+                        "primary-fixed": "#78fbb6",
+                        "secondary-fixed-dim": "#95d1ce",
+                        "tertiary-fixed": "#79f9ce",
+                        "on-tertiary-fixed-variant": "#00513d",
+                        "outline-variant": "#bccabe",
+                        "secondary-container": "#b1eeea",
+                        "inverse-surface": "#2d3130",
+                        "tertiary-fixed-dim": "#5adcb3",
+                        "surface-container": "#ebefed",
+                        "primary-container": "#00a86b",
+                        "on-background": "#181d1c",
+                        "on-secondary-container": "#316e6b",
+                        "on-primary-fixed-variant": "#005232",
+                        "surface-bright": "#f6faf8",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed-dim": "#59de9b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Manrope"],
+                        "label-sm": ["IBM Plex Sans"],
+                        "headline-xl": ["Manrope"],
+                        "body-lg": ["Work Sans"],
+                        "label-md": ["IBM Plex Sans"],
+                        "headline-lg": ["Manrope"],
+                        "headline-lg-mobile": ["Manrope"],
+                        "body-md": ["Work Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        
+        .bento-glow {
+            background: radial-gradient(circle at 50% 50%, rgba(0, 168, 107, 0.05) 0%, transparent 70%);
+        }
+
+        .login-card-backdrop {
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 168, 107, 0.15);
+        }
+
+        .auth-divider::before, .auth-divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #D1E3DC;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex items-center justify-center p-4">
+<!-- Subtle Atmospheric Background -->
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+<div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]"></div>
+<div class="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-tertiary/5 blur-[120px]"></div>
+<div class="absolute inset-0 bento-glow"></div>
+</div>
+<!-- Login Container -->
+<main class="relative z-10 w-full max-w-[440px] animate-in fade-in slide-in-from-bottom-4 duration-700">
+<!-- Brand Header (Floating above card) -->
+<div class="flex flex-col items-center mb-8"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1VIlvE-BEgpZkJB_LIuHNK9FSHZRU0FNvXDZ4GKgEMJCHYtV88P2zZSgzoF0jUUCvmHkYdcGPPruD_C39ZH70I6ixoKyc5nwEUohPB3TTdePOCqm9rvLni8DrUvgaWeipw5xTf0uEGPU5QqWoxqhymZl0nmuDZiG6k6BjEbs6g6tHYJBkzERMG5DenDZ1p0L4ktSDOZt1Rc89uLBuKcJA-Czvp3gixLEYsuPqXPbDcBUpiDzIXvAnqAE0RIBbGzAjf45SFE7FMZh5" alt="BERYL Emerald Logo" class="h-16 w-auto mb-2">
+<p class="font-label-md text-label-md text-on-surface-variant mt-1 opacity-75">Business E-bidding &amp; Resource Yield Link</p></div>
+<!-- Main Card -->
+<div class="login-card-backdrop border border-outline-variant p-8 md:p-10 rounded-xl shadow-[0_8px_32px_rgba(0,36,27,0.04)]">
+<header class="mb-8">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Welcome back</h2>
+<p class="font-body-md text-on-surface-variant mt-2">Enter your credentials to access the procurement portal.</p>
+</header>
+<form class="space-y-6" id="loginForm">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="block font-label-md text-label-md text-on-surface" for="email">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">mail</span>
+<input class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg text-body-md focus:border-primary-container transition-all placeholder:text-outline-variant" id="email" name="email" placeholder="name@company.com" required="" type="email">
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label class="block font-label-md text-label-md text-on-surface" for="password">Password</label>
+<a class="text-label-sm text-primary hover:underline decoration-primary/30 transition-all" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">lock</span>
+<input class="w-full pl-10 pr-12 py-3 bg-white border border-outline-variant rounded-lg text-body-md focus:border-primary-container transition-all placeholder:text-outline-variant" id="password" name="password" placeholder="••••••••" required="" type="password">
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" onclick="togglePassword()" type="button">
+<span class="material-symbols-outlined text-xl" id="passwordIcon">visibility</span>
+</button>
+</div>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center">
+<input class="w-4 h-4 text-primary border-outline-variant rounded focus:ring-primary/20 cursor-pointer" id="remember" type="checkbox">
+<label class="ml-2 font-body-md text-on-surface-variant text-sm cursor-pointer select-none" for="remember">Remember this device</label>
+</div>
+<!-- Login Button -->
+<button class="w-full bg-primary-container hover:bg-primary text-on-primary font-label-md py-4 rounded-lg shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-2 group" type="submit">
+<span class="">Log In</span>
+<span class="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</form>
+<!-- Social/Secondary Auth -->
+<div class="mt-8">
+<div class="auth-divider flex items-center gap-4 text-label-sm text-outline mb-6">
+<span class="">OR CONTINUE WITH</span>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<button class="flex items-center justify-center gap-3 w-full py-3 border border-outline-variant bg-white rounded-lg hover:bg-surface-container-low transition-colors group">
+<img class="w-5 h-5" data-alt="The official Google 'G' logo icon in its signature four-color scheme: red, yellow, green, and blue, rendered as a crisp, minimalist vector graphic centered on a clean white circular background. The style is modern corporate, professional, and familiar, fitting seamlessly into a high-end enterprise software authentication interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2lBmM1aN_K0YAeES9nWsVoOgBXGfdfWRi6jiH6eYftfmUf8CMcJpuQd49YtoqW8T1BiqKQeUoUfHJ8syh7IPqeV_Q63vnVq5ioIYjhAa_RrFiTmlFuUA1MwzvMEjqG95ZBwV4eZHk6XaC4sbAkt7Cie_c8o7WxlXL0MoghQNccVxMsZS39qy3tg7Regv1JvTS3A7-oE97Zir8XoDdmwXvlTPsGRopCR8nqseYCdOQHW2yGbNmIaI5nIa6-TgsPqyD3VJk05BunWOs">
+<span class="font-label-md text-on-surface">Sign in with Google</span>
+</button>
+</div>
+</div>
+<!-- Footer Signup -->
+<footer class="mt-10 pt-6 border-t border-outline-variant/50 text-center">
+<p class="font-body-md text-sm text-on-surface-variant">
+                    Don't have an account? 
+                    <a class="text-primary font-bold hover:underline decoration-primary/30 ml-1" href="#">Request Access</a>
+</p>
+</footer>
+</div>
+<!-- Branding / Regulatory Footer -->
+<div class="mt-8 flex flex-col md:flex-row justify-between items-center gap-4 px-4 opacity-60">
+<span class="text-label-sm text-on-surface-variant">© 2024 ProcurePro BERYL</span>
+<div class="flex gap-6">
+<a class="text-label-sm hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-label-sm hover:text-primary transition-colors" href="#">Terms of Service</a>
+</div>
+</div>
+</main>
+<script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const passwordIcon = document.getElementById('passwordIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordIcon.innerText = 'visibility_off';
+            } else {
+                passwordInput.type = 'password';
+                passwordIcon.innerText = 'visibility';
+            }
+        }
+
+        // Simple feedback for the demo
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalContent = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">progress_activity</span> Authenticating...';
+            
+            setTimeout(() => {
+                btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Success';
+                btn.classList.replace('bg-primary-container', 'bg-tertiary-container');
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                    btn.classList.replace('bg-tertiary-container', 'bg-primary-container');
+                }, 2000);
+            }, 1500);
+        });
+    </script>
+
+
+</body></html>

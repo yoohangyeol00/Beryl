@@ -1,0 +1,437 @@
+<!DOCTYPE html><html class="light" lang="ko"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Work+Sans:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        body { font-family: 'Work Sans', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Custom scrollbar for high-density dashboard */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f6faf8; }
+        ::-webkit-scrollbar-thumb { background: #bccabe; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6d7a70; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#2a6865",
+                        "surface-variant": "#dfe3e1",
+                        "surface": "#f6faf8",
+                        "background": "#f6faf8",
+                        "secondary-fixed-dim": "#95d1ce",
+                        "surface-bright": "#f6faf8",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#5adcb3",
+                        "inverse-on-surface": "#eef2f0",
+                        "surface-container": "#ebefed",
+                        "on-primary-fixed-variant": "#005232",
+                        "tertiary-fixed": "#79f9ce",
+                        "on-secondary-container": "#316e6b",
+                        "secondary-fixed": "#b1eeea",
+                        "inverse-surface": "#2d3130",
+                        "on-tertiary-container": "#003326",
+                        "inverse-primary": "#59de9b",
+                        "on-surface-variant": "#3d4a41",
+                        "surface-tint": "#006d43",
+                        "on-primary-fixed": "#002111",
+                        "primary": "#006d43",
+                        "tertiary": "#006c52",
+                        "on-error": "#ffffff",
+                        "on-tertiary-fixed": "#002117",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d7dbd9",
+                        "on-background": "#181d1c",
+                        "on-secondary-fixed": "#00201f",
+                        "primary-fixed": "#78fbb6",
+                        "surface-container-high": "#e5e9e7",
+                        "surface-container-highest": "#dfe3e1",
+                        "primary-fixed-dim": "#59de9b",
+                        "secondary-container": "#b1eeea",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f0f4f2",
+                        "on-primary-container": "#00331d",
+                        "outline-variant": "#bccabe",
+                        "on-tertiary-fixed-variant": "#00513d",
+                        "tertiary-container": "#00a782",
+                        "on-secondary-fixed-variant": "#084f4d",
+                        "outline": "#6d7a70",
+                        "primary-container": "#00a86b",
+                        "on-surface": "#181d1c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "container-max": "1280px",
+                        "margin-desktop": "48px",
+                        "unit": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Manrope"],
+                        "headline-lg": ["Manrope"],
+                        "body-md": ["Work Sans"],
+                        "label-md": ["IBM Plex Sans"],
+                        "label-sm": ["IBM Plex Sans"],
+                        "headline-xl": ["Manrope"],
+                        "body-lg": ["Work Sans"],
+                        "headline-lg-mobile": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="bg-surface-container-low h-screen w-64 flex-shrink-0 border-r border-outline-variant flex flex-col sticky top-0 py-6">
+<div class="px-6 mb-8">
+<div class="mb-2"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1VIlvE-BEgpZkJB_LIuHNK9FSHZRU0FNvXDZ4GKgEMJCHYtV88P2zZSgzoF0jUUCvmHkYdcGPPruD_C39ZH70I6ixoKyc5nwEUohPB3TTdePOCqm9rvLni8DrUvgaWeipw5xTf0uEGPU5QqWoxqhymZl0nmuDZiG6k6BjEbs6g6tHYJBkzERMG5DenDZ1p0L4ktSDOZt1Rc89uLBuKcJA-Czvp3gixLEYsuPqXPbDcBUpiDzIXvAnqAE0RIBbGzAjf45SFE7FMZh5" alt="BERYL Emerald Logo" class="h-10 w-auto object-contain"></div>
+<p class="font-label-sm text-on-surface-variant uppercase tracking-wider">Public Admin System</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container transition-colors duration-200 font-label-md" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span> 대시보드
+        </a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container transition-colors duration-200 font-label-md" href="#">
+<span class="material-symbols-outlined mr-3">assignment</span> 입찰공고
+        </a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container transition-colors duration-200 font-label-md" href="#">
+<span class="material-symbols-outlined mr-3">psychology</span> RFP 분석
+        </a>
+<a class="flex items-center px-6 py-3 text-primary font-bold border-r-4 border-primary bg-primary-container/10 font-label-md" href="#">
+<span class="material-symbols-outlined mr-3">groups</span> 인력 현황
+        </a>
+<a class="flex items-center px-6 py-3 text-on-surface-variant hover:bg-surface-container transition-colors duration-200 font-label-md" href="#">
+<span class="material-symbols-outlined mr-3">analytics</span> 자원 배정
+        </a>
+</nav>
+<div class="mt-auto px-6 space-y-1">
+<button class="w-full bg-primary text-on-primary py-3 rounded-xl font-label-md mb-6 hover:opacity-90 transition-all shadow-sm">공고 등록</button>
+<a class="flex items-center py-2 text-on-surface-variant hover:text-primary transition-colors font-label-md" href="#">
+<span class="material-symbols-outlined mr-3">settings</span> 설정
+        </a>
+<a class="flex items-center py-2 text-on-surface-variant hover:text-primary transition-colors font-label-md" href="#">
+<span class="material-symbols-outlined mr-3">support_agent</span> 고객센터
+        </a>
+</div>
+</aside>
+<main class="flex-1 flex flex-col min-w-0">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-12 h-16 sticky top-0 z-50 bg-surface/90 backdrop-blur-md border-b border-outline-variant">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary rounded-lg text-body-md" placeholder="직원 이름, 부서 또는 직책 검색" type="text">
+</div>
+</div>
+<div class="flex items-center space-x-4">
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="flex items-center pl-4 border-l border-outline-variant">
+<div class="text-right mr-3 hidden md:block">
+<p class="font-label-md text-on-surface font-bold">김관리 사무관</p>
+<p class="font-label-sm text-on-surface-variant">운영지원과</p>
+</div>
+<img alt="사용자 프로필" class="w-10 h-10 rounded-full border border-outline-variant object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdKCkIa53GyQEgpV0h6IOZCW3hn41ZqzOnmFECedBVEtge5_aEG_fd84aPrhYsu6Xemz2bGdZ4JCW6uVyqSZBcP_QPqQBfqoD1Vmpk_X9Zbj2M7Ctje6NT9fDtaSlCr86XflwpKLn7AMibca0zZpHTRgtkYSePaxL4NynKTnxgrWUX-8xPQXOWbrGLy1wLWKt7mrN9rzs4gMfks42-IjLP1L_EKWyzbajszIG7THoxuL5wR2bqrL8MqKFcKP1byp6a0LsmNGtNXgs">
+</div>
+</div>
+</header>
+<div class="p-12 space-y-8">
+<!-- Agency Overview Header -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm">
+<div class="flex items-center gap-6">
+<div class="w-16 h-16 bg-primary-container rounded-2xl flex items-center justify-center text-on-primary-container shadow-sm">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<div>
+<div class="flex items-center gap-3 mb-1">
+<h2 class="font-headline-md text-on-surface">조달청</h2>
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded text-label-sm font-bold">중앙행정기관</span>
+</div>
+<div class="flex gap-4">
+<span class="text-body-md text-on-surface-variant">총 부서: <strong class="text-on-surface">8개</strong></span>
+<span class="text-body-md text-on-surface-variant">총 인원: <strong class="text-on-surface">124명</strong></span>
+</div>
+</div>
+</div>
+<div class="flex gap-3 w-full md:w-auto">
+<button class="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-xl font-label-md border border-outline-variant">
+<span class="material-symbols-outlined text-[20px]">edit</span> 기관 정보 수정
+                </button>
+<button class="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-on-primary hover:opacity-90 transition-all rounded-xl font-label-md shadow-md">
+<span class="material-symbols-outlined text-[20px]">person_add</span> 직원 초대
+                </button>
+</div>
+</section>
+<div class="grid grid-cols-12 gap-8">
+<!-- Organization Tree -->
+<aside class="col-span-12 lg:col-span-3 space-y-4">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-sm">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h3 class="font-label-md text-on-surface uppercase tracking-tight">조직 구조</h3>
+<button class="p-1 text-primary hover:bg-primary-container/20 rounded-md transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+<div class="p-2">
+<ul class="space-y-1">
+<li class="">
+<button class="w-full flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-bold rounded-xl text-left text-body-md transition-all">
+<span class="material-symbols-outlined text-[20px]">folder_open</span> 운영지원과
+                                </button>
+</li>
+<li class="">
+<button class="w-full flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container rounded-xl text-left text-body-md transition-colors">
+<span class="material-symbols-outlined text-[20px]">folder</span> 기획조정관실
+                                </button>
+</li>
+<li class="">
+<div class="ml-4 pl-4 border-l border-outline-variant space-y-1 my-1">
+<button class="w-full flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container rounded-xl text-left text-body-md transition-colors">
+                                        기획재정담당관
+                                    </button>
+<button class="w-full flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container rounded-xl text-left text-body-md transition-colors">
+                                        혁신행정담당관
+                                    </button>
+</div>
+</li>
+<li class="">
+<button class="w-full flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container rounded-xl text-left text-body-md transition-colors">
+<span class="material-symbols-outlined text-[20px]">folder</span> 조달관리국
+                                </button>
+</li>
+<li class="">
+<button class="w-full flex items-center gap-2 px-4 py-2 text-on-surface-variant hover:bg-surface-container rounded-xl text-left text-body-md transition-colors">
+<span class="material-symbols-outlined text-[20px]">folder</span> 구매사업국
+                                </button>
+</li>
+</ul>
+</div>
+</div>
+</aside>
+<!-- Staff Directory List -->
+<section class="col-span-12 lg:col-span-9 space-y-6">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-sm">
+<div class="p-6 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div>
+<h3 class="font-headline-md text-on-surface">운영지원과 직원 목록</h3>
+<p class="text-body-md text-on-surface-variant">현재 부서원 <span class="text-primary font-bold">12명</span>이 검색되었습니다.</p>
+</div>
+<div class="flex items-center gap-2 w-full md:w-auto">
+<select class="bg-surface-container-low border-outline-variant rounded-xl text-body-md px-4 py-2 focus:ring-primary focus:border-primary">
+<option>모든 직책</option>
+<option>과장</option>
+<option>사무관</option>
+<option>주무관</option>
+</select>
+<button class="p-2 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-xl transition-colors border border-outline-variant">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">이름 / 성별</th>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">직책</th>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">연락처 / 이메일</th>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider text-center">역할</th>
+<th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider text-right">관리</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Staff Row 1 -->
+<tr class="hover:bg-primary-container/5 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold text-sm">이</div>
+<div>
+<p class="font-body-md font-bold text-on-surface">이민우</p>
+<p class="text-label-sm text-on-surface-variant">남성</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 font-body-md text-on-surface-variant">과장</td>
+<td class="px-6 py-4">
+<p class="font-body-md text-on-surface">010-1234-5678</p>
+<p class="text-body-md text-on-surface-variant">mw.lee@pps.go.kr</p>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-label-sm font-bold bg-primary/10 text-primary border border-primary/20">부서 총괄</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">more_vert</span></button>
+</td>
+</tr>
+<!-- Staff Row 2 -->
+<tr class="hover:bg-primary-container/5 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-bold text-sm">김</div>
+<div>
+<p class="font-body-md font-bold text-on-surface">김관리</p>
+<p class="text-label-sm text-on-surface-variant">남성</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 font-body-md text-on-surface-variant">사무관</td>
+<td class="px-6 py-4">
+<p class="font-body-md text-on-surface">010-8765-4321</p>
+<p class="text-body-md text-on-surface-variant">admin.kim@pps.go.kr</p>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-label-sm font-bold bg-secondary/10 text-secondary border border-secondary/20">메인 담당자</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">more_vert</span></button>
+</td>
+</tr>
+<!-- Staff Row 3 -->
+<tr class="hover:bg-primary-container/5 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant font-bold text-sm">박</div>
+<div>
+<p class="font-body-md font-bold text-on-surface">박지성</p>
+<p class="text-label-sm text-on-surface-variant">남성</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 font-body-md text-on-surface-variant">주무관</td>
+<td class="px-6 py-4">
+<p class="font-body-md text-on-surface">010-4455-6677</p>
+<p class="text-body-md text-on-surface-variant">js.park@pps.go.kr</p>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-label-sm font-bold bg-surface-container text-on-surface-variant border border-outline-variant">평가 위원</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 hover:bg-surface-container rounded-full transition-colors"><span class="material-symbols-outlined text-[20px] text-on-surface-variant">more_vert</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-outline-variant flex justify-between items-center bg-surface-container-low">
+<span class="text-label-sm text-on-surface-variant">12개 중 1-3 표시 중</span>
+<div class="flex gap-2">
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-9 h-9 flex items-center justify-center bg-primary text-on-primary rounded-lg font-bold">1</button>
+<button class="w-9 h-9 flex items-center justify-center hover:bg-surface-container rounded-lg">2</button>
+<button class="w-9 h-9 flex items-center justify-center hover:bg-surface-container rounded-lg">3</button>
+<button class="p-2 border border-outline-variant rounded-lg hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Manpower Analysis Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-sm">
+<h4 class="font-label-md text-on-surface-variant mb-4 flex items-center gap-2 uppercase tracking-wide">
+<span class="material-symbols-outlined text-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">pie_chart</span> 직급 분포
+                        </h4>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between items-center text-label-sm mb-1">
+<span class="text-on-surface font-bold">과장급 이상</span>
+<span class="text-primary">12%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 12%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center text-label-sm mb-1">
+<span class="text-on-surface font-bold">사무관급</span>
+<span class="text-primary">35%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full opacity-70" style="width: 35%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center text-label-sm mb-1">
+<span class="text-on-surface font-bold">주무관급</span>
+<span class="text-primary">53%</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full opacity-40" style="width: 53%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 col-span-1 md:col-span-2 shadow-sm">
+<div class="flex justify-between items-center mb-4">
+<h4 class="font-label-md text-on-surface-variant flex items-center gap-2 uppercase tracking-wide">
+<span class="material-symbols-outlined text-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">assignment_turned_in</span> 주요 프로젝트 배치 현황
+                            </h4>
+<button class="text-primary font-bold text-label-sm hover:underline">자세히 보기</button>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant hover:border-primary/50 transition-colors">
+<p class="text-label-sm font-bold text-on-surface-variant mb-2 uppercase">차세대 디지털 조달 시스템</p>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-2">
+<div class="w-7 h-7 rounded-full bg-primary-fixed border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold">L</div>
+<div class="w-7 h-7 rounded-full bg-secondary-fixed border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold">K</div>
+<div class="w-7 h-7 rounded-full bg-tertiary-fixed border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold">P</div>
+</div>
+<span class="px-3 py-1 bg-primary text-on-primary rounded-full text-[10px] font-bold">8명 참여</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl border border-outline-variant hover:border-primary/50 transition-colors">
+<p class="text-label-sm font-bold text-on-surface-variant mb-2 uppercase">2024 상반기 해외조달 연수</p>
+<div class="flex items-center justify-between">
+<div class="flex -space-x-2">
+<div class="w-7 h-7 rounded-full bg-tertiary-fixed border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold">C</div>
+<div class="w-7 h-7 rounded-full bg-primary-fixed border-2 border-surface-container-lowest flex items-center justify-center text-[10px] font-bold">S</div>
+</div>
+<span class="px-3 py-1 bg-secondary text-on-secondary rounded-full text-[10px] font-bold">3명 참여</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+
+
+</body></html>

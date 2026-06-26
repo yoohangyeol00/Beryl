@@ -1,0 +1,396 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Manpower Matching Algorithm Analysis - BERYL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&amp;family=Work+Sans:wght@400;500&amp;family=IBM+Plex+Sans:wght@500;600&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#2a6865",
+                      "surface-variant": "#dfe3e1",
+                      "surface": "#f6faf8",
+                      "background": "#f6faf8",
+                      "secondary-fixed-dim": "#95d1ce",
+                      "surface-bright": "#f6faf8",
+                      "on-primary": "#ffffff",
+                      "tertiary-fixed-dim": "#5adcb3",
+                      "inverse-on-surface": "#eef2f0",
+                      "surface-container": "#ebefed",
+                      "on-primary-fixed-variant": "#005232",
+                      "tertiary-fixed": "#79f9ce",
+                      "on-secondary-container": "#316e6b",
+                      "secondary-fixed": "#b1eeea",
+                      "inverse-surface": "#2d3130",
+                      "on-tertiary-container": "#003326",
+                      "inverse-primary": "#59de9b",
+                      "on-surface-variant": "#3d4a41",
+                      "surface-tint": "#006d43",
+                      "on-primary-fixed": "#002111",
+                      "primary": "#006d43",
+                      "tertiary": "#006c52",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed": "#002117",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "on-error-container": "#93000a",
+                      "error": "#ba1a1a",
+                      "surface-dim": "#d7dbd9",
+                      "on-background": "#181d1c",
+                      "on-secondary-fixed": "#00201f",
+                      "primary-fixed": "#78fbb6",
+                      "surface-container-high": "#e5e9e7",
+                      "surface-container-highest": "#dfe3e1",
+                      "primary-fixed-dim": "#59de9b",
+                      "secondary-container": "#b1eeea",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-low": "#f0f4f2",
+                      "on-primary-container": "#00331d",
+                      "outline-variant": "#bccabe",
+                      "on-tertiary-fixed-variant": "#00513d",
+                      "tertiary-container": "#00a782",
+                      "on-secondary-fixed-variant": "#084f4d",
+                      "outline": "#6d7a70",
+                      "primary-container": "#00a86b",
+                      "on-surface": "#181d1c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "margin-mobile": "16px",
+                      "gutter": "24px",
+                      "container-max": "1280px",
+                      "margin-desktop": "48px",
+                      "unit": "8px"
+              },
+              "fontFamily": {
+                      "headline-md": ["Manrope"],
+                      "headline-lg": ["Manrope"],
+                      "body-md": ["Work Sans"],
+                      "label-md": ["IBM Plex Sans"],
+                      "label-sm": ["IBM Plex Sans"],
+                      "headline-xl": ["Manrope"],
+                      "body-lg": ["Work Sans"],
+                      "headline-lg-mobile": ["Manrope"]
+              },
+              "fontSize": {
+                      "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                      "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                      "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                      "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                      "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                      "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                      "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                      "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Work Sans', sans-serif; }
+        h1, h2, h3, h4 { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col md:flex-row antialiased">
+<!-- Mobile TopNav -->
+<header class="md:hidden flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-50 bg-surface/90 backdrop-blur-md border-b border-outline-variant">
+<div class="h-8">https://lh3.googleusercontent.com/aida-public/AB6AXuA1VIlvE-BEgpZkJB_LIuHNK9FSHZRU0FNvXDZ4GKgEMJCHYtV88P2zZSgzoF0jUUCvmHkYdcGPPruD_C39ZH70I6ixoKyc5nwEUohPB3TTdePOCqm9rvLni8DrUvgaWeipw5xTf0uEGPU5QqWoxqhymZl0nmuDZiG6k6BjEbs6g6tHYJBkzERMG5DenDZ1p0L4ktSDOZt1Rc89uLBuKcJA-Czvp3gixLEYsuPqXPbDcBUpiDzIXvAnqAE0RIBbGzAjf45SFE7FMZh5</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer">notifications</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+<img alt="사용자 프로필" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAawVe-Tasce7CpoSlg0DmD6ZgzbrwEnQMAPlstag2fTLqTY8Jzd9WCCly-yAWPN3wGa-WXEUZ4wlT5dUHI63C8GmN9-AhE9ldmCbuUAImn1DR351IfTlDKUfqA3HlMRfunwrhIlOkoddHxiDPRngRlGZNc7B4UeXwRQwvz_2tPrBb70o_oak-unJs8bQDvB599oidM_piXVPKXH5aazq-Prx2bJ4F18GXsXgjgZuiF7_Gwlclen4Qr4lXQpU8VcI-11kBAPRiSVgk">
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen sticky top-0 py-8 bg-surface-container-lowest w-64 flex-shrink-0 border-r border-outline-variant">
+<div class="px-6 mb-10">
+<div class="flex items-center mb-2 h-10">https://lh3.googleusercontent.com/aida-public/AB6AXuA1VIlvE-BEgpZkJB_LIuHNK9FSHZRU0FNvXDZ4GKgEMJCHYtV88P2zZSgzoF0jUUCvmHkYdcGPPruD_C39ZH70I6ixoKyc5nwEUohPB3TTdePOCqm9rvLni8DrUvgaWeipw5xTf0uEGPU5QqWoxqhymZl0nmuDZiG6k6BjEbs6g6tHYJBkzERMG5DenDZ1p0L4ktSDOZt1Rc89uLBuKcJA-Czvp3gixLEYsuPqXPbDcBUpiDzIXvAnqAE0RIBbGzAjf45SFE7FMZh5</div>
+<p class="text-label-sm text-secondary">Intelligent Procurement</p>
+</div>
+<div class="px-6 mb-8">
+<button class="w-full bg-primary text-on-primary font-label-md py-3 rounded-full hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">add</span>
+                공고 등록
+            </button>
+</div>
+<ul class="flex-1 px-4 space-y-1">
+<li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md">대시보드</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-label-md">입찰공고</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-md">RFP 분석</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-label-md">인력 현황</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold bg-primary-container/20 border-l-4 border-primary transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-label-md">자원 배정</span>
+</a>
+</li>
+</ul>
+<div class="mt-auto px-4 pt-6 border-t border-outline-variant">
+<ul class="space-y-1">
+<li class="">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md">설정</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">support_agent</span>
+<span class="font-label-md">고객센터</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-w-0">
+<!-- Desktop TopNav -->
+<header class="hidden md:flex justify-between items-center w-full px-10 h-16 sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
+<div class="flex items-center gap-2 text-on-surface-variant text-sm">
+<span class="material-symbols-outlined text-sm">home</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="">자원 배정</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="font-semibold text-primary">인력 매칭 분석</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+<input class="pl-9 pr-4 py-2 bg-surface-container border border-outline-variant rounded-full text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all w-64" placeholder="통합 검색..." type="text">
+</div>
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant cursor-pointer">
+<img alt="사용자 프로필" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgyvwWc1L9FUsJiAWWMYWU5BHckqpqYX5kGVbISr9sKYe3KCTb72Wz_A340uN3_VZGFE847TFz1856Ao9KvnwV6rwVMeMYUgMbOJlvbhNSBzQKwrlR_NNGsw_86SuD3lnsOufhbEa35QT2WmAr5dRC5SXJh85CIDLtnfcC9VUKArF5Az155QG9xV2DxGI0dJJSgUdNNIsr-bKnS8V87YWEuV7YpSWlVTgXGm1TXk4p-tG7Lzkg1tcmXwoCZV5GStNCIcT0Ga79bCA">
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<div class="p-8 lg:p-10 flex-1 overflow-y-auto">
+<!-- Page Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm">분석 완료</span>
+<p class="text-sm text-secondary">ID: REQ-2023-089</p>
+</div>
+<h2 class="text-headline-lg text-on-surface">추천 매칭 알고리즘 상세 분석</h2>
+<p class="text-body-md text-on-surface-variant mt-2">대상 사업: 차세대 국세 행정 시스템 구축 (김도윤 수석 매칭 평가)</p>
+</div>
+<div class="flex flex-wrap gap-3">
+<button class="px-4 py-2.5 border border-outline-variant rounded-lg font-label-md text-on-surface-variant hover:bg-surface-container-low transition-colors flex items-center gap-2 bg-surface">
+<span class="material-symbols-outlined text-lg">download</span>
+                        분석 리포트
+                    </button>
+<button class="px-5 py-2.5 bg-primary text-on-primary rounded-lg font-label-md hover:shadow-lg transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+                        인력 확정
+                    </button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Overall Match Score -->
+<div class="lg:col-span-4 bg-surface-container-lowest rounded-2xl border border-outline-variant p-8 flex flex-col items-center relative shadow-sm">
+<div class="absolute top-6 right-6 opacity-10">
+<span class="material-symbols-outlined text-6xl text-primary">analytics</span>
+</div>
+<h3 class="text-headline-md text-on-surface w-full mb-8">종합 매칭 점수</h3>
+<div class="relative w-52 h-52 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+<circle class="text-surface-container" cx="50" cy="50" fill="transparent" r="42" stroke="currentColor" stroke-width="10"></circle>
+<circle class="text-primary" cx="50" cy="50" fill="transparent" r="42" stroke="currentColor" stroke-dasharray="263.89" stroke-dashoffset="39.58" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="absolute flex flex-col items-center justify-center">
+<span class="text-headline-xl text-primary font-bold">85<span class="text-headline-md font-semibold">%</span></span>
+<span class="text-label-sm text-on-primary-container bg-primary-container px-3 py-1 rounded-full mt-2">Excellent Fit</span>
+</div>
+</div>
+<div class="mt-10 w-full flex items-center justify-between text-sm border-t border-outline-variant pt-6">
+<span class="text-secondary">기준 점수: 70%</span>
+<span class="text-primary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                            기준 대비 +15%
+                        </span>
+</div>
+</div>
+<!-- AI Rationale Summary -->
+<div class="lg:col-span-8 bg-surface-container-lowest rounded-2xl border border-outline-variant overflow-hidden flex flex-col shadow-sm">
+<div class="bg-primary/5 px-8 py-5 border-b border-outline-variant flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+<h3 class="text-headline-md text-on-surface">AI 추천 요약 (Vertex AI)</h3>
+</div>
+<span class="text-label-sm text-secondary">Updated 10m ago</span>
+</div>
+<div class="p-8 flex-1 flex flex-col justify-center bg-gradient-to-br from-surface-container-lowest to-primary/5">
+<p class="text-body-lg text-on-surface leading-relaxed">
+<strong class="font-semibold text-primary">김도윤 수석</strong>은 국세청 및 유관 공공기관의 대규모 시스템 구축 경험이 풍부하며, 본 사업의 핵심 기술인 <span class="bg-primary-container/30 px-2 py-0.5 rounded text-on-primary-container font-medium">Java, Spring Boot 기반 MSA 전환</span>에 있어 90% 이상의 기술적 부합도를 보입니다.
+</p>
+<p class="text-body-lg text-on-surface-variant leading-relaxed mt-6">
+                            특히 이전 '관세청 차세대 시스템' 프로젝트에서의 성공적인 리딩 경험이 본 '차세대 국세 행정 시스템 구축'의 규모 및 예산과 매우 유사하여 높은 사업 이해도를 기대할 수 있습니다. 가용일 기준 프로젝트 착수 시점과 완벽히 일치합니다.
+                        </p>
+<div class="mt-8 flex gap-4">
+<div class="flex items-center gap-2 bg-white/50 px-4 py-2 rounded-xl border border-outline-variant shadow-sm">
+<span class="material-symbols-outlined text-sm text-primary">verified</span>
+<span class="text-label-sm text-on-surface-variant">신뢰도 수준: 높음</span>
+</div>
+<div class="flex items-center gap-2 bg-white/50 px-4 py-2 rounded-xl border border-outline-variant shadow-sm">
+<span class="material-symbols-outlined text-sm text-primary">history</span>
+<span class="text-label-sm text-on-surface-variant">과거 수행이력 5건 분석됨</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Scoring Breakdown -->
+<div class="lg:col-span-12 bg-surface-container-lowest rounded-2xl border border-outline-variant p-8 shadow-sm">
+<div class="flex items-center justify-between mb-8">
+<h3 class="text-headline-md text-on-surface">상세 평가 지표</h3>
+<div class="text-label-sm text-secondary flex gap-6">
+<span class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-primary"></div>요구사항 대비 충족률</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+<!-- Metric 1 -->
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-end">
+<span class="text-label-md text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-lg text-primary">code</span>기술 스택 일치도</span>
+<span class="text-headline-md text-primary">90%</span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 90%;"></div>
+</div>
+<p class="text-sm text-secondary">Java, Spring Boot, MSA 핵심 충족</p>
+</div>
+<!-- Metric 2 -->
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-end">
+<span class="text-label-md text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-lg text-primary">account_balance</span>공공 사업 경험</span>
+<span class="text-headline-md text-primary">80%</span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 80%;"></div>
+</div>
+<p class="text-sm text-secondary">국세청/관세청 유사 도메인 이력</p>
+</div>
+<!-- Metric 3 -->
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-end">
+<span class="text-label-md text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-lg text-primary">event_available</span>투입 가용성</span>
+<span class="text-headline-md text-primary">100%</span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-tertiary-container h-full rounded-full" style="width: 100%;"></div>
+</div>
+<p class="text-sm text-secondary">9/1 착수일 기준 즉시 투입 가능</p>
+</div>
+<!-- Metric 4 -->
+<div class="flex flex-col gap-3">
+<div class="flex justify-between items-end">
+<span class="text-label-md text-on-surface-variant flex items-center gap-2"><span class="material-symbols-outlined text-lg text-primary">monitoring</span>유사 프로젝트 실적</span>
+<span class="text-headline-md text-primary">75%</span>
+</div>
+<div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 75%;"></div>
+</div>
+<p class="text-sm text-secondary">100억 이상 규모 PL 경험 2회</p>
+</div>
+</div>
+</div>
+<!-- Comparison Table -->
+<div class="lg:col-span-12 bg-surface-container-lowest rounded-2xl border border-outline-variant overflow-hidden flex flex-col shadow-sm">
+<div class="bg-surface-container-low px-8 py-5 border-b border-outline-variant">
+<h3 class="text-headline-md text-on-surface">요구사항 vs 보유역량 상세 비교</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface border-b border-outline-variant">
+<th class="px-8 py-4 text-label-md text-secondary uppercase tracking-wider w-1/4">평가 항목</th>
+<th class="px-8 py-4 text-label-md text-secondary uppercase tracking-wider w-1/3">RFP 핵심 요구사항</th>
+<th class="px-8 py-4 text-label-md text-secondary uppercase tracking-wider w-1/3">후보자 보유 역량 (김도윤)</th>
+<th class="px-8 py-4 text-label-md text-secondary uppercase tracking-wider text-center w-1/12">판정</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-8 py-5 text-sm text-on-surface font-semibold">프레임워크 / 아키텍처</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">Spring Boot 기반 MSA 전환 경험 필수</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">관세청 시스템 MSA 아키텍처 설계 및 전환 리딩 (2022)</td>
+<td class="px-8 py-5 text-center">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined text-base">check</span>
+</span>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-8 py-5 text-sm text-on-surface font-semibold">데이터베이스</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">Oracle to PostgreSQL 마이그레이션</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">PostgreSQL 기반 구축 경험 3회 (마이그레이션 주도 경험 부족)</td>
+<td class="px-8 py-5 text-center">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-surface-container text-secondary">
+<span class="material-symbols-outlined text-base">horizontal_rule</span>
+</span>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-8 py-5 text-sm text-on-surface font-semibold">사업 관리 등급</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">특급 기술자 (PL급 이상)</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">특급 기술자 (경력 15년), 공공 PL 경험 5회</td>
+<td class="px-8 py-5 text-center">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined text-base">check</span>
+</span>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-8 py-5 text-sm text-on-surface font-semibold">보안 / 규제</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">국가정보원 보안 가이드라인 준수 경험</td>
+<td class="px-8 py-5 text-sm text-on-surface-variant">다수의 금융/공공 프로젝트로 망분리 및 보안 가이드라인 숙지도 높음</td>
+<td class="px-8 py-5 text-center">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary-container text-on-primary-container">
+<span class="material-symbols-outlined text-base">check</span>
+</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div></main>
+
+
+</body></html>

@@ -1,0 +1,460 @@
+﻿{
+    "id":  20,
+    "jsonrpc":  "2.0",
+    "result":  {
+                   "content":  [
+                                   {
+                                       "text":  "{\"screens\":[{\"name\":\"projects/12282738876199046513/screens/4be019a996ba43c7bdcf3ff9e4034867\",\"title\":\"입찰 공고 상세 및 RFP 분석 정보\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/b1d1a1323e41491c8495aa2fdfb77494\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvKzZTzW3g9zUue9yW_yRgDscvd69j2x3ocpvAC4C-2yg_HCqoEXitko7ftfKrfkDOq-5v8qoN25mGuLFFuxcffs2dMa6BSjPVAUPzpoxg6rY7AzVDdFl-G4jgaZNb6VoTpUlIf_KocJEeZoVYbTkUB8aQdDjy0SzcO0ULkRg4qkaCmRSJ_qZRLY-Tde44CD0JMqDvmVE7lE_HKVZOKVo7xT7nlWpN85xfSnQfdFY-wjxE7cTkLhMn18kU\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/db5dbbdc37cb43eb978092fa112f3948\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZjcwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/90c87ecef2dd40b6afbb20f1fdc7f814\",\"title\":\"인력 상세 정보 및 이력 관리\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/87fe3f99b522431087c58d1ef630db84\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvoJhSCg428okN-ioagVRmyzTiYo_t3qoSQzD3x53ghKtBhISD3DP2aAZzJNKNFb0Lk5AnzQDLUyVdYNXTVOe2-3HOU_woiiKLof4UO0A0mxOAY4NU7uWuYtrmuIzbv_SgRBtOmegJrZuGHV27y_G8P4_H5duWCREGlVd8HPIGUweuaF-RkspneZVqKAuymqeIU0DG-_PvzeFYc8OgUZMB0kcnLQEKnMzWVWdYGjVmUoNPg62QHmYd8b06Q\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/4bc6288283e843fa86235c6bbd70242b\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZjQwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/4bc69bda45274fd0b2bf48cc9ca5cadc\",\"title\":\"BERYL - 공급기업별 계약사업 관리\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/30b36f2f6f884b0a99ce5661d1d10b2a\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLsclqBCGEMs9G1x9eL2nMF-dJ05xHzQzqRd6V5MdDYhJAcam9HpN5lG49dy1_0Jes6f3apgctWAVl87UncyMWzxqgqqfaGLON2XXc-h70SqgdRAyL0MpHGwqFs3Zus4RDwVYUcfIfjumirUv1pPEMzRFR-K15V-BZ-Tg54U3_R8ufnm_VVSYsbxVKPvQ7WzzePiRKF8UCJ4Z8WHwZeArEa46dBsNyZw-w4k8BlFvCE_09_5_qOhDkLtnqj_\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/5222289444054195591\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTBlMWE4YTkwN2M0ZDM0MDU2MTNmMWY1EgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/439bf090620f4612ad43559811ca6d78\",\"title\":\"공공입찰관리시스템 시스템 설계서\",\"screenshot\":{},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/260f76278c154451afa5eaec4fa66260\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZWYwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/markdown\"},\"width\":\"0\",\"height\":\"0\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/90eef49b461e47f88ea05a5cd09f4d90\",\"title\":\"공급기업별 계약사업 관리\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/eef988a377154652bf4cb1e4569d4834\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuvmVtppqGJWEcelFzL-afFeMLQycmt_U15nKQQa_qsEFGXxx2rkDL1wbZM_iPzYuWLaakFPz1xgilbJl60QDmJBl-oabtCK4ZoRIfoxL4EgcJtCJGNB6OOe6d70VCIW2bnFsFlDqhVLkCqtSNj9KUWfEbEHGyTthdL2efXoeuMdZaiXk4hwB8f6rprL0S3-CRlNPnITJ_9EvxSE219GC6zquINbTO2zvtp5VsuR30HZP8odwaQQj3y2Ug\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/e9bfc87f0b8e4597be07fc0443232303\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhmMDYwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/ec43ebf33f22417eaa9cb921e2277124\",\"title\":\"BERYL - 추천 인력 매칭 알고리즘 상세 분석\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/7625770904359285551\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvtIF0ADxiuEJJlLVpn9ICWJoDTjWqKTmIxQ_CaPwCqBCS5rlI7NeJH8MUKOEGhm5NN989eUQpz92hqMLMvVEPn-jWRtI-rhp3U1aREiVqzQcNc85XuBqnpv5sx608vR5Lmr0v0bUKbEOeNGP3p6pCHTqnoMXi0u1kqlCqvQi49pOTHJSX65Mb0if15k5pSHSLawPxV3L-WWygmXSY6U9VPM_uHefod8C4yw609Ychp-s0UcBsD4qp2aH7U\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/14154572175186923265\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTExZjAzMDAwOTI1YzQzZmVlMTFlOGY1EgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2978\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/ea7eb4e38a1f4549a8432c7077892b93\",\"title\":\"BERYL - 발주기관 등록 및 수정\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/16945185456890475008\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtfDM5VPs9tkK0LQ0i2YBh92vnLatgc5ulWnK__kyrTfbbqmv5BJA68A9f_3FS5hJIA_ZxHhlvd4oEpISOVifJk9cXoUNoi1InWL9juD3NtP6pmGRMHd0K2P8CzJYVr7caVXvVFQr2agf7YTMNW7hLc9Bc_FbeNo6i-HTa16Rr4QVKQiG2YvPLF_waQmx56mAw1OF69bj6oJADbqsat4udcDPgPXzlg84mX-RdzMqzotI_vdpsbGtP0sLuD\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/8396590116168876715\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTBhMjU4YTYwMzM4NWVkMDgwMzUxMjQ4EgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2580\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/5e3baf426c3b4079a7fa5542e570ce48\",\"title\":\"BERYL - 공급기업 등록 및 수정\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/4708393123971245815\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLsnxn_JlCbjmsyZk9JDMxvN14SGvZlOMgdgv7TLukzKQ-JE5t__KHAoRlvhoYOM9HZwcYWYKHzgwfmNwwZs1pm8DCpLRa0LZJdgkTDc_gWFDEPuu3cpVdctZxxqtjoF-Loyj0h-7J2rBJAGIRxiXh1jOntBeD1Bxru2ai4_yNdxSu_y_EVHejK6wD8K-YCVbkR0VxxXkIv7P9nFoxlnxOx0sZ_FPrkKXZnIZitz84J64lIWA3DzANdBQVoO\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/15191094316452078102\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTA2YTNjM2YwOTI1YzdjZWZkMDE5YWRhEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3744\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/8422dafa76dc4d72a045c33a31936b83\",\"title\":\"추천 인력 매칭 알고리즘 상세 분석\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/cd14de9a8df94abcaf1c43911b07e3e9\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLv12yhH2hv_n3tnO7xYG2KzeGmZULIVoPd24VH6qgeAoVQIAeTu9vT67AzSD42tgZy-5y-jimgzw2ENzpPhZvEQ8_tWe1_K4e6w1zVlsuWIJDoXcsHjJ0fiYbBxMJtIP02hSiF_aqYpmAIRtLclN-Ibypzf-2-8JpfnvW0pqCKFTA9LfUtQjzPD60p6eVrM9CnQB42AaV7rOgI1FIMWgb66yb6vVHx8LcPmOXWltT2UijXKYd-SPXyFL34\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/12a3b7d459314f2cb8c72c2a3ce71245\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZTQwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2376\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/9543d3c334da49559fab03c2285ccef1\",\"title\":\"BERYL - 발주기관 관리 대시보드\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/a673c362bb21418d87c684eda1ef7a26\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtXq17jig5shDENLV31sLwcdPP0DyPWQXp1HBYQyw5QweGDM6I3eNADmkhAx7XgqeYtG-h1AeF_Qsee04zAz7HqqdcUeISzZcXH1culI10uEBb-p8-4A0hfkntE-BxnJx0vHNsUytmaqZmEL6ofgdYPa0Ne76fgVOKau2NZ-O2WDt4470yMqZNYjJChsVZYw8sidOnrv0n4jh-xbbqp-j9E7srYtbbegyyPXMz6w7t5hMeLSorgNX3lsEks\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/9754883348241401641\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTAyYWRkNGUwODQwZDBlMTdkMjU1ZjNkEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/7bbfd413a6cd4ffc9298a643c9369f45\",\"title\":\"BERYL - 로그인\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/6485075221907534881\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtjZsvW30tw3kHZOR_c_nFE6PxISqU2I2PT_eDRj51RGocMzThNqsnT_1F00z6nuzjcXZ8sZnWq__A_j2cDwRMxMQ8RPNLhvoYd2Z5xgapIbzs8D-sDyt6eSRUpioDkL4HGAcK6YpyeT0QvkBNzpimKAjj8z3taEhPXdaqCdCuls9xLrEvatiGiaaGOsVZPw7Ax9_E4R3XObDJlNUZONtKKVG_PsXX37w4nnb-JkmbLw7EZ07K0izUll0w\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/5542769425893563700\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTA1MzBmOGQwMWE2MDgxNWU2MjhkMGZmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/73ccc0bf8028434196cbced243eead50\",\"title\":\"발주기관 조직 및 직원 관리\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/0b09e97cbf164675995f75e3c71aae9a\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLsjGNUa3jcTMSrVh8FYk2oSVRWQ6aV5dPlNUpWw7RaOrqPG_wk3Vxx9ZkkUvYDB1WAnubZ9kZNaMCAAQ--BgDxoYZ_6XvX9NERwQk9alBPY85sYBNxYovyc7qI9-H4Cb4YU1WH58yUuxCac_j3VHdZD_LsRlAroQvzI0DhCpy0qidPoXie8T00N18BuKFjO2gqUmmyJZjGp2fDnexkhIsOBrpTsWhSe1dPOoDv_TRAwJigmpFzIJhutFudp\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/c4888af71cb743c2a448a3c5fac82a44\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZjEwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/13534851180327242825\",\"title\":\"image.png\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/13534851180327242292\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuUMsz4-ztgpF8KEyxSKCmz7iliUjg1do8s3cB4boHvEwytaKRcYq2GUNRNnfW35sss2Oxu1FAFqvAprDd66mxTOc3UqaKq1aPbvPt5SzZGcgiwQovTxRXiM5ypAEY-DfufIcckanfcxe0gG14gLpyrZYzqzIwqZiaj1tnow3UwiIxY6iDkci8y12sN50y1ycqGNUZgoSxxWWPyHMKdmD0aktqgrWxZNxZMQKj1pJQlXt4P_gC_7kcENfUV4gHgW-_4LBZ4u9sK2X8\"},\"htmlCode\":{},\"width\":\"1448\",\"height\":\"1086\"},{\"name\":\"projects/12282738876199046513/screens/099bab0b71154bf08c664887938ec0bb\",\"title\":\"BERYL - 발주기관별 입찰공고 관리\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/9754883348241401716\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvVgY-tZ6hs4xGjQxwsJgCY7rv_p8RDoait9_mgvKOdUMuSQWgUH-TEHB4UeNNM2AvIWNvobmPuYKdhLafan9lSE-eAOJqwqW8FhSX-2u25WJBpX-uvWWit56BRKw1NPH6cNnRcNznE-qHG_tcy4jMfwEzcQXlghgoTpzGviD1L5_A-S8_bgQGt1Jen58-SiF2WR0iAAdidvBqIlH4wmyzpa_8NQNOpD1-g7e4vnDTVXqzMA7Eb1YlKIng\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/9579603255695217055\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNGZmYjNmNWQwMDMwMWY5M2I2MjUyOTM1EgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/f5f14d8c9c9d4bc08fa6ce2d2e87bdbd\",\"title\":\"BERYL - 수주 사업 관리 현황\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/ed3630efd1dc41f3b474365444371088\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLu_PV02g_o3a5DCcLN8b654aIkm8Nz0MueLm3gD1EqtsUB2cwJ85AlixFrErwthDDca7nX9oM-oc5MB291TTkFnW6CPi_ntOP3haizoAY9vBG3oCmhk1_Ff6m-Q2HD2JI-8aTxTeV9glixFkWP5iNGJRAOgZ2QR2Q7lnSyzD2tdskwe2JGXOhMicuE-7TUrWo_EQN1VfcxGPmzyvSIeLXrpTQQXwv7ITbppVhOe9sqZWWbW2rpgNS3hQfM\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/058347eaab66436881e33e54c7dcdd23\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2EwNTAwYTgxZmE4ZjRlOTE4OWQ0YmJkZmQzZTZkZGUyEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3232\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/bad1c361d193465fabba1ef78dfe2e91\",\"title\":\"BERYL - 입찰 공고 상세 및 RFP 분석 정보\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/18082277944252398917\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLs8j2uAX3KlYW8-QTbqwmwwkvJFkG7SDSZItQ67IKxp5RT3pWpa97jPdIdaLovnnKSx9g9WqWCIpMyksEeQHmpur94Rw2VZ1JNmrObhWEf-WJNhBlShvdAw1vnNTSmMIuMmBqfsNFnDTiNfC22UCMsl2wyiaQZg2ugd4TE1PQhAGXFEFjejqKMQAmmnrCdgHAs2YhCMPPg0Q5uzhylHYnvS6Fq5adjY7oiK2qAzW3XwUe0svZrB9KTpdRw\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/11540389265569578039\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTEwM2JhMmEwMWE2MzFkYjRjMjk3ZDEwEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/a232d007f4184bb79c3e6cf6b9532dcc\",\"title\":\"발주기관별 입찰공고 관리\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/b1d58da67d19464487529408c6ea208f\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtRcYxma4Q1tlGPdV28epKaz8E13HhRqKHw-SgEr06UBsxA5_yc1EeJdIh-uzQFeTuYHJx1J-8iMsqjal9qJxFQjJvKqF3IqkFtPGpvt7NmZO1JIjxTNUL5Dm8i9Apy1LsaoVg4UBgDoq_Qc-SKJKt6lSAlWeFwPGjjBVZjVaST2HcF9C7Z6gPlUdUxnhSEddBxVq8e7YN8KVLn7AIYruAvMPzDV2jwbwQp_FjnwelR72B-3QICcYJU7ok\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/3b2296fdf8b64f5dacb27380e69ea53e\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhmMDEwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/407e79f9713e4f22a258c94dd4f55911\",\"title\":\"발주기관 관리 대시보드\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/b4b728a30e7645f7a6fce51f413edb1d\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLsARq0Kds6Vt-ev6N6yXzdHHVh2FUo4jTf-UjZnkwLoh9f1_9TFToQRzv6jpLXapS79gdQlNuciDhfufQcCFxzXlmfEGk-jzLVW1W-UmFeaVm25IiF3YNJPblgpEFpSAB1OZKBbi65c0wsUuo2Lnwxd4GPIGoHRMacOvZsDUoGH6VdX3qOh0_RFJ16VldIvAXQ4YEXKp1e61No9dTEMwQd29fU_de_GSaQ6q_TMXBTGIC1CadssEBZNb9E\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/c068db879886470b8205e899b3508af5\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZWEwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/104be3535eb74b3488729d0ac7ecf59e\",\"title\":\"BERYL - 투입인력 관리 및 M/M 현황\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/4382613430957443865\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLsQfyUJjZtZiQEB2h54ytxalarjqE8QEkKt6yDrSai9YivmL03ppdJP8SWHRax5TqDTBlwVaPgPoIcVyHZxQiSFZ3WvEX_-ly-QN3IeF2sud3JNFFXLTGZOqQcWkNJ_a7_zyaSNPq6IBQ3f3y9ddUHjcEBC9wptYM6u0EZGwg-ypMLa781EC57G9MUFppd9d_FB1bJKl65kcmAuPY1NnCuO2wZxMzDrP4KWE607aT0rURBVmGJtfNChbXGx\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/13410341491039905322\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTA1YjVhZWUwMWE2MDM4NDE2MjBiOTBiEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2244\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/3e341e4941ff4fb2ab1ed78dd19fc81e\",\"title\":\"BERYL - 인력 상세 정보 및 이력 관리\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/16478250713605980854\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtnOpYbwIudtRPbNj3Y-0W-Jkbj4qcXUB2O4shmjsSSZwlxc2dyMB2SA9-1QjOo0_3miVC47yFqfLUlmroW9UNfArNjl8uQAmiiY0dRQ3wRW--CrQ1UlIB2Fan4XwmyGYGbo3jPt4INpcyrTwV3sSElxRmcJiqRUhGdiyUFiut_vojK2wzxVSJxLYD9yB8dgdfEED9RuOuRtyrNpXyG8WwJKuoLdY4ttbtl_PRO4FUMbx_C3nYdYgrCy4s\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/6485075221907535451\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTAzNzZlMTEwODQwZDBlMTdkMjU1ZjNkEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2328\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/ba719db813764ef5960fccd538c98146\",\"title\":\"발주기관 등록 및 수정\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/3585559c395d46e3aa14403abd33790e\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtU1ofalob9PhwNKBJcMDv4KH4STctNBnDyTiN-pt3c_TBsxdnp97QhMW_SYgvekfG-gjlJjZX4m6vNT3d7TRZwxNrjH34QAVxMdQosKPtyUJVdCS2t3kBdSPwFHwCYqbPRCWgmofne6UJj8nBjQBE8xoM0Wb-JzW5gSAHBh0aKXpRvfwl2T6moxNvXm_2rJsY1Uxe6oAJsfhfjIgEMaiDLQANyN3h2bcEk3YNStF9p9LHGCoW3Ussz3yk\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/041c0b73c24443a48d222934a85ff7c3\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZmYwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2118\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/e534e80da3d24fcf96c9baeaff9fa23e\",\"title\":\"투입인력 관리 및 M/M 현황\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/8eb7762e5d22437d8a76ea5e54068cf5\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLujjPZQ_t9qxn0WOQkp4eBAI_7dJawZIJ0DXUzjJwiwn-DujHcHyMa_FKobANsyaPz16yslEHfTBJACvdYzV9FJQd94-wKUsI2Htf74FpmJ5ZKcvNJwZUgWE24SWs1jf9bf4WrR7lUcg5qoaet_5f7dGnENRukSn-jMA1POYdpNDvHVSYGh2OMmFAytVuZh6kJEWS4x49XeFSLsWJJEdOH7KAQaE0vezgbZV9YxmGVzOEuTJdOfQSs2_r_t\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/1e859dd2ff6d4d93821a1f10ab32a298\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhmMDQwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/e114164f28014c37b9cabaf8bb8f8922\",\"title\":\"BERYL - 발주기관 조직 및 직원 관리\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/18189359311981420736\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuFuM4F0seUubSt4Fy4blxjTBiiy6yU47hisgVMxJpAOET85lzCAdmXTbCh1bBqsv2gwJBvwbri20tobuKBPqiLHC0XV0-Q7K6fNOtPLryyxXq8WTvPypL5lrqajKb-MKNOcO9iRJBAGzgtu3BnKaTXo31svEgagSQq-psxIzfyt5Og2JkUV8sDJ3AP7M1EZ1nktbDN5h7qWYMoqXB9-vDgo5R0jeAwHqw_1KvuJra--1_QbeLgjDB5YVAT\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/18319500179123559497\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTAwOTA1NTkwMjJkNDE5ZDc3MWQxMDZmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/9c500639c6ab49aeb32c89ba174a9faf\",\"title\":\"공급기업 관리 대시보드\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/276da80d1f684ad992e5dc25581c39db\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLtrT3K1rrSQNUyUZVWtI10maFdsNaJ0Lm2EatDFKykrCMUKd_K-TXYcVhBdYqPX8qpZ0iZ0aMwu9er4RnCsdZJo_4DLUcxtNpqbAQN5kyOWJauariDUUl88hKDMORfu1n40GmfHIyF_rNVYvtjbW-Pda6dowa8qFp8oj5NWj9M2q_tXDdcOmLEIXxu5B-ybV2C0y-3WcmAB3zQLe8lQNObDdfK-lxlVrCRjhrg_16Vq4uOfyUDzLXqHT_4\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/2ce8d2232808486094d242a5b8c218b7\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZmEwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2310\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/1cd2a3fb9e02407f803b68cc54c34244\",\"title\":\"수주 사업 관리 현황\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/f33311ef7c4a48bba17126fb93d3aa6a\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvZFgTg7j5kz0J5zxwWkRp-t3QH2Bq1AOXipSAf6INkIJ8r6QMcT5zQqziKx3VBd-ZTZkkzwU8lDMjgprKyHky2jS9-9_1DOq3zy3a9WNWvxI3DN-DlxdFtYAsSeE1N7i00Fln22M5ZFAENZBw5BUu7o9mYDsFK96Hfk8-lQ5dgmhGQZQBBJI27TLvle49cOdnvdDmkFU4XwyACRNPODq2pgWg6RFWlUK_UPP1Y8HsMh6-Ob0I-1pr4MZyx\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/7f0ed24a54954641a74f09aa5399dbd0\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZWQwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3198\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/a82ef1f661d34e33a9039e139264fd39\",\"title\":\"BERYL - 회원가입\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/15630997370581989364\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLvWpFOZ6u3f0A-_BDtY6_K3uD2iWc0UUZqGpUOTuAE6fYD1A9NtD0Sfw2KS2DRAq8mYijiftgSH6i5BtZgv5XmTFkbeHHoz3D0jWM4l8AH1HUNQr2ZkoRzu02a2-58cGt3JjTGElfcCHMD8GYUyjJWYj1Jk1DRHSvekRUont8KDkyhIc2P2SbLKQerE4uoOZyR_ds3XRGwvIKJHR5oTIaYeyZnX5HoMeX09DAfmM_P_6YPnwMT28Gpauy9G\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/16786703781706118123\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTBkNjU4NjQwNjM5NzEyM2IzMGE3ZGI4EgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2048\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/ac44042b0d9e4aa4b510d9d4ae27aac5\",\"title\":\"공급기업 등록 및 수정\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/b182c3d851b54feca61eceaed401e4d3\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLsLK9GnIUe9ev-ZySKUKKcbsry5vTd7YMz9fNy9vJ8T1sz6SyGGBJEIdPnjio-w9VkzyYTwh_IzZhh3k1FYlUlsMnrfDyUXyGu-yYyImOOHSk7tsTY3P_401TWDg6R4ptWKOEkrg05TtQYfv4iEeH3D3PQCKhMFzbfE-7jfLxfyEMNfTloH9WmIy9tksRsj2QG8VIphEwcK6kjfZXMEv1dLYXWwj47r5BdVt1yNCZlk6_TCpch7uUBEXtEc\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/19165e8c078843cc9b15267b0ad18733\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZmMwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"3824\",\"deviceType\":\"DESKTOP\"},{\"name\":\"projects/12282738876199046513/screens/b7ab51d69aa44cf48da8dba1cefe5910\",\"title\":\"BERYL - 공급기업 관리 대시보드\",\"screenshot\":{\"name\":\"projects/12282738876199046513/files/12772744588486960339\",\"downloadUrl\":\"https://lh3.googleusercontent.com/aida/AP1WRLuflfXkFLmAhyQVI2-0UBtvK_Vi8Monsk7iA94IJakLVBbPgSDWFQaBm_aMCCR8dIFWc7M_R1L9QaPwBG0h95Rnj4hrEH-TbQOCoj9G-Reka5owXv60j5OVHWUgwg7lwGWtDrX8CeNNEZ4bxTWTx0sjy2QoaIub2YcIjZK9Y-WJg6ZqCLy5v1tfFC1N0lLyDVKpcAZ8p-C0uif2JDTCcRvYGpRB3zUaZahCwuOGX_HQ0Apla8xY6lmFTCB4\"},\"htmlCode\":{\"name\":\"projects/12282738876199046513/files/16099729064256117509\",\"downloadUrl\":\"https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTBhYzI2ZDIwODQwZDBlMTdkMjU1ZjNkEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086\",\"mimeType\":\"text/html\"},\"width\":\"2560\",\"height\":\"2660\",\"deviceType\":\"DESKTOP\"}]}",
+                                       "type":  "text"
+                                   }
+                               ],
+                   "structuredContent":  {
+                                             "screens":  [
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZjcwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/db5dbbdc37cb43eb978092fa112f3948"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/4be019a996ba43c7bdcf3ff9e4034867",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvKzZTzW3g9zUue9yW_yRgDscvd69j2x3ocpvAC4C-2yg_HCqoEXitko7ftfKrfkDOq-5v8qoN25mGuLFFuxcffs2dMa6BSjPVAUPzpoxg6rY7AzVDdFl-G4jgaZNb6VoTpUlIf_KocJEeZoVYbTkUB8aQdDjy0SzcO0ULkRg4qkaCmRSJ_qZRLY-Tde44CD0JMqDvmVE7lE_HKVZOKVo7xT7nlWpN85xfSnQfdFY-wjxE7cTkLhMn18kU",
+                                                                                    "name":  "projects/12282738876199046513/files/b1d1a1323e41491c8495aa2fdfb77494"
+                                                                                },
+                                                                 "title":  "입찰 공고 상세 및 RFP 분석 정보",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZjQwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/4bc6288283e843fa86235c6bbd70242b"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/90c87ecef2dd40b6afbb20f1fdc7f814",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvoJhSCg428okN-ioagVRmyzTiYo_t3qoSQzD3x53ghKtBhISD3DP2aAZzJNKNFb0Lk5AnzQDLUyVdYNXTVOe2-3HOU_woiiKLof4UO0A0mxOAY4NU7uWuYtrmuIzbv_SgRBtOmegJrZuGHV27y_G8P4_H5duWCREGlVd8HPIGUweuaF-RkspneZVqKAuymqeIU0DG-_PvzeFYc8OgUZMB0kcnLQEKnMzWVWdYGjVmUoNPg62QHmYd8b06Q",
+                                                                                    "name":  "projects/12282738876199046513/files/87fe3f99b522431087c58d1ef630db84"
+                                                                                },
+                                                                 "title":  "인력 상세 정보 및 이력 관리",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTBlMWE4YTkwN2M0ZDM0MDU2MTNmMWY1EgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/5222289444054195591"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/4bc69bda45274fd0b2bf48cc9ca5cadc",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLsclqBCGEMs9G1x9eL2nMF-dJ05xHzQzqRd6V5MdDYhJAcam9HpN5lG49dy1_0Jes6f3apgctWAVl87UncyMWzxqgqqfaGLON2XXc-h70SqgdRAyL0MpHGwqFs3Zus4RDwVYUcfIfjumirUv1pPEMzRFR-K15V-BZ-Tg54U3_R8ufnm_VVSYsbxVKPvQ7WzzePiRKF8UCJ4Z8WHwZeArEa46dBsNyZw-w4k8BlFvCE_09_5_qOhDkLtnqj_",
+                                                                                    "name":  "projects/12282738876199046513/files/30b36f2f6f884b0a99ce5661d1d10b2a"
+                                                                                },
+                                                                 "title":  "BERYL - 공급기업별 계약사업 관리",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "0",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZWYwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/markdown",
+                                                                                  "name":  "projects/12282738876199046513/files/260f76278c154451afa5eaec4fa66260"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/439bf090620f4612ad43559811ca6d78",
+                                                                 "screenshot":  {
+
+                                                                                },
+                                                                 "title":  "공공입찰관리시스템 시스템 설계서",
+                                                                 "width":  "0"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhmMDYwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/e9bfc87f0b8e4597be07fc0443232303"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/90eef49b461e47f88ea05a5cd09f4d90",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuvmVtppqGJWEcelFzL-afFeMLQycmt_U15nKQQa_qsEFGXxx2rkDL1wbZM_iPzYuWLaakFPz1xgilbJl60QDmJBl-oabtCK4ZoRIfoxL4EgcJtCJGNB6OOe6d70VCIW2bnFsFlDqhVLkCqtSNj9KUWfEbEHGyTthdL2efXoeuMdZaiXk4hwB8f6rprL0S3-CRlNPnITJ_9EvxSE219GC6zquINbTO2zvtp5VsuR30HZP8odwaQQj3y2Ug",
+                                                                                    "name":  "projects/12282738876199046513/files/eef988a377154652bf4cb1e4569d4834"
+                                                                                },
+                                                                 "title":  "공급기업별 계약사업 관리",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2978",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTExZjAzMDAwOTI1YzQzZmVlMTFlOGY1EgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/14154572175186923265"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/ec43ebf33f22417eaa9cb921e2277124",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvtIF0ADxiuEJJlLVpn9ICWJoDTjWqKTmIxQ_CaPwCqBCS5rlI7NeJH8MUKOEGhm5NN989eUQpz92hqMLMvVEPn-jWRtI-rhp3U1aREiVqzQcNc85XuBqnpv5sx608vR5Lmr0v0bUKbEOeNGP3p6pCHTqnoMXi0u1kqlCqvQi49pOTHJSX65Mb0if15k5pSHSLawPxV3L-WWygmXSY6U9VPM_uHefod8C4yw609Ychp-s0UcBsD4qp2aH7U",
+                                                                                    "name":  "projects/12282738876199046513/files/7625770904359285551"
+                                                                                },
+                                                                 "title":  "BERYL - 추천 인력 매칭 알고리즘 상세 분석",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2580",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTBhMjU4YTYwMzM4NWVkMDgwMzUxMjQ4EgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/8396590116168876715"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/ea7eb4e38a1f4549a8432c7077892b93",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtfDM5VPs9tkK0LQ0i2YBh92vnLatgc5ulWnK__kyrTfbbqmv5BJA68A9f_3FS5hJIA_ZxHhlvd4oEpISOVifJk9cXoUNoi1InWL9juD3NtP6pmGRMHd0K2P8CzJYVr7caVXvVFQr2agf7YTMNW7hLc9Bc_FbeNo6i-HTa16Rr4QVKQiG2YvPLF_waQmx56mAw1OF69bj6oJADbqsat4udcDPgPXzlg84mX-RdzMqzotI_vdpsbGtP0sLuD",
+                                                                                    "name":  "projects/12282738876199046513/files/16945185456890475008"
+                                                                                },
+                                                                 "title":  "BERYL - 발주기관 등록 및 수정",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "3744",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTA2YTNjM2YwOTI1YzdjZWZkMDE5YWRhEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/15191094316452078102"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/5e3baf426c3b4079a7fa5542e570ce48",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLsnxn_JlCbjmsyZk9JDMxvN14SGvZlOMgdgv7TLukzKQ-JE5t__KHAoRlvhoYOM9HZwcYWYKHzgwfmNwwZs1pm8DCpLRa0LZJdgkTDc_gWFDEPuu3cpVdctZxxqtjoF-Loyj0h-7J2rBJAGIRxiXh1jOntBeD1Bxru2ai4_yNdxSu_y_EVHejK6wD8K-YCVbkR0VxxXkIv7P9nFoxlnxOx0sZ_FPrkKXZnIZitz84J64lIWA3DzANdBQVoO",
+                                                                                    "name":  "projects/12282738876199046513/files/4708393123971245815"
+                                                                                },
+                                                                 "title":  "BERYL - 공급기업 등록 및 수정",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2376",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZTQwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/12a3b7d459314f2cb8c72c2a3ce71245"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/8422dafa76dc4d72a045c33a31936b83",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLv12yhH2hv_n3tnO7xYG2KzeGmZULIVoPd24VH6qgeAoVQIAeTu9vT67AzSD42tgZy-5y-jimgzw2ENzpPhZvEQ8_tWe1_K4e6w1zVlsuWIJDoXcsHjJ0fiYbBxMJtIP02hSiF_aqYpmAIRtLclN-Ibypzf-2-8JpfnvW0pqCKFTA9LfUtQjzPD60p6eVrM9CnQB42AaV7rOgI1FIMWgb66yb6vVHx8LcPmOXWltT2UijXKYd-SPXyFL34",
+                                                                                    "name":  "projects/12282738876199046513/files/cd14de9a8df94abcaf1c43911b07e3e9"
+                                                                                },
+                                                                 "title":  "추천 인력 매칭 알고리즘 상세 분석",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTAyYWRkNGUwODQwZDBlMTdkMjU1ZjNkEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/9754883348241401641"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/9543d3c334da49559fab03c2285ccef1",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtXq17jig5shDENLV31sLwcdPP0DyPWQXp1HBYQyw5QweGDM6I3eNADmkhAx7XgqeYtG-h1AeF_Qsee04zAz7HqqdcUeISzZcXH1culI10uEBb-p8-4A0hfkntE-BxnJx0vHNsUytmaqZmEL6ofgdYPa0Ne76fgVOKau2NZ-O2WDt4470yMqZNYjJChsVZYw8sidOnrv0n4jh-xbbqp-j9E7srYtbbegyyPXMz6w7t5hMeLSorgNX3lsEks",
+                                                                                    "name":  "projects/12282738876199046513/files/a673c362bb21418d87c684eda1ef7a26"
+                                                                                },
+                                                                 "title":  "BERYL - 발주기관 관리 대시보드",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTA1MzBmOGQwMWE2MDgxNWU2MjhkMGZmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/5542769425893563700"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/7bbfd413a6cd4ffc9298a643c9369f45",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtjZsvW30tw3kHZOR_c_nFE6PxISqU2I2PT_eDRj51RGocMzThNqsnT_1F00z6nuzjcXZ8sZnWq__A_j2cDwRMxMQ8RPNLhvoYd2Z5xgapIbzs8D-sDyt6eSRUpioDkL4HGAcK6YpyeT0QvkBNzpimKAjj8z3taEhPXdaqCdCuls9xLrEvatiGiaaGOsVZPw7Ax9_E4R3XObDJlNUZONtKKVG_PsXX37w4nnb-JkmbLw7EZ07K0izUll0w",
+                                                                                    "name":  "projects/12282738876199046513/files/6485075221907534881"
+                                                                                },
+                                                                 "title":  "BERYL - 로그인",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZjEwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/c4888af71cb743c2a448a3c5fac82a44"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/73ccc0bf8028434196cbced243eead50",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLsjGNUa3jcTMSrVh8FYk2oSVRWQ6aV5dPlNUpWw7RaOrqPG_wk3Vxx9ZkkUvYDB1WAnubZ9kZNaMCAAQ--BgDxoYZ_6XvX9NERwQk9alBPY85sYBNxYovyc7qI9-H4Cb4YU1WH58yUuxCac_j3VHdZD_LsRlAroQvzI0DhCpy0qidPoXie8T00N18BuKFjO2gqUmmyJZjGp2fDnexkhIsOBrpTsWhSe1dPOoDv_TRAwJigmpFzIJhutFudp",
+                                                                                    "name":  "projects/12282738876199046513/files/0b09e97cbf164675995f75e3c71aae9a"
+                                                                                },
+                                                                 "title":  "발주기관 조직 및 직원 관리",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "height":  "1086",
+                                                                 "htmlCode":  {
+
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/13534851180327242825",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuUMsz4-ztgpF8KEyxSKCmz7iliUjg1do8s3cB4boHvEwytaKRcYq2GUNRNnfW35sss2Oxu1FAFqvAprDd66mxTOc3UqaKq1aPbvPt5SzZGcgiwQovTxRXiM5ypAEY-DfufIcckanfcxe0gG14gLpyrZYzqzIwqZiaj1tnow3UwiIxY6iDkci8y12sN50y1ycqGNUZgoSxxWWPyHMKdmD0aktqgrWxZNxZMQKj1pJQlXt4P_gC_7kcENfUV4gHgW-_4LBZ4u9sK2X8",
+                                                                                    "name":  "projects/12282738876199046513/files/13534851180327242292"
+                                                                                },
+                                                                 "title":  "image.png",
+                                                                 "width":  "1448"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNGZmYjNmNWQwMDMwMWY5M2I2MjUyOTM1EgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/9579603255695217055"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/099bab0b71154bf08c664887938ec0bb",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvVgY-tZ6hs4xGjQxwsJgCY7rv_p8RDoait9_mgvKOdUMuSQWgUH-TEHB4UeNNM2AvIWNvobmPuYKdhLafan9lSE-eAOJqwqW8FhSX-2u25WJBpX-uvWWit56BRKw1NPH6cNnRcNznE-qHG_tcy4jMfwEzcQXlghgoTpzGviD1L5_A-S8_bgQGt1Jen58-SiF2WR0iAAdidvBqIlH4wmyzpa_8NQNOpD1-g7e4vnDTVXqzMA7Eb1YlKIng",
+                                                                                    "name":  "projects/12282738876199046513/files/9754883348241401716"
+                                                                                },
+                                                                 "title":  "BERYL - 발주기관별 입찰공고 관리",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "3232",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sX2EwNTAwYTgxZmE4ZjRlOTE4OWQ0YmJkZmQzZTZkZGUyEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/058347eaab66436881e33e54c7dcdd23"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/f5f14d8c9c9d4bc08fa6ce2d2e87bdbd",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLu_PV02g_o3a5DCcLN8b654aIkm8Nz0MueLm3gD1EqtsUB2cwJ85AlixFrErwthDDca7nX9oM-oc5MB291TTkFnW6CPi_ntOP3haizoAY9vBG3oCmhk1_Ff6m-Q2HD2JI-8aTxTeV9glixFkWP5iNGJRAOgZ2QR2Q7lnSyzD2tdskwe2JGXOhMicuE-7TUrWo_EQN1VfcxGPmzyvSIeLXrpTQQXwv7ITbppVhOe9sqZWWbW2rpgNS3hQfM",
+                                                                                    "name":  "projects/12282738876199046513/files/ed3630efd1dc41f3b474365444371088"
+                                                                                },
+                                                                 "title":  "BERYL - 수주 사업 관리 현황",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTEwM2JhMmEwMWE2MzFkYjRjMjk3ZDEwEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/11540389265569578039"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/bad1c361d193465fabba1ef78dfe2e91",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLs8j2uAX3KlYW8-QTbqwmwwkvJFkG7SDSZItQ67IKxp5RT3pWpa97jPdIdaLovnnKSx9g9WqWCIpMyksEeQHmpur94Rw2VZ1JNmrObhWEf-WJNhBlShvdAw1vnNTSmMIuMmBqfsNFnDTiNfC22UCMsl2wyiaQZg2ugd4TE1PQhAGXFEFjejqKMQAmmnrCdgHAs2YhCMPPg0Q5uzhylHYnvS6Fq5adjY7oiK2qAzW3XwUe0svZrB9KTpdRw",
+                                                                                    "name":  "projects/12282738876199046513/files/18082277944252398917"
+                                                                                },
+                                                                 "title":  "BERYL - 입찰 공고 상세 및 RFP 분석 정보",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhmMDEwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/3b2296fdf8b64f5dacb27380e69ea53e"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/a232d007f4184bb79c3e6cf6b9532dcc",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtRcYxma4Q1tlGPdV28epKaz8E13HhRqKHw-SgEr06UBsxA5_yc1EeJdIh-uzQFeTuYHJx1J-8iMsqjal9qJxFQjJvKqF3IqkFtPGpvt7NmZO1JIjxTNUL5Dm8i9Apy1LsaoVg4UBgDoq_Qc-SKJKt6lSAlWeFwPGjjBVZjVaST2HcF9C7Z6gPlUdUxnhSEddBxVq8e7YN8KVLn7AIYruAvMPzDV2jwbwQp_FjnwelR72B-3QICcYJU7ok",
+                                                                                    "name":  "projects/12282738876199046513/files/b1d58da67d19464487529408c6ea208f"
+                                                                                },
+                                                                 "title":  "발주기관별 입찰공고 관리",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZWEwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/c068db879886470b8205e899b3508af5"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/407e79f9713e4f22a258c94dd4f55911",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLsARq0Kds6Vt-ev6N6yXzdHHVh2FUo4jTf-UjZnkwLoh9f1_9TFToQRzv6jpLXapS79gdQlNuciDhfufQcCFxzXlmfEGk-jzLVW1W-UmFeaVm25IiF3YNJPblgpEFpSAB1OZKBbi65c0wsUuo2Lnwxd4GPIGoHRMacOvZsDUoGH6VdX3qOh0_RFJ16VldIvAXQ4YEXKp1e61No9dTEMwQd29fU_de_GSaQ6q_TMXBTGIC1CadssEBZNb9E",
+                                                                                    "name":  "projects/12282738876199046513/files/b4b728a30e7645f7a6fce51f413edb1d"
+                                                                                },
+                                                                 "title":  "발주기관 관리 대시보드",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2244",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTA1YjVhZWUwMWE2MDM4NDE2MjBiOTBiEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/13410341491039905322"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/104be3535eb74b3488729d0ac7ecf59e",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLsQfyUJjZtZiQEB2h54ytxalarjqE8QEkKt6yDrSai9YivmL03ppdJP8SWHRax5TqDTBlwVaPgPoIcVyHZxQiSFZ3WvEX_-ly-QN3IeF2sud3JNFFXLTGZOqQcWkNJ_a7_zyaSNPq6IBQ3f3y9ddUHjcEBC9wptYM6u0EZGwg-ypMLa781EC57G9MUFppd9d_FB1bJKl65kcmAuPY1NnCuO2wZxMzDrP4KWE607aT0rURBVmGJtfNChbXGx",
+                                                                                    "name":  "projects/12282738876199046513/files/4382613430957443865"
+                                                                                },
+                                                                 "title":  "BERYL - 투입인력 관리 및 M/M 현황",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2328",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTAzNzZlMTEwODQwZDBlMTdkMjU1ZjNkEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/6485075221907535451"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/3e341e4941ff4fb2ab1ed78dd19fc81e",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtnOpYbwIudtRPbNj3Y-0W-Jkbj4qcXUB2O4shmjsSSZwlxc2dyMB2SA9-1QjOo0_3miVC47yFqfLUlmroW9UNfArNjl8uQAmiiY0dRQ3wRW--CrQ1UlIB2Fan4XwmyGYGbo3jPt4INpcyrTwV3sSElxRmcJiqRUhGdiyUFiut_vojK2wzxVSJxLYD9yB8dgdfEED9RuOuRtyrNpXyG8WwJKuoLdY4ttbtl_PRO4FUMbx_C3nYdYgrCy4s",
+                                                                                    "name":  "projects/12282738876199046513/files/16478250713605980854"
+                                                                                },
+                                                                 "title":  "BERYL - 인력 상세 정보 및 이력 관리",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2118",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZmYwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/041c0b73c24443a48d222934a85ff7c3"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/ba719db813764ef5960fccd538c98146",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtU1ofalob9PhwNKBJcMDv4KH4STctNBnDyTiN-pt3c_TBsxdnp97QhMW_SYgvekfG-gjlJjZX4m6vNT3d7TRZwxNrjH34QAVxMdQosKPtyUJVdCS2t3kBdSPwFHwCYqbPRCWgmofne6UJj8nBjQBE8xoM0Wb-JzW5gSAHBh0aKXpRvfwl2T6moxNvXm_2rJsY1Uxe6oAJsfhfjIgEMaiDLQANyN3h2bcEk3YNStF9p9LHGCoW3Ussz3yk",
+                                                                                    "name":  "projects/12282738876199046513/files/3585559c395d46e3aa14403abd33790e"
+                                                                                },
+                                                                 "title":  "발주기관 등록 및 수정",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhmMDQwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/1e859dd2ff6d4d93821a1f10ab32a298"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/e534e80da3d24fcf96c9baeaff9fa23e",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLujjPZQ_t9qxn0WOQkp4eBAI_7dJawZIJ0DXUzjJwiwn-DujHcHyMa_FKobANsyaPz16yslEHfTBJACvdYzV9FJQd94-wKUsI2Htf74FpmJ5ZKcvNJwZUgWE24SWs1jf9bf4WrR7lUcg5qoaet_5f7dGnENRukSn-jMA1POYdpNDvHVSYGh2OMmFAytVuZh6kJEWS4x49XeFSLsWJJEdOH7KAQaE0vezgbZV9YxmGVzOEuTJdOfQSs2_r_t",
+                                                                                    "name":  "projects/12282738876199046513/files/8eb7762e5d22437d8a76ea5e54068cf5"
+                                                                                },
+                                                                 "title":  "투입인력 관리 및 M/M 현황",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTAwOTA1NTkwMjJkNDE5ZDc3MWQxMDZmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/18319500179123559497"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/e114164f28014c37b9cabaf8bb8f8922",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuFuM4F0seUubSt4Fy4blxjTBiiy6yU47hisgVMxJpAOET85lzCAdmXTbCh1bBqsv2gwJBvwbri20tobuKBPqiLHC0XV0-Q7K6fNOtPLryyxXq8WTvPypL5lrqajKb-MKNOcO9iRJBAGzgtu3BnKaTXo31svEgagSQq-psxIzfyt5Og2JkUV8sDJ3AP7M1EZ1nktbDN5h7qWYMoqXB9-vDgo5R0jeAwHqw_1KvuJra--1_QbeLgjDB5YVAT",
+                                                                                    "name":  "projects/12282738876199046513/files/18189359311981420736"
+                                                                                },
+                                                                 "title":  "BERYL - 발주기관 조직 및 직원 관리",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2310",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZmEwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/2ce8d2232808486094d242a5b8c218b7"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/9c500639c6ab49aeb32c89ba174a9faf",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLtrT3K1rrSQNUyUZVWtI10maFdsNaJ0Lm2EatDFKykrCMUKd_K-TXYcVhBdYqPX8qpZ0iZ0aMwu9er4RnCsdZJo_4DLUcxtNpqbAQN5kyOWJauariDUUl88hKDMORfu1n40GmfHIyF_rNVYvtjbW-Pda6dowa8qFp8oj5NWj9M2q_tXDdcOmLEIXxu5B-ybV2C0y-3WcmAB3zQLe8lQNObDdfK-lxlVrCRjhrg_16Vq4uOfyUDzLXqHT_4",
+                                                                                    "name":  "projects/12282738876199046513/files/276da80d1f684ad992e5dc25581c39db"
+                                                                                },
+                                                                 "title":  "공급기업 관리 대시보드",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "3198",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZWQwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/7f0ed24a54954641a74f09aa5399dbd0"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/1cd2a3fb9e02407f803b68cc54c34244",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvZFgTg7j5kz0J5zxwWkRp-t3QH2Bq1AOXipSAf6INkIJ8r6QMcT5zQqziKx3VBd-ZTZkkzwU8lDMjgprKyHky2jS9-9_1DOq3zy3a9WNWvxI3DN-DlxdFtYAsSeE1N7i00Fln22M5ZFAENZBw5BUu7o9mYDsFK96Hfk8-lQ5dgmhGQZQBBJI27TLvle49cOdnvdDmkFU4XwyACRNPODq2pgWg6RFWlUK_UPP1Y8HsMh6-Ob0I-1pr4MZyx",
+                                                                                    "name":  "projects/12282738876199046513/files/f33311ef7c4a48bba17126fb93d3aa6a"
+                                                                                },
+                                                                 "title":  "수주 사업 관리 현황",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2048",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTBkNjU4NjQwNjM5NzEyM2IzMGE3ZGI4EgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/16786703781706118123"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/a82ef1f661d34e33a9039e139264fd39",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLvWpFOZ6u3f0A-_BDtY6_K3uD2iWc0UUZqGpUOTuAE6fYD1A9NtD0Sfw2KS2DRAq8mYijiftgSH6i5BtZgv5XmTFkbeHHoz3D0jWM4l8AH1HUNQr2ZkoRzu02a2-58cGt3JjTGElfcCHMD8GYUyjJWYj1Jk1DRHSvekRUont8KDkyhIc2P2SbLKQerE4uoOZyR_ds3XRGwvIKJHR5oTIaYeyZnX5HoMeX09DAfmM_P_6YPnwMT28Gpauy9G",
+                                                                                    "name":  "projects/12282738876199046513/files/15630997370581989364"
+                                                                                },
+                                                                 "title":  "BERYL - 회원가입",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "3824",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTBmZGQ4MDhlZmMwNGVhYjFjMzczMTRhMjNmEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/19165e8c078843cc9b15267b0ad18733"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/ac44042b0d9e4aa4b510d9d4ae27aac5",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLsLK9GnIUe9ev-ZySKUKKcbsry5vTd7YMz9fNy9vJ8T1sz6SyGGBJEIdPnjio-w9VkzyYTwh_IzZhh3k1FYlUlsMnrfDyUXyGu-yYyImOOHSk7tsTY3P_401TWDg6R4ptWKOEkrg05TtQYfv4iEeH3D3PQCKhMFzbfE-7jfLxfyEMNfTloH9WmIy9tksRsj2QG8VIphEwcK6kjfZXMEv1dLYXWwj47r5BdVt1yNCZlk6_TCpch7uUBEXtEc",
+                                                                                    "name":  "projects/12282738876199046513/files/b182c3d851b54feca61eceaed401e4d3"
+                                                                                },
+                                                                 "title":  "공급기업 등록 및 수정",
+                                                                 "width":  "2560"
+                                                             },
+                                                             {
+                                                                 "deviceType":  "DESKTOP",
+                                                                 "height":  "2660",
+                                                                 "htmlCode":  {
+                                                                                  "downloadUrl":  "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ8Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpbCiVodG1sXzAwMDY1NTFjNTBhYzI2ZDIwODQwZDBlMTdkMjU1ZjNkEgsSBxD1tMSdnhYYAZIBJAoKcHJvamVjdF9pZBIWQhQxMjI4MjczODg3NjE5OTA0NjUxMw\u0026filename=\u0026opi=89354086",
+                                                                                  "mimeType":  "text/html",
+                                                                                  "name":  "projects/12282738876199046513/files/16099729064256117509"
+                                                                              },
+                                                                 "name":  "projects/12282738876199046513/screens/b7ab51d69aa44cf48da8dba1cefe5910",
+                                                                 "screenshot":  {
+                                                                                    "downloadUrl":  "https://lh3.googleusercontent.com/aida/AP1WRLuflfXkFLmAhyQVI2-0UBtvK_Vi8Monsk7iA94IJakLVBbPgSDWFQaBm_aMCCR8dIFWc7M_R1L9QaPwBG0h95Rnj4hrEH-TbQOCoj9G-Reka5owXv60j5OVHWUgwg7lwGWtDrX8CeNNEZ4bxTWTx0sjy2QoaIub2YcIjZK9Y-WJg6ZqCLy5v1tfFC1N0lLyDVKpcAZ8p-C0uif2JDTCcRvYGpRB3zUaZahCwuOGX_HQ0Apla8xY6lmFTCB4",
+                                                                                    "name":  "projects/12282738876199046513/files/12772744588486960339"
+                                                                                },
+                                                                 "title":  "BERYL - 공급기업 관리 대시보드",
+                                                                 "width":  "2560"
+                                                             }
+                                                         ]
+                                         }
+               }
+}
