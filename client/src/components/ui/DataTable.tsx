@@ -11,6 +11,7 @@ type DataTableProps<T> = {
   columns: DataTableColumn<T>[];
   data: T[];
   getRowKey: (row: T) => string;
+  onRowClick?: (row: T) => void;
 };
 
 const alignMap = {
@@ -19,7 +20,7 @@ const alignMap = {
   center: 'text-center'
 };
 
-export function DataTable<T extends object>({ columns, data, getRowKey }: DataTableProps<T>) {
+export function DataTable<T extends object>({ columns, data, getRowKey, onRowClick }: DataTableProps<T>) {
   return (
     <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest">
       <div className="overflow-x-auto">
@@ -40,10 +41,26 @@ export function DataTable<T extends object>({ columns, data, getRowKey }: DataTa
             </tr>
           </thead>
           <tbody>
-            {data.map((row, index) => (
+            {data.map((row) => (
               <tr
                 key={getRowKey(row)}
-                className="bg-surface-container-lowest"
+                className={[
+                  'bg-surface-container-lowest transition-colors',
+                  onRowClick ? 'cursor-pointer hover:bg-surface-container-low' : ''
+                ].join(' ')}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                onKeyDown={
+                  onRowClick
+                    ? (event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          onRowClick(row);
+                        }
+                      }
+                    : undefined
+                }
+                role={onRowClick ? 'button' : undefined}
+                tabIndex={onRowClick ? 0 : undefined}
               >
                 {columns.map((column) => (
                   <td
