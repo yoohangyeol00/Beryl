@@ -21,8 +21,8 @@ interface JobRow {
   source_type: SourceType;
   source_url: string | null;
   budget: string | null;
-  published_at: string | null;
-  deadline: string | null;
+  published_at: string | Date | null;
+  deadline: string | Date | null;
   status: JobStatus;
   rfp_score: string | null;
   recommended_people_count: number;
@@ -143,8 +143,8 @@ function toJobListItem(row: JobRow) {
     agency: row.buyer_company_name,
     category: row.category ?? '',
     budget: row.budget ? Number(row.budget) : 0,
-    publishedAt: row.published_at ?? '',
-    deadline: row.deadline ?? '',
+    publishedAt: formatDateValue(row.published_at),
+    deadline: formatDateValue(row.deadline),
     status: row.status,
     procurementType: row.procurement_type,
     sourceType: row.source_type,
@@ -162,8 +162,8 @@ function toJobDetail(row: JobRow) {
     agency: row.buyer_company_name,
     category: row.category ?? '',
     budget: row.budget ? Number(row.budget) : 0,
-    publishedAt: row.published_at ?? '',
-    deadline: row.deadline ?? '',
+    publishedAt: formatDateValue(row.published_at),
+    deadline: formatDateValue(row.deadline),
     status: row.status,
     rfpScore: row.rfp_score ? Number(row.rfp_score) : 0,
     recommendedPeople: row.recommended_people_count,
@@ -172,23 +172,49 @@ function toJobDetail(row: JobRow) {
   };
 }
 
+function formatDateValue(value: string | Date | null): string {
+  if (!value) {
+    return '';
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  return value.slice(0, 10);
+}
+
 function buildJobsFilter(req: Request, currentCompanyId: string) {
   const query = asRecord(req.query);
   const values: unknown[] = [currentCompanyId];
-  const conditions = [
-    `(
-      j.buyer_company_id = $1
-      or exists (
-        select 1
-        from company_relationships cr
-        where cr.source_company_id = $1
-          and cr.target_company_id = j.buyer_company_id
-          and cr.source_perspective = 'supplier'
-          and cr.target_perspective = 'buyer'
-          and cr.status = 'active'
-      )
-    )`
-  ];
+  const perspective = getString(query.perspective);
+  const conditions =
+    perspective === 'buyer'
+      ? [
+          `(
+            j.buyer_company_id = $1
+            or exists (
+              select 1
+              from company_members cm
+              where cm.id = j.internal_owner_member_id
+                and cm.company_id = $1
+            )
+          )`
+        ]
+      : [
+          `(
+            j.buyer_company_id = $1
+            or exists (
+              select 1
+              from company_relationships cr
+              where cr.source_company_id = $1
+                and cr.target_company_id = j.buyer_company_id
+                and cr.source_perspective = 'supplier'
+                and cr.target_perspective = 'buyer'
+                and cr.status = 'active'
+            )
+          )`
+        ];
 
   const q = getString(query.q);
   const status = getString(query.status);
@@ -479,7 +505,8 @@ jobsRouter.post('/', async (req: Request, res: Response, next) => {
   const currentCompanyId = getCurrentCompanyId(authReq);
   const body = asRecord(req.body);
   const title = getString(body.title);
-  const buyerName = getString(body.buyerName);
+  const currentCompanyName = authReq.auth?.company?.name ?? '';
+  const buyerName = currentCompanyName || getString(body.buyerName);
   const noticeNumber = getNullableString(body.noticeNumber);
   const category = getNullableString(body.category);
   const budget = getBudget(body.budget);
@@ -505,9 +532,6 @@ jobsRouter.post('/', async (req: Request, res: Response, next) => {
         return;
       }
     }
-
-    const buyerCompany = await findOrCreateBuyerCompany(buyerName);
-    await ensureBidRelationship(currentCompanyId, buyerCompany.id);
 
     const result = await pool.query<JobRow>(
       `
@@ -546,7 +570,7 @@ jobsRouter.post('/', async (req: Request, res: Response, next) => {
           description
       `,
       [
-        buyerCompany.id,
+        currentCompanyId,
         authReq.auth?.member?.id ?? null,
         noticeNumber,
         title,
@@ -559,21 +583,8 @@ jobsRouter.post('/', async (req: Request, res: Response, next) => {
         deadline,
         status,
         description,
-        buyerCompany.name
+        buyerName
       ]
-    );
-
-    await pool.query(
-      `
-        update company_relationships
-        set last_activity_date = current_date,
-            updated_at = now()
-        where source_company_id = $1
-          and target_company_id = $2
-          and source_perspective = 'supplier'
-          and target_perspective = 'buyer'
-      `,
-      [currentCompanyId, buyerCompany.id]
     );
     sendSuccess(res, toJobDetail(result.rows[0]), 201);
   } catch (error) {

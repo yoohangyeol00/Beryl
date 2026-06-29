@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { getJobs } from '../../../api/jobsApi';
+import { getJobs, type GetJobsParams } from '../../../api/jobsApi';
 
-export function useJobs() {
+export function useJobs(params?: GetJobsParams) {
   return useQuery({
-    queryKey: ['jobs'],
-    queryFn: getJobs
+    queryKey: ['jobs', params ?? {}],
+    queryFn: () => getJobs(params)
   });
 }

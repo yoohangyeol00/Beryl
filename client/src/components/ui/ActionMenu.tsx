@@ -47,7 +47,7 @@ export function ActionMenu({ label = '더보기', items, align = 'right' }: Acti
         aria-label={label}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="grid h-10 w-10 place-items-center rounded  bg-surface-container-lowest text-on-surface transition-colors hover:bg-surface-container-low"
+        className="grid h-10 w-10 place-items-center rounded  text-on-surface transition-colors hover:bg-surface-container-low"
         onClick={() => setOpen((current) => !current)}
       >
         <MoreHorizontal className="h-5 w-5" />

@@ -338,5 +338,7 @@ function formatCurrency(value: number) {
 }
 
 function formatDate(value: string) {
-  return value || '-';
+  if (!value) return '-';
+
+  return value.slice(0, 10);
 }

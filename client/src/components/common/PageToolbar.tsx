@@ -1,5 +1,5 @@
-﻿import type { ChangeEvent, ReactNode } from 'react';
 import { Filter } from 'lucide-react';
+import { useEffect, useState, type ChangeEvent, type CompositionEvent, type ReactNode } from 'react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 
@@ -20,16 +20,75 @@ type PageToolbarProps = {
   actions?: ReactNode;
 };
 
-export function PageToolbar({ children, searchPlaceholder = '검색어 입력', searchValue = '', onSearchChange, selects, resultCount, actions }: PageToolbarProps) {
+export function PageToolbar({
+  children,
+  searchPlaceholder = '검색어 입력',
+  searchValue = '',
+  onSearchChange,
+  selects,
+  resultCount,
+  actions
+}: PageToolbarProps) {
+  const [draftSearchValue, setDraftSearchValue] = useState(searchValue);
+  const [isComposing, setIsComposing] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  useEffect(() => {
+    if (isComposing || isSearchFocused) return;
+
+    setDraftSearchValue(searchValue);
+  }, [isComposing, isSearchFocused, searchValue]);
+
+  useEffect(() => {
+    if (isComposing || !isSearchFocused || draftSearchValue === searchValue) return;
+
+    const timeoutId = window.setTimeout(() => {
+      onSearchChange?.(draftSearchValue);
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [draftSearchValue, isComposing, isSearchFocused, onSearchChange, searchValue]);
+
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    onSearchChange?.(event.target.value);
+    setDraftSearchValue(event.target.value);
+  };
+
+  const handleSearchFocus = () => {
+    setIsSearchFocused(true);
+  };
+
+  const handleSearchBlur = () => {
+    setIsSearchFocused(false);
+
+    if (draftSearchValue !== searchValue) {
+      onSearchChange?.(draftSearchValue);
+    }
+  };
+
+  const handleCompositionStart = () => {
+    setIsComposing(true);
+  };
+
+  const handleCompositionEnd = (event: CompositionEvent<HTMLInputElement>) => {
+    const nextValue = event.currentTarget.value;
+
+    setIsComposing(false);
+    setDraftSearchValue(nextValue);
   };
 
   return (
     <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-3">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="grid flex-1 gap-3 md:grid-cols-[minmax(220px,360px)_repeat(2,minmax(150px,220px))]">
-          <Input placeholder={searchPlaceholder} value={searchValue} onChange={handleSearchChange} />
+          <Input
+            placeholder={searchPlaceholder}
+            value={draftSearchValue}
+            onChange={handleSearchChange}
+            onFocus={handleSearchFocus}
+            onBlur={handleSearchBlur}
+            onCompositionStart={handleCompositionStart}
+            onCompositionEnd={handleCompositionEnd}
+          />
           {selects?.map((select) => (
             <label key={select.label} className="block">
               <span className="sr-only">{select.label}</span>
@@ -61,4 +120,3 @@ export function PageToolbar({ children, searchPlaceholder = '검색어 입력', 
     </div>
   );
 }
-

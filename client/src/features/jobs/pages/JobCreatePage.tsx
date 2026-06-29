@@ -8,6 +8,7 @@ import { PageTitle } from '../../../components/common/PageTitle';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
+import { useAuth } from '../../auth/AuthContext';
 import { useJobDetail } from '../hooks/useJobDetail';
 
 type SourceType = NonNullable<CreateJobRequest['sourceType']>;
@@ -18,6 +19,7 @@ export function JobCreatePage() {
   const navigate = useNavigate();
   const { jobId } = useParams();
   const isEditMode = Boolean(jobId);
+  const { session } = useAuth();
   const { data: job, isLoading: isDetailLoading, isError: isDetailError, error: detailError } = useJobDetail(jobId ?? '');
   const [title, setTitle] = useState('');
   const [noticeNumber, setNoticeNumber] = useState('');
@@ -46,10 +48,22 @@ export function JobCreatePage() {
     setBudget(job.budget ? String(job.budget) : '');
     setSourceType(job.sourceType ?? 'manual');
     setSourceUrl(job.sourceUrl ?? '');
-    setPublishedAt(job.publishedAt);
-    setDeadline(job.deadline);
-    setAnalysisCriteria(job.description);
+    setPublishedAt(formatDateInputValue(job.publishedAt));
+    setDeadline(formatDateInputValue(job.deadline));
+
+    const descriptionFields = parseDescriptionFields(job.description);
+    setQuestionDeadline(descriptionFields.questionDeadline);
+    setEvaluationDate(descriptionFields.evaluationDate);
+    setExpectedStartDate(descriptionFields.expectedStartDate);
+    setExpectedDuration(descriptionFields.expectedDuration);
+    setAnalysisCriteria(descriptionFields.analysisCriteria);
   }, [job]);
+
+  useEffect(() => {
+    if (isEditMode || buyerName || !session?.company?.name) return;
+
+    setBuyerName(session.company.name);
+  }, [buyerName, isEditMode, session?.company?.name]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -128,7 +142,7 @@ export function JobCreatePage() {
             <div className="grid gap-6 md:grid-cols-2">
               <Input label="공고명" placeholder="차세대 통합 안전 관리 시스템 구축" value={title} onChange={(event) => setTitle(event.target.value)} required />
               <Input label="공고번호" placeholder="20261012345-00" value={noticeNumber} onChange={(event) => setNoticeNumber(event.target.value)} />
-              <Input label="발주기관" placeholder="소방청" value={buyerName} onChange={(event) => setBuyerName(event.target.value)} required />
+              <Input label="발주기관" placeholder="소방청" value={buyerName} onChange={(event) => setBuyerName(event.target.value)} required disabled={!isEditMode} />
               <Input label="필요 역량" placeholder="Java, Spring Boot, MSA, React" value={category} onChange={(event) => setCategory(event.target.value)} />
               <Input label="추정 예산" placeholder="8,900,000,000 KRW" value={budget} onChange={(event) => setBudget(event.target.value)} />
               <label className="block">
@@ -261,6 +275,63 @@ function buildPayload({
 function parseBudget(value: string) {
   const budget = Number(value.replace(/[^\d.]/g, ''));
   return Number.isFinite(budget) && budget > 0 ? budget : undefined;
+}
+
+function formatDateInputValue(value: string) {
+  return value ? value.slice(0, 10) : '';
+}
+
+function parseDescriptionFields(description: string) {
+  const fields = {
+    questionDeadline: '',
+    evaluationDate: '',
+    expectedStartDate: '',
+    expectedDuration: '',
+    analysisCriteria: ''
+  };
+
+  if (!description.trim()) {
+    return fields;
+  }
+
+  const blocks = description.split(/\n{2,}/).map((block) => block.trim()).filter(Boolean);
+  const dateValues: string[] = [];
+  const unstructuredBlocks: string[] = [];
+
+  for (const block of blocks) {
+    if (block.includes('RFP')) {
+      fields.analysisCriteria = block.replace(/^.*RFP.*?:\s*/s, '').trim();
+      continue;
+    }
+
+    const date = block.match(/\d{4}-\d{2}-\d{2}/)?.[0];
+
+    if (date) {
+      dateValues.push(date);
+      continue;
+    }
+
+    if (!fields.expectedDuration && isDurationBlock(block)) {
+      fields.expectedDuration = block.replace(/^.*?:\s*/, '').trim();
+      continue;
+    }
+
+    unstructuredBlocks.push(block);
+  }
+
+  fields.questionDeadline = dateValues[0] ?? '';
+  fields.evaluationDate = dateValues[1] ?? '';
+  fields.expectedStartDate = dateValues[2] ?? '';
+
+  if (!fields.analysisCriteria && unstructuredBlocks.length) {
+    fields.analysisCriteria = unstructuredBlocks.join('\n\n');
+  }
+
+  return fields;
+}
+
+function isDurationBlock(value: string) {
+  return /기간|duration|month|개월|媛쒖썡|湲곌컙/i.test(value);
 }
 
 function buildDescription({

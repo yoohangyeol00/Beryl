@@ -1,17 +1,23 @@
 import { useNavigate } from 'react-router-dom';
+import { getApiErrorMessage } from '../../../api/apiResponse';
+import { EmptyState } from '../../../components/common/EmptyState';
+import { LoadingState } from '../../../components/common/LoadingState';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { MetricCard } from '../../../components/common/MetricCard';
+import { StatusBadge } from '../../../components/common/StatusBadge';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
-import { Badge } from '../../../components/ui/Badge';
+import type { Job, JobStatus } from '../../../types/job';
+import { useJobs } from '../../jobs/hooks/useJobs';
 
 type AgencyProjectRow = {
   id: string;
   project: string;
-  status: 'open' | 'reviewing' | 'contracting' | 'running';
-  proposals: number;
+  status: JobStatus;
+  recommendedPeople: number;
   closingAt: string;
-  owner: string;
+  budget: number;
+  category: string;
   nextAction: string;
 };
 
@@ -35,26 +41,13 @@ const t = {
   projectStatusTitle: '\uC6B0\uB9AC \uAE30\uAD00 \uBC1C\uC8FC \uC0AC\uC5C5 \uD604\uD669',
   projectColumn: '\uBC1C\uC8FC \uC0AC\uC5C5',
   statusColumn: '\uC9C4\uD589\uC0C1\uD0DC',
-  proposalsColumn: '\uC811\uC218 \uC81C\uC548',
+  recommendedPeopleColumn: '\uCD94\uCC9C \uC778\uB825',
   dateColumn: '\uB9C8\uAC10/\uAE30\uC900\uC77C',
-  ownerColumn: '\uB2F4\uB2F9 \uBD80\uC11C',
+  budgetColumn: '\uC608\uC0B0',
+  categoryColumn: '\uC694\uAD6C \uC5ED\uB7C9',
   nextActionColumn: '\uB2E4\uC74C \uC870\uCE58',
   count: '\uAC74'
 };
-
-const statusLabel: Record<AgencyProjectRow['status'], string> = {
-  open: '\uACF5\uACE0\uC911',
-  reviewing: '\uD3C9\uAC00\uC911',
-  contracting: '\uACC4\uC57D\uC900\uBE44',
-  running: '\uC218\uD589\uC911'
-};
-
-const rows: AgencyProjectRow[] = [
-  { id: 'job-1', project: '\uCC28\uC138\uB300 \uD1B5\uD569 \uC7AC\uB09C \uC548\uC804 \uAD00\uB9AC \uC2DC\uC2A4\uD15C \uAD6C\uCD95', status: 'reviewing', proposals: 8, closingAt: '2026-07-03 14:00', owner: '\uB514\uC9C0\uD138\uC7AC\uB09C\uB300\uC751\uACFC', nextAction: '\uAE30\uC220\uD3C9\uAC00 \uC704\uC6D0 \uBC30\uC815' },
-  { id: 'job-2', project: '\uD604\uC7A5 \uB300\uC751 \uBAA8\uBC14\uC77C \uAD00\uC81C \uACE0\uB3C4\uD654', status: 'open', proposals: 3, closingAt: '2026-07-12 16:00', owner: '\uC815\uBCF4\uD654\uB2F4\uB2F9\uAD00', nextAction: '\uC9C8\uC758 \uB2F5\uBCC0 \uACF5\uAC1C' },
-  { id: 'job-3', project: '\uC18C\uBC29 \uB370\uC774\uD130 \uD1B5\uD569 \uBD84\uC11D \uD50C\uB7AB\uD3FC', status: 'contracting', proposals: 5, closingAt: '2026-06-25 10:00', owner: '\uB370\uC774\uD130\uC815\uCC45\uD300', nextAction: '\uC6B0\uC120\uD611\uC0C1 \uD1B5\uBCF4' },
-  { id: 'job-4', project: 'AI \uC0C1\uD669\uC804\uD30C \uC2DC\uBC94 \uC6B4\uC601', status: 'running', proposals: 0, closingAt: '2026-05-18 11:00', owner: '\uC7AC\uB09C\uC0C1\uD669\uC2E4', nextAction: '\uC6D4\uAC04 \uC218\uD589 \uC810\uAC80' }
-];
 
 const columns: DataTableColumn<AgencyProjectRow>[] = [
   { key: 'project', header: t.projectColumn, sortable: true, render: (row) => <strong>{row.project}</strong> },
@@ -62,25 +55,38 @@ const columns: DataTableColumn<AgencyProjectRow>[] = [
     key: 'status',
     header: t.statusColumn,
     sortable: true,
-    render: (row) => <Badge tone={row.status === 'open' ? 'info' : row.status === 'running' ? 'success' : row.status === 'reviewing' ? 'danger' : 'info'}>{statusLabel[row.status]}</Badge>
+    render: (row) => <StatusBadge status={row.status} />
   },
-  { key: 'proposals', header: t.proposalsColumn, align: 'right', sortable: true, sortValue: (row) => row.proposals, render: (row) => `${row.proposals}${t.count}` },
+  {
+    key: 'recommendedPeople',
+    header: t.recommendedPeopleColumn,
+    align: 'right',
+    sortable: true,
+    sortValue: (row) => row.recommendedPeople,
+    render: (row) => `${row.recommendedPeople}\uBA85`
+  },
   { key: 'closingAt', header: t.dateColumn, sortable: true },
-  { key: 'owner', header: t.ownerColumn, sortable: true },
+  { key: 'budget', header: t.budgetColumn, align: 'right', sortable: true, sortValue: (row) => row.budget, render: (row) => formatCurrency(row.budget) },
+  { key: 'category', header: t.categoryColumn, sortable: true },
   { key: 'nextAction', header: t.nextActionColumn, sortable: true }
 ];
 
 export function AgencyDashboardPage() {
   const navigate = useNavigate();
+  const { data, isLoading, isError, error } = useJobs({ perspective: 'buyer' });
+  const jobs = data?.items ?? [];
+  const summary = data?.summary;
+  const rows = jobs.map(toAgencyProjectRow).slice(0, 8);
+  const activeBidCount = jobs.filter((job) => job.status !== 'closed' && job.status !== 'awarded').length;
 
   return (
     <section>
       <PageTitle title={t.title} description={t.description} />
       <div className="mb-6 grid gap-4 md:grid-cols-4">
-        <MetricCard label={t.activeBid} value={`18${t.count}`} description={t.activeBidDesc} onClick={() => navigate('/jobs')} />
-        <MetricCard label={t.reviewWaiting} value={`8${t.count}`} description={t.reviewWaitingDesc} tone="danger" onClick={() => navigate('/jobs?status=reviewing')} />
-        <MetricCard label={t.contractReady} value={`3${t.count}`} description={t.contractReadyDesc} onClick={() => navigate('/projects/won')} />
-        <MetricCard label={t.runningProjects} value={`11${t.count}`} description={t.runningProjectsDesc} onClick={() => navigate('/projects/won')} />
+        <MetricCard label={t.activeBid} value={`${activeBidCount}${t.count}`} description={t.activeBidDesc} onClick={() => navigate('/jobs')} />
+        <MetricCard label={t.reviewWaiting} value={`${summary?.closingSoon ?? 0}${t.count}`} description={t.reviewWaitingDesc} tone="danger" onClick={() => navigate('/jobs?status=closingSoon')} />
+        <MetricCard label={t.contractReady} value={`${summary?.awarded ?? 0}${t.count}`} description={t.contractReadyDesc} onClick={() => navigate('/projects/won')} />
+        <MetricCard label={t.runningProjects} value={`0${t.count}`} description={t.runningProjectsDesc} onClick={() => navigate('/projects/won')} />
       </div>
 
       <div className="mb-6 grid gap-4 xl:grid-cols-3">
@@ -100,8 +106,61 @@ export function AgencyDashboardPage() {
 
       <Card className="p-5">
         <h2 className="mb-4 font-headline text-headline-md text-on-surface">{t.projectStatusTitle}</h2>
-        <DataTable columns={columns} data={rows} getRowKey={(row) => row.id} onRowClick={(row) => navigate(`/jobs/${row.id}`)} />
+        {isError ? (
+          <EmptyState title="발주 사업 현황을 불러오지 못했습니다." description={getApiErrorMessage(error, '잠시 후 다시 시도해주세요.')} />
+        ) : isLoading ? (
+          <LoadingState />
+        ) : (
+          <DataTable
+            columns={columns}
+            data={rows}
+            getRowKey={(row) => row.id}
+            onRowClick={(row) => navigate(`/jobs/${row.id}`)}
+            emptyMessage="등록된 발주 공고가 없습니다."
+            density="compact"
+            tableClassName="min-w-[1080px] w-full"
+          />
+        )}
       </Card>
     </section>
   );
+}
+
+function toAgencyProjectRow(job: Job): AgencyProjectRow {
+  return {
+    id: job.id,
+    project: job.title,
+    status: job.status,
+    recommendedPeople: job.recommendedPeople,
+    closingAt: formatDate(job.deadline),
+    budget: job.budget,
+    category: job.category || '-',
+    nextAction: getNextAction(job)
+  };
+}
+
+function getNextAction(job: Job) {
+  if (job.status === 'draft') return '공고 정보 검토';
+  if (job.status === 'open') return '질의/참여 현황 확인';
+  if (job.status === 'closingSoon') return '마감 전 제안 확인';
+  if (job.status === 'closed') return '평가 및 선정 검토';
+  if (job.status === 'awarded') return '계약/수행 전환 확인';
+
+  return '-';
+}
+
+function formatCurrency(value: number) {
+  if (!value) return '-';
+
+  return new Intl.NumberFormat('ko-KR', {
+    style: 'currency',
+    currency: 'KRW',
+    maximumFractionDigits: 0
+  }).format(value);
+}
+
+function formatDate(value: string) {
+  if (!value) return '-';
+
+  return value.slice(0, 10);
 }

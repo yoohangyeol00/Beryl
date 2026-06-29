@@ -199,7 +199,7 @@ export function JobDetailPage() {
     <section>
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <StatusBadge status={job.status} />
-        <Badge tone="danger">{job.deadline ? `마감 ${job.deadline}` : '마감일 미정'}</Badge>
+        <Badge tone="danger">{job.deadline ? `마감 ${formatDate(job.deadline)}` : '마감일 미정'}</Badge>
         <span className="text-on-surface-variant">공고번호: {job.noticeNumber || '-'}</span>
       </div>
 
@@ -282,9 +282,9 @@ function TabContent({ activeTab, job }: { activeTab: DetailTab; job: JobDetail }
           <InfoBlock label="발주기관" value={job.agency || '-'} />
           <InfoBlock label="추정 예산" value={formatCurrency(job.budget)} strong />
           <InfoBlock label="수집 경로" value={formatSourceType(job.sourceType)} />
-          <InfoBlock label="제안 마감일" value={job.deadline || '-'} danger />
+          <InfoBlock label="제안 마감일" value={formatDate(job.deadline)} danger />
           <InfoBlock label="필요 역량" value={job.category || '-'} />
-          <InfoBlock label="공고 시작일" value={job.publishedAt || '-'} />
+          <InfoBlock label="공고 시작일" value={formatDate(job.publishedAt)} />
           <InfoBlock label="원문 공고 URL" value={job.sourceUrl || '-'} />
           <InfoBlock label="추천 인력" value={`${job.recommendedPeople}명`} />
         </dl>
@@ -333,8 +333,8 @@ function TabContent({ activeTab, job }: { activeTab: DetailTab; job: JobDetail }
       <div>
         <SectionTitle icon={<Calendar className="h-6 w-6" />} title={labels.schedule} />
         <div className="space-y-3 rounded border border-outline-variant bg-surface-container-low p-5">
-          <Schedule label="공고 시작일" value={job.publishedAt || '-'} />
-          <Schedule label="제안 마감" value={job.deadline || '-'} />
+          <Schedule label="공고 시작일" value={formatDate(job.publishedAt)} />
+          <Schedule label="제안 마감" value={formatDate(job.deadline)} />
           <Schedule label="상태" value={job.status} />
         </div>
       </div>
@@ -482,6 +482,12 @@ function formatCurrency(value: number) {
     currency: 'KRW',
     maximumFractionDigits: 0
   }).format(value);
+}
+
+function formatDate(value: string) {
+  if (!value) return '-';
+
+  return value.slice(0, 10);
 }
 
 function formatSourceType(value: string | undefined) {

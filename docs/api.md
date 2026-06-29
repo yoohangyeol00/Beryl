@@ -391,7 +391,7 @@ Query:
 - `status`: `draft`, `open`, `closingSoon`, `closed`, `awarded`
 - `procurementType`: `public`, `private`
 - `sourceType`: `nara`, `private_bid`, `manual`, `email`, `other`
-- `buyerCompanyId`
+- `perspective`: `buyer`이면 현재 회사가 발주자인 공고만 조회하고, 생략하거나 `accessible`이면 현재 회사가 접근 가능한 공고를 조회한다.
 - `page`
 - `pageSize`
 - `sort`
@@ -454,8 +454,8 @@ Request:
 
 서버 처리 기준:
 
-- `buyerName`으로 발주처 기업을 찾고, 없으면 `companies`에 발주처 기업을 생성한다.
-- 현재 로그인 사용자의 `companyId`와 발주처 기업 사이에 `bid_participation` 관계를 생성하거나 갱신한다.
+- 발주기관 모드에서 등록한 공고의 `buyerCompanyId`는 현재 로그인 사용자의 `companyId`로 저장한다.
+- `buyerName`은 화면 표시용 발주기관명으로만 사용하며, 권한이나 소속을 결정하는 기준으로 사용하지 않는다.
 - `buyerCompanyId`, `internalOwnerMemberId`, `companyId`, `role`처럼 권한이나 소속을 결정하는 값은 클라이언트 요청값으로 받지 않는다.
 
 ### `PATCH /api/jobs/:jobId`

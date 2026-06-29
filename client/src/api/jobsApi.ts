@@ -4,6 +4,10 @@ import { unwrapApiResponse } from './apiResponse';
 import { mockJobDetailResponse, mockJobsResponse } from '../mocks/jobs.mock';
 import type { JobDetail, JobList, JobStatus } from '../types/job';
 
+export interface GetJobsParams {
+  perspective?: 'buyer' | 'accessible';
+}
+
 export interface CreateJobRequest {
   title: string;
   noticeNumber?: string;
@@ -19,10 +23,10 @@ export interface CreateJobRequest {
   description?: string;
 }
 
-export async function getJobs() {
+export async function getJobs(params?: GetJobsParams) {
   return requestWithMockFallback<JobList>({
     request: async () => {
-      const response = await axiosInstance.get<ApiResponse<JobList>>('/jobs');
+      const response = await axiosInstance.get<ApiResponse<JobList>>('/jobs', { params });
       return unwrapApiResponse(response.data);
     },
     mock: () => unwrapApiResponse(mockJobsResponse)
