@@ -1,14 +1,38 @@
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
+import path from 'path';
 import { config } from './config.js';
 import { pool } from './db.js';
+import { attachAuthContext } from './middleware/auth.js';
+import { authRouter } from './routes/auth.js';
+import { companiesRouter } from './routes/companies.js';
+import { jobsRouter } from './routes/jobs.js';
+import { sendError } from './utils/apiResponse.js';
 
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+app.use(
+  cors({
+    origin: config.clientOrigin,
+    credentials: true
+  })
+);
 app.use(express.json());
+app.use(
+  '/uploads',
+  (_req, res, next) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  },
+  express.static(path.resolve(process.cwd(), 'uploads'))
+);
+app.use(attachAuthContext);
+
+app.use('/api/auth', authRouter);
+app.use('/api/companies', companiesRouter);
+app.use('/api/jobs', jobsRouter);
 
 app.get('/api/health', async (_req, res, next) => {
   try {
@@ -25,7 +49,7 @@ app.get('/api/health', async (_req, res, next) => {
 
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(error);
-  res.status(500).json({ error: 'Internal server error' });
+  sendError(res, 500, 'INTERNAL_SERVER_ERROR', 'Internal server error');
 });
 
 app.listen(config.port, () => {

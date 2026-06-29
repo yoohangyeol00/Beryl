@@ -49,6 +49,37 @@ API path 기준:
 }
 ```
 
+### Protected Domain API Rules
+
+로그인/회원가입처럼 공개되어야 하는 endpoint를 제외한 도메인 API는 기본적으로 인증과 현재 소속 기업 기준 접근 제어를 적용한다.
+
+서버 구현 기준:
+
+- 도메인 라우터는 기본적으로 `createCompanyScopedRouter()`로 생성한다.
+- handler는 클라이언트 request body/query/path의 `companyId`, `role`, `currentCompanyId` 값을 권한 판단 기준으로 신뢰하지 않는다.
+- 현재 기업 기준은 서버 세션에서 주입된 `req.auth.user.companyId`를 사용한다.
+- handler 내부에서는 `getCurrentCompanyId(req)`로 current company를 얻는다.
+- URL의 리소스 ID로 DB row를 조회한 뒤, row의 소유/관계 기업 ID가 current company와 맞는지 확인한다.
+- current company가 접근할 수 없는 row는 `403 COMPANY_SCOPE_FORBIDDEN`을 반환한다.
+
+예:
+
+```ts
+export const jobsRouter = createCompanyScopedRouter();
+
+jobsRouter.get('/:jobId', async (req, res) => {
+  const companyId = getCurrentCompanyId(req);
+  const job = await findJob(req.params.jobId);
+
+  if (!job || job.buyerCompanyId !== companyId) {
+    sendCompanyScopeError(res);
+    return;
+  }
+
+  sendSuccess(res, job);
+});
+```
+
 ### Pagination
 
 목록 API는 기본적으로 다음 query를 지원한다.
@@ -95,9 +126,66 @@ status=active
 
 | Method | Endpoint | Purpose |
 | --- | --- | --- |
+| `POST` | `/api/auth/signup` | 회원가입 |
 | `POST` | `/api/auth/login` | 로그인 |
 | `POST` | `/api/auth/logout` | 로그아웃 |
 | `GET` | `/api/auth/me` | 현재 사용자와 소속 기업 조회 |
+| `PATCH` | `/api/auth/me` | 내 계정/구성원 프로필 수정 |
+| `PATCH` | `/api/auth/me/password` | 내 비밀번호 변경 |
+| `DELETE` | `/api/auth/me` | 내 계정 탈퇴 처리 |
+
+### `POST /api/auth/signup`
+
+일반 회원가입은 `companyUser`만 생성한다. request body에서 `role`은 받지 않으며, `systemAdmin` 계정은 프로그램 초기 설정, seed, 운영 스크립트 같은 별도 경로로 생성한다.
+
+Request:
+
+```json
+{
+  "name": "홍길동",
+  "email": "user@example.com",
+  "password": "password",
+  "passwordConfirm": "password",
+  "company": {
+    "name": "A기업",
+    "businessRegistrationNo": "123-45-67890"
+  }
+}
+```
+
+Response data:
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "name": "홍길동",
+    "role": "companyUser",
+    "companyId": "uuid"
+  },
+  "company": {
+    "id": "uuid",
+    "name": "A기업",
+    "businessRegistrationNo": "123-45-67890",
+    "companyType": null,
+    "representativeName": null,
+    "address": null,
+    "contactPhone": null,
+    "contactEmail": null,
+    "status": "active",
+    "logoUrl": null
+  },
+  "member": {
+    "id": "uuid",
+    "name": "홍길동",
+    "department": null,
+    "position": null,
+    "email": "user@example.com",
+    "phone": null
+  }
+}
+```
 
 ### `POST /api/auth/login`
 
@@ -123,7 +211,23 @@ Response data:
   },
   "company": {
     "id": "uuid",
-    "name": "A기업"
+    "name": "A기업",
+    "businessRegistrationNo": "123-45-67890",
+    "companyType": null,
+    "representativeName": null,
+    "address": null,
+    "contactPhone": null,
+    "contactEmail": null,
+    "status": "active",
+    "logoUrl": null
+  },
+  "member": {
+    "id": "uuid",
+    "name": "홍길동",
+    "department": null,
+    "position": null,
+    "email": "user@example.com",
+    "phone": null
   }
 }
 ```
@@ -138,6 +242,8 @@ Response data:
 | `GET` | `/api/companies/:companyId` | 기업 상세 조회 |
 | `POST` | `/api/companies` | 기업 등록 |
 | `PATCH` | `/api/companies/:companyId` | 기업 수정 |
+| `PATCH` | `/api/companies/me` | 내 소속 기업 정보 수정 |
+| `POST` | `/api/companies/me/logo` | 내 소속 기업 로고 업로드 |
 
 ### `GET /api/companies`
 
@@ -148,6 +254,75 @@ Query:
 - `companyType`
 - `page`
 - `pageSize`
+
+### `PATCH /api/companies/me`
+
+현재 로그인 사용자의 `companyId` 기준으로 소속 기업 정보를 수정한다. request body의 `companyId`는 받지 않으며, 서버 세션의 소속 기업만 수정한다.
+
+Request:
+
+```json
+{
+  "name": "A기업",
+  "businessRegistrationNo": "123-45-67890",
+  "companyType": "법인",
+  "representativeName": "김대표",
+  "address": "서울시 강남구",
+  "contactPhone": "02-0000-0000",
+  "contactEmail": "contact@example.com"
+}
+```
+
+Response data:
+
+```json
+{
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "name": "홍길동",
+    "role": "companyUser",
+    "companyId": "uuid"
+  },
+  "company": {
+    "id": "uuid",
+    "name": "A기업",
+    "businessRegistrationNo": "123-45-67890",
+    "companyType": "법인",
+    "representativeName": "김대표",
+    "address": "서울시 강남구",
+    "contactPhone": "02-0000-0000",
+    "contactEmail": "contact@example.com",
+    "status": "active",
+    "logoUrl": "http://localhost:3000/uploads/company-logos/logo.png"
+  },
+  "member": {
+    "id": "uuid",
+    "name": "홍길동",
+    "department": "사업개발팀",
+    "position": "과장",
+    "email": "user@example.com",
+    "phone": "010-0000-0000"
+  }
+}
+```
+
+### `POST /api/companies/me/logo`
+
+현재 로그인 사용자의 소속 기업 로고를 업로드한다.
+
+Request:
+
+```text
+multipart/form-data
+logo=<회사 로고 이미지>
+```
+
+Validation:
+
+- 최대 2MB
+- 허용 MIME type: `image/png`, `image/jpeg`, `image/webp`, `image/gif`
+- 서버 세션의 `companyId` 기준으로만 저장
 
 ## 5. Company Relationships
 
@@ -219,18 +394,24 @@ Request:
 {
   "noticeNumber": "2026-0001",
   "title": "차세대 시스템 구축",
-  "buyerCompanyId": "uuid",
-  "internalOwnerMemberId": "uuid",
+  "buyerName": "소방청",
   "procurementType": "public",
   "sourceType": "nara",
   "sourceUrl": "https://example.com/notice",
-  "category": "IT",
+  "category": "Java, Spring Boot, MSA",
   "budget": 100000000,
   "publishedAt": "2026-06-01",
   "deadline": "2026-06-30",
-  "description": "공고 설명"
+  "status": "draft",
+  "description": "투입 시작 예정일: 2026-07-01\n\n예상 투입 기간: 12개월\n\n인력추천 분석 기준:\nJava/Spring Boot 경력 우선"
 }
 ```
+
+서버 처리 기준:
+
+- `buyerName`으로 발주처 기업을 찾고, 없으면 `companies`에 발주처 기업을 생성한다.
+- 현재 로그인 사용자의 `companyId`와 발주처 기업 사이에 `bid_participation` 관계를 생성하거나 갱신한다.
+- `buyerCompanyId`, `internalOwnerMemberId`, `companyId`, `role`처럼 권한이나 소속을 결정하는 값은 클라이언트 요청값으로 받지 않는다.
 
 ## 7. RFP Files And Analyses
 

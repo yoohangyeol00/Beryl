@@ -1,9 +1,20 @@
-import { Bell, CircleHelp, Search, UserRound } from 'lucide-react';
+import { Bell, Building2, CircleHelp, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.png';
+import { useAuth } from '../../features/auth/AuthContext';
 import { Input } from '../ui/Input';
 
 export function Header() {
+  const { session: authSession } = useAuth();
+
+  const userName = authSession?.user.name ?? '사용자';
+  const companyName = authSession?.company?.name ?? '소속 기업';
+  const logoUrl = authSession?.company?.logoUrl;
+  const position = authSession?.member?.position;
+  const department = authSession?.member?.department;
+  const title = position ? `${userName} ${position}` : userName;
+  const subtitle = [companyName, department].filter(Boolean).join(' · ');
+
   return (
     <header className="fixed left-0 right-0 top-0 z-50 flex h-20 items-center bg-surface-container-lowest">
       <div className="hidden h-full w-80 shrink-0 items-center border-r border-outline-variant px-6 lg:flex">
@@ -27,11 +38,15 @@ export function Header() {
           <div className="h-8 w-px bg-outline-variant" />
           <Link to="/mypage" className="flex items-center gap-4 rounded-xl px-2 py-1 hover:bg-surface-container">
             <div className="text-right">
-              <p className="font-label text-label-md text-on-surface">김관리 팀장</p>
-              <p className="text-xs text-on-surface-variant">BERYL 관리자</p>
+              <p className="max-w-48 truncate font-label text-label-md text-on-surface">{title}</p>
+              <p className="max-w-48 truncate text-xs text-on-surface-variant">{subtitle || '회원 정보'}</p>
             </div>
-            <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary text-on-primary">
-              <UserRound className="h-6 w-6" />
+            <div className="grid h-12 w-12 place-items-center overflow-hidden rounded-xl bg-surface-container-lowest p-1.5 text-primary">
+              {logoUrl ? (
+                <img src={logoUrl} alt={`${companyName} 로고`} className="h-full w-full object-contain" />
+              ) : (
+                <Building2 className="h-6 w-6" />
+              )}
             </div>
           </Link>
         </div>

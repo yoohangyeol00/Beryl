@@ -1,6 +1,6 @@
-exports.shorthands = undefined;
+export const shorthands = undefined;
 
-exports.up = (pgm) => {
+export function up(pgm) {
   pgm.createTable('health_checks', {
     id: 'id',
     created_at: {
@@ -9,8 +9,8 @@ exports.up = (pgm) => {
       default: pgm.func('current_timestamp')
     }
   });
-};
+}
 
-exports.down = (pgm) => {
+export function down(pgm) {
   pgm.dropTable('health_checks');
-};
+}

@@ -33,6 +33,8 @@
 
 - 일반 사용자 권한은 `companyUser`를 기본으로 본다.
 - 시스템 운영자는 `systemAdmin`으로 구분한다.
+- `systemAdmin`은 일반 회원가입으로 생성하지 않고, 필요 시 프로그램 초기 설정, seed, 운영 스크립트 등 별도 경로로 생성한다.
+- 회원가입 request에서 role 값을 받지 않는다.
 - 발주/공급은 로그인 role이 아니라 기업 간 거래 관계와 화면 관점으로 판단한다.
 
 ### REQ-ROLE-002: 시스템 관리자 범위
@@ -54,6 +56,7 @@
 - `/dashboard/supplier`는 현재 기업의 공급 관점 현황을 보여준다.
 - `/jobs`, `/jobs/:jobId`, `/offers/:offerId/analysis`는 현재 기업과 관련된 공고/RFP/매칭 흐름을 보여준다.
 - `/suppliers`, `/projects/won`, `/manpower`는 현재 기업의 거래 관계, 수주 사업, 투입 인력 흐름과 연결되어야 한다.
+- `/dashboard/admin`은 시스템 관리자 관점의 전체 운영 현황을 보여준다.
 
 ### REQ-ROLE-004: 관점 전환
 
@@ -103,24 +106,32 @@
 - `/login`
 - `/signup`
 - `/jobs`
+- `/jobs/new`
 - `/jobs/:jobId`
 - `/resumes/:resumeId`
 - `/offers/:offerId/analysis`
+- `/dashboard/admin`
 - `/dashboard/agency`
 - `/dashboard/supplier`
 - `/agencies`
 - `/agencies/new`
 - `/agencies/:agencyId/edit`
+- `/agency-organizations`
+- `/agency-staff`
+- `/bid-participation`
+- `/clients`
 - `/suppliers`
 - `/suppliers/new`
 - `/suppliers/:supplierId/edit`
+- `/suppliers/:supplierId`
 - `/projects/won`
+- `/projects/won/:projectId`
 - `/manpower`
 
 수용 기준:
 
-- `/`는 `/jobs`로 이동한다.
-- `/dashboard`는 `/dashboard/agency`로 이동한다.
+- 현재 구현 기준으로 `/`는 `/dashboard/admin`으로 이동한다.
+- 현재 구현 기준으로 `/dashboard`는 `/dashboard/admin`으로 이동한다.
 - 라우트 변경은 관련 문서와 함께 갱신되어야 한다.
 
 ### REQ-SCR-003: 상태 화면
@@ -578,7 +589,7 @@ RFP/제안요청서/과업지시서 원문 파일은 저장 대상이다. 파일
 
 ### REQ-NF-003: 확장성
 
-MVP 이후 인증, DB, 외부 조달 시스템 연동, RFP 분석 서비스를 추가할 수 있어야 한다.
+MVP 이후 인증/권한 고도화, 외부 조달 시스템 연동, 실제 RFP 분석 서비스를 추가할 수 있어야 한다. DB와 핵심 CRUD API는 MVP 범위에 포함한다.
 
 수용 기준:
 

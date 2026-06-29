@@ -98,7 +98,11 @@ export function JobListPage() {
       <PageTitle
         title="사업공고 발굴"
         description="외부 입찰공고를 API/크롤링으로 수집하고, 당사 인력으로 제안 가능한 사업을 선별합니다."
-        actions={<Button icon={<RefreshCw className="h-4 w-4" />}>공고 수집</Button>}
+        actions={
+          <Button icon={<RefreshCw className="h-4 w-4" />} onClick={() => navigate('/jobs/new')}>
+            공고 수집
+          </Button>
+        }
       />
 
       <div className="mb-6 grid gap-4 md:grid-cols-4">

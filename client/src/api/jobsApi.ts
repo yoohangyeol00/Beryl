@@ -2,7 +2,22 @@ import { axiosInstance, requestWithMockFallback } from './axios';
 import type { ApiResponse } from './apiResponse';
 import { unwrapApiResponse } from './apiResponse';
 import { mockJobDetailResponse, mockJobsResponse } from '../mocks/jobs.mock';
-import type { JobDetail, JobList } from '../types/job';
+import type { JobDetail, JobList, JobStatus } from '../types/job';
+
+export interface CreateJobRequest {
+  title: string;
+  noticeNumber?: string;
+  buyerName: string;
+  category?: string;
+  budget?: number;
+  procurementType?: 'public' | 'private';
+  sourceType?: 'nara' | 'private_bid' | 'manual' | 'email' | 'other';
+  sourceUrl?: string;
+  publishedAt?: string;
+  deadline?: string;
+  status?: JobStatus;
+  description?: string;
+}
 
 export async function getJobs() {
   return requestWithMockFallback<JobList>({
@@ -22,4 +37,9 @@ export async function getJobDetail(jobId: string) {
     },
     mock: () => unwrapApiResponse(mockJobDetailResponse)
   });
+}
+
+export async function createJob(payload: CreateJobRequest) {
+  const response = await axiosInstance.post<ApiResponse<JobDetail>>('/jobs', payload);
+  return unwrapApiResponse(response.data);
 }
