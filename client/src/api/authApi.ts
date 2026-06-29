@@ -23,6 +23,8 @@ export interface AuthCompany {
   contactEmail: string | null;
   status: string | null;
   logoUrl: string | null;
+  supportsBuyer: boolean;
+  supportsSupplier: boolean;
 }
 
 export interface AuthMember {
@@ -53,6 +55,8 @@ export interface SignupRequest {
   company: {
     name: string;
     businessRegistrationNo?: string;
+    supportsBuyer: boolean;
+    supportsSupplier: boolean;
   };
 }
 

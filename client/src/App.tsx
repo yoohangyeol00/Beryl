@@ -3,7 +3,7 @@ import { Navigate, RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { AuthLayout } from './layouts/AuthLayout';
 import { MainLayout } from './layouts/MainLayout';
 import { AuthProvider } from './features/auth/AuthContext';
-import { ProtectedRoute, PublicOnlyRoute } from './features/auth/components/AuthRouteGuards';
+import { ProtectedRoute, PublicOnlyRoute } from './features/auth/routes/AuthRouteGuards';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { SignupPage } from './features/auth/pages/SignupPage';
 import { AgenciesPage } from './features/agencies/pages/AgenciesPage';
@@ -55,6 +55,7 @@ const router = createBrowserRouter([
           { path: 'mypage', element: <MyPage /> },
           { path: 'jobs', element: <JobListPage /> },
           { path: 'jobs/new', element: <JobCreatePage /> },
+          { path: 'jobs/:jobId/edit', element: <JobCreatePage /> },
           { path: 'jobs/:jobId', element: <JobDetailPage /> },
           { path: 'resumes/:resumeId', element: <ResumeDetailPage /> },
           { path: 'offers/:offerId/analysis', element: <OfferAnalysisPage /> },

@@ -1,29 +1,30 @@
-﻿import { Calendar, FilePlus2, Paperclip, Save, Sparkles } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Calendar, FilePlus2, Paperclip, Save, Sparkles } from 'lucide-react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
-import { createJob } from '../../../api/jobsApi';
+import { createJob, updateJob, type CreateJobRequest } from '../../../api/jobsApi';
+import { LoadingState } from '../../../components/common/LoadingState';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
+import { useJobDetail } from '../hooks/useJobDetail';
 
-const checklist = [
-  '사업 기본 정보 확인',
-  'RFP 및 첨부파일 등록',
-  '제안 마감/평가 일정 입력',
-  '평가 기준과 배점 검토',
-  '공개 범위와 담당자 지정'
-];
+type SourceType = NonNullable<CreateJobRequest['sourceType']>;
+
+const checklist = ['사업 기본 정보 확인', 'RFP 및 첨부파일 등록', '제안 마감/평가 일정 입력', '평가 기준과 배점 검토', '공개 범위와 담당자 지정'];
 
 export function JobCreatePage() {
   const navigate = useNavigate();
+  const { jobId } = useParams();
+  const isEditMode = Boolean(jobId);
+  const { data: job, isLoading: isDetailLoading, isError: isDetailError, error: detailError } = useJobDetail(jobId ?? '');
   const [title, setTitle] = useState('');
   const [noticeNumber, setNoticeNumber] = useState('');
   const [buyerName, setBuyerName] = useState('');
   const [category, setCategory] = useState('');
   const [budget, setBudget] = useState('');
-  const [sourceType, setSourceType] = useState('nara');
+  const [sourceType, setSourceType] = useState<SourceType>('nara');
   const [sourceUrl, setSourceUrl] = useState('');
   const [publishedAt, setPublishedAt] = useState('');
   const [deadline, setDeadline] = useState('');
@@ -33,56 +34,79 @@ export function JobCreatePage() {
   const [expectedDuration, setExpectedDuration] = useState('');
   const [analysisCriteria, setAnalysisCriteria] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    if (!job) return;
+
+    setTitle(job.title);
+    setNoticeNumber(job.noticeNumber);
+    setBuyerName(job.agency);
+    setCategory(job.category);
+    setBudget(job.budget ? String(job.budget) : '');
+    setSourceType(job.sourceType ?? 'manual');
+    setSourceUrl(job.sourceUrl ?? '');
+    setPublishedAt(job.publishedAt);
+    setDeadline(job.deadline);
+    setAnalysisCriteria(job.description);
+  }, [job]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMessage('');
     setErrorMessage('');
     setIsSubmitting(true);
 
-    try {
-      const createdJob = await createJob({
-        title,
-        noticeNumber,
-        buyerName,
-        category,
-        budget: parseBudget(budget),
-        procurementType: 'public',
-        sourceType: sourceType as 'nara' | 'private_bid' | 'manual' | 'email' | 'other',
-        sourceUrl,
-        publishedAt,
-        deadline,
-        status: 'draft',
-        description: buildDescription({
-          questionDeadline,
-          evaluationDate,
-          expectedStartDate,
-          expectedDuration,
-          analysisCriteria
-        })
-      });
+    const payload = buildPayload({
+      title,
+      noticeNumber,
+      buyerName,
+      category,
+      budget,
+      sourceType,
+      sourceUrl,
+      publishedAt,
+      deadline,
+      questionDeadline,
+      evaluationDate,
+      expectedStartDate,
+      expectedDuration,
+      analysisCriteria
+    });
 
-      setMessage('공고가 등록되었습니다.');
-      navigate(`/jobs/${createdJob.id}`, { replace: true });
+    try {
+      const savedJob = isEditMode && jobId ? await updateJob(jobId, payload) : await createJob(payload);
+      navigate(`/jobs/${savedJob.id}`, { replace: true });
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error, '공고 등록 중 오류가 발생했습니다.'));
+      setErrorMessage(getApiErrorMessage(error, isEditMode ? '공고 수정 중 오류가 발생했습니다.' : '공고 등록 중 오류가 발생했습니다.'));
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  if (isEditMode && isDetailLoading) {
+    return <LoadingState />;
+  }
+
+  if (isEditMode && isDetailError) {
+    return (
+      <Card className="p-8">
+        <p className="font-semibold text-error">{getApiErrorMessage(detailError, '공고 정보를 불러오지 못했습니다.')}</p>
+      </Card>
+    );
+  }
+
   return (
     <section>
       <PageTitle
-        title="공고 등록/수정"
-        description="기관 발주 사업의 공고 정보, RFP, 평가 기준, 제출 일정을 등록하고 공개 상태를 관리합니다."
+        title={isEditMode ? '공고 수정' : '공고 등록/수집'}
+        description="발주 사업의 공고 정보, RFP, 평가 기준, 제출 일정을 등록하고 관리합니다."
         actions={
           <>
-            <Button variant="secondary" type="button" disabled={isSubmitting}>임시저장</Button>
-            <Button type="submit" form="job-create-form" icon={<Save className="h-4 w-4" />} disabled={isSubmitting}>
-              {isSubmitting ? '등록 중...' : '공고 저장'}
+            <Button variant="secondary" type="button" disabled={isSubmitting} onClick={() => navigate(-1)}>
+              취소
+            </Button>
+            <Button type="submit" form="job-form" icon={<Save className="h-4 w-4" />} disabled={isSubmitting}>
+              {isSubmitting ? '저장 중...' : isEditMode ? '수정 저장' : '공고 저장'}
             </Button>
           </>
         }
@@ -93,13 +117,8 @@ export function JobCreatePage() {
           {errorMessage}
         </div>
       ) : null}
-      {message ? (
-        <div className="mb-6 rounded-lg border border-primary/30 bg-secondary-container px-5 py-4 font-semibold text-primary">
-          {message}
-        </div>
-      ) : null}
 
-      <form id="job-create-form" className="grid gap-8 xl:grid-cols-[1fr_360px]" onSubmit={handleSubmit}>
+      <form id="job-form" className="grid gap-8 xl:grid-cols-[1fr_360px]" onSubmit={handleSubmit}>
         <div className="space-y-8">
           <Card className="p-8">
             <div className="mb-7 flex items-center gap-3 border-b border-outline-variant pb-6">
@@ -107,44 +126,17 @@ export function JobCreatePage() {
               <h2 className="font-headline text-[26px] font-bold">사업 기본 정보</h2>
             </div>
             <div className="grid gap-6 md:grid-cols-2">
-              <Input
-                label="공고명"
-                placeholder="차세대 통합 재난 안전 관리 시스템 구축"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                required
-              />
-              <Input
-                label="공고번호"
-                placeholder="20261012345-00"
-                value={noticeNumber}
-                onChange={(event) => setNoticeNumber(event.target.value)}
-              />
-              <Input
-                label="발주기관"
-                placeholder="소방청"
-                value={buyerName}
-                onChange={(event) => setBuyerName(event.target.value)}
-                required
-              />
-              <Input
-                label="필요 역량"
-                placeholder="Java, Spring Boot, MSA, React"
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
-              />
-              <Input
-                label="추정 예산"
-                placeholder="8,900,000,000 KRW"
-                value={budget}
-                onChange={(event) => setBudget(event.target.value)}
-              />
+              <Input label="공고명" placeholder="차세대 통합 안전 관리 시스템 구축" value={title} onChange={(event) => setTitle(event.target.value)} required />
+              <Input label="공고번호" placeholder="20261012345-00" value={noticeNumber} onChange={(event) => setNoticeNumber(event.target.value)} />
+              <Input label="발주기관" placeholder="소방청" value={buyerName} onChange={(event) => setBuyerName(event.target.value)} required />
+              <Input label="필요 역량" placeholder="Java, Spring Boot, MSA, React" value={category} onChange={(event) => setCategory(event.target.value)} />
+              <Input label="추정 예산" placeholder="8,900,000,000 KRW" value={budget} onChange={(event) => setBudget(event.target.value)} />
               <label className="block">
                 <span className="mb-2 block font-label text-label-sm text-on-surface-variant">수집 경로</span>
                 <select
                   className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body text-[16px] text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim"
                   value={sourceType}
-                  onChange={(event) => setSourceType(event.target.value)}
+                  onChange={(event) => setSourceType(event.target.value as SourceType)}
                 >
                   <option value="nara">나라장터 API</option>
                   <option value="private_bid">민간 입찰</option>
@@ -154,12 +146,7 @@ export function JobCreatePage() {
                 </select>
               </label>
               <div className="md:col-span-2">
-                <Input
-                  label="원문 공고 URL"
-                  placeholder="https://example.com/notice"
-                  value={sourceUrl}
-                  onChange={(event) => setSourceUrl(event.target.value)}
-                />
+                <Input label="원문 공고 URL" placeholder="https://example.com/notice" value={sourceUrl} onChange={(event) => setSourceUrl(event.target.value)} />
               </div>
             </div>
           </Card>
@@ -171,7 +158,7 @@ export function JobCreatePage() {
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               <Input label="공고 시작일" type="date" value={publishedAt} onChange={(event) => setPublishedAt(event.target.value)} />
-              <Input label="제안 마감일시" type="datetime-local" value={deadline} onChange={(event) => setDeadline(event.target.value)} />
+              <Input label="제안 마감일" type="date" value={deadline} onChange={(event) => setDeadline(event.target.value)} />
               <Input label="질의 마감일" type="date" value={questionDeadline} onChange={(event) => setQuestionDeadline(event.target.value)} />
               <Input label="평가 예정일" type="date" value={evaluationDate} onChange={(event) => setEvaluationDate(event.target.value)} />
               <Input label="착수 예정일" type="date" value={expectedStartDate} onChange={(event) => setExpectedStartDate(event.target.value)} />
@@ -209,13 +196,66 @@ export function JobCreatePage() {
             <Sparkles className="mb-4 h-7 w-7" />
             <p className="font-label text-label-md">RFP 분석 준비</p>
             <p className="mt-3 text-[18px] leading-7">
-              RFP를 등록하면 핵심 요구사항, 평가 기준, 공급기업 제안 비교 항목을 자동으로 구조화할 수 있습니다.
+              RFP를 등록하면 핵심 요구사항, 평가 기준, 공급기업 제안 비교 항목을 구조화할 수 있습니다.
             </p>
           </Card>
         </aside>
       </form>
     </section>
   );
+}
+
+function buildPayload({
+  title,
+  noticeNumber,
+  buyerName,
+  category,
+  budget,
+  sourceType,
+  sourceUrl,
+  publishedAt,
+  deadline,
+  questionDeadline,
+  evaluationDate,
+  expectedStartDate,
+  expectedDuration,
+  analysisCriteria
+}: {
+  title: string;
+  noticeNumber: string;
+  buyerName: string;
+  category: string;
+  budget: string;
+  sourceType: SourceType;
+  sourceUrl: string;
+  publishedAt: string;
+  deadline: string;
+  questionDeadline: string;
+  evaluationDate: string;
+  expectedStartDate: string;
+  expectedDuration: string;
+  analysisCriteria: string;
+}): CreateJobRequest {
+  return {
+    title,
+    noticeNumber,
+    buyerName,
+    category,
+    budget: parseBudget(budget),
+    procurementType: 'public',
+    sourceType,
+    sourceUrl,
+    publishedAt,
+    deadline,
+    status: 'draft',
+    description: buildDescription({
+      questionDeadline,
+      evaluationDate,
+      expectedStartDate,
+      expectedDuration,
+      analysisCriteria
+    })
+  };
 }
 
 function parseBudget(value: string) {

@@ -261,6 +261,17 @@ export function MyPage() {
             >
               {isLogoutPending ? '로그아웃 중...' : '로그아웃'}
             </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              icon={<Trash2 className="h-5 w-5" />}
+              className="h-12 w-full rounded-lg border border-error/25 bg-error-container/45 px-4 text-error hover:bg-error-container hover:text-on-error-container"
+              disabled={isLoading || isWithdrawPending}
+              onClick={handleWithdraw}
+            >
+              {isWithdrawPending ? '탈퇴 처리 중...' : '탈퇴하기'}
+            </Button>
+
           </Card>
 
           <Card className="p-7">
@@ -321,17 +332,8 @@ export function MyPage() {
                 />
                 <div className="md:col-span-2">
                   <div className="grid gap-3 md:grid-cols-2 md:items-end">
-                    <Input label="소속 기업" value={companyName} disabled />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      icon={<Trash2 className="h-5 w-5" />}
-                      className="h-12 w-full rounded-lg border border-error/25 bg-error-container/45 px-4 text-error hover:bg-error-container hover:text-on-error-container"
-                      disabled={isLoading || isWithdrawPending}
-                      onClick={handleWithdraw}
-                    >
-                      {isWithdrawPending ? '탈퇴 처리 중...' : '탈퇴하기'}
-                    </Button>
+                    {/* <Input label="소속 기업" value={companyName} disabled /> */}
+
                   </div>
                 </div>
               </div>

@@ -25,6 +25,8 @@ export interface AuthenticatedCompany {
   contactEmail: string | null;
   status: string | null;
   logoUrl: string | null;
+  supportsBuyer: boolean;
+  supportsSupplier: boolean;
 }
 
 export interface AuthenticatedMember {
@@ -75,6 +77,8 @@ interface AuthSessionRow {
   company_contact_email: string | null;
   company_status: string | null;
   company_logo_url: string | null;
+  company_supports_buyer: boolean | null;
+  company_supports_supplier: boolean | null;
   member_id: string | null;
   member_name: string | null;
   member_department: string | null;
@@ -110,6 +114,8 @@ export async function attachAuthContext(req: AuthenticatedRequest, _res: Respons
           c.contact_email as company_contact_email,
           c.status as company_status,
           c.logo_url as company_logo_url,
+          c.supports_buyer as company_supports_buyer,
+          c.supports_supplier as company_supports_supplier,
           cm.id as member_id,
           cm.name as member_name,
           cm.department as member_department,
@@ -158,7 +164,9 @@ export async function attachAuthContext(req: AuthenticatedRequest, _res: Respons
               contactPhone: row.company_contact_phone,
               contactEmail: row.company_contact_email,
               status: row.company_status,
-              logoUrl: row.company_logo_url
+              logoUrl: row.company_logo_url,
+              supportsBuyer: row.company_supports_buyer ?? true,
+              supportsSupplier: row.company_supports_supplier ?? true
             }
           : null,
       member: row.member_id

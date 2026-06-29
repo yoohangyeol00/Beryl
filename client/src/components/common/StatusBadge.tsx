@@ -5,11 +5,11 @@ type StatusBadgeProps = {
 };
 
 const statusMap = {
-  open: { label: '진행중', tone: 'success' },
-  closingSoon: { label: '마감임박', tone: 'danger' },
+  open: { label: '진행 중', tone: 'success' },
+  closingSoon: { label: '마감 임박', tone: 'danger' },
   closed: { label: '마감', tone: 'neutral' },
   awarded: { label: '낙찰', tone: 'success' },
-  draft: { label: '작성중', tone: 'info' }
+  draft: { label: '작성 중', tone: 'info' }
 } as const;
 
 export function StatusBadge({ status }: StatusBadgeProps) {

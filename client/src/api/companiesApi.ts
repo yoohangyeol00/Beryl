@@ -11,6 +11,8 @@ export interface UpdateMyCompanyRequest {
   address?: string;
   contactPhone?: string;
   contactEmail?: string;
+  supportsBuyer?: boolean;
+  supportsSupplier?: boolean;
 }
 
 export async function updateMyCompany(payload: UpdateMyCompanyRequest) {

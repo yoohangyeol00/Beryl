@@ -32,6 +32,8 @@ interface UserRow {
   company_contact_email: string | null;
   company_status: string | null;
   company_logo_url: string | null;
+  company_supports_buyer: boolean | null;
+  company_supports_supplier: boolean | null;
   member_id: string | null;
   member_name: string | null;
   member_department: string | null;
@@ -51,6 +53,8 @@ interface CompanyResponse {
   contactEmail: string | null;
   status: string | null;
   logoUrl: string | null;
+  supportsBuyer: boolean;
+  supportsSupplier: boolean;
 }
 
 interface MemberResponse {
@@ -88,6 +92,10 @@ function getString(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+function getBoolean(value: unknown): boolean {
+  return value === true;
+}
+
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
@@ -117,7 +125,9 @@ function toAuthResponse(row: UserRow): AuthResponse {
             contactPhone: row.company_contact_phone,
             contactEmail: row.company_contact_email,
             status: row.company_status,
-            logoUrl: row.company_logo_url
+            logoUrl: row.company_logo_url,
+            supportsBuyer: row.company_supports_buyer ?? true,
+            supportsSupplier: row.company_supports_supplier ?? true
           }
         : null,
     member: row.member_id
@@ -153,6 +163,8 @@ async function findUserForAuthResponse(userId: string): Promise<UserRow | null> 
         c.contact_email as company_contact_email,
         c.status as company_status,
         c.logo_url as company_logo_url,
+        c.supports_buyer as company_supports_buyer,
+        c.supports_supplier as company_supports_supplier,
         cm.id as member_id,
         cm.name as member_name,
         cm.department as member_department,
@@ -202,9 +214,16 @@ authRouter.post('/signup', async (req, res, next) => {
   const company = asRecord(body.company);
   const companyName = getString(company.name);
   const businessRegistrationNo = getString(company.businessRegistrationNo) || null;
+  const supportsBuyer = getBoolean(company.supportsBuyer);
+  const supportsSupplier = getBoolean(company.supportsSupplier);
 
   if (!name || !email || !password || !passwordConfirm || !companyName) {
     sendError(res, 400, 'VALIDATION_ERROR', '이름, 이메일, 비밀번호, 기업명은 필수입니다.');
+    return;
+  }
+
+  if (!supportsBuyer && !supportsSupplier) {
+    sendError(res, 400, 'COMPANY_PERSPECTIVE_REQUIRED', '발주기관 또는 공급기관 중 하나 이상을 선택해주세요.');
     return;
   }
 
@@ -250,11 +269,11 @@ authRouter.post('/signup', async (req, res, next) => {
 
     const companyResult = await client.query<{ id: string; name: string }>(
       `
-        insert into companies (name, business_registration_no)
-        values ($1, $2)
+        insert into companies (name, business_registration_no, supports_buyer, supports_supplier)
+        values ($1, $2, $3, $4)
         returning id, name
       `,
-      [companyName, businessRegistrationNo]
+      [companyName, businessRegistrationNo, supportsBuyer, supportsSupplier]
     );
     const createdCompany = companyResult.rows[0];
     const passwordHash = await hashPassword(password);
@@ -325,6 +344,8 @@ authRouter.post('/login', async (req, res, next) => {
           c.contact_email as company_contact_email,
           c.status as company_status,
           c.logo_url as company_logo_url,
+          c.supports_buyer as company_supports_buyer,
+          c.supports_supplier as company_supports_supplier,
           cm.id as member_id,
           cm.name as member_name,
           cm.department as member_department,

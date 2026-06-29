@@ -43,3 +43,13 @@ export async function createJob(payload: CreateJobRequest) {
   const response = await axiosInstance.post<ApiResponse<JobDetail>>('/jobs', payload);
   return unwrapApiResponse(response.data);
 }
+
+export async function updateJob(jobId: string, payload: CreateJobRequest) {
+  const response = await axiosInstance.patch<ApiResponse<JobDetail>>(`/jobs/${jobId}`, payload);
+  return unwrapApiResponse(response.data);
+}
+
+export async function deleteJob(jobId: string) {
+  const response = await axiosInstance.delete<ApiResponse<{ ok: true }>>(`/jobs/${jobId}`);
+  return unwrapApiResponse(response.data);
+}

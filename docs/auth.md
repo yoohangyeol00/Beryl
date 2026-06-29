@@ -156,7 +156,9 @@ Request 후보:
   "passwordConfirm": "password",
   "company": {
     "name": "A기업",
-    "businessRegistrationNo": "123-45-67890"
+    "businessRegistrationNo": "123-45-67890",
+    "supportsBuyer": true,
+    "supportsSupplier": true
   }
 }
 ```
@@ -174,7 +176,10 @@ Response data 후보:
   },
   "company": {
     "id": "uuid",
-    "name": "A기업"
+    "name": "A기업",
+    "businessRegistrationNo": "123-45-67890",
+    "supportsBuyer": true,
+    "supportsSupplier": true
   }
 }
 ```

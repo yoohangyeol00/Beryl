@@ -39,6 +39,8 @@ interface UserRow {
   company_contact_email: string | null;
   company_status: string | null;
   company_logo_url: string | null;
+  company_supports_buyer: boolean | null;
+  company_supports_supplier: boolean | null;
   member_id: string | null;
   member_name: string | null;
   member_department: string | null;
@@ -80,7 +82,9 @@ function toAuthResponse(row: UserRow) {
             contactPhone: row.company_contact_phone,
             contactEmail: row.company_contact_email,
             status: row.company_status,
-            logoUrl: row.company_logo_url
+            logoUrl: row.company_logo_url,
+            supportsBuyer: row.company_supports_buyer ?? true,
+            supportsSupplier: row.company_supports_supplier ?? true
           }
         : null,
     member: row.member_id
@@ -116,6 +120,8 @@ async function findUserForAuthResponse(userId: string): Promise<UserRow | null> 
         c.contact_email as company_contact_email,
         c.status as company_status,
         c.logo_url as company_logo_url,
+        c.supports_buyer as company_supports_buyer,
+        c.supports_supplier as company_supports_supplier,
         cm.id as member_id,
         cm.name as member_name,
         cm.department as member_department,
@@ -154,9 +160,16 @@ companiesRouter.patch('/me', async (req: Request, res: Response, next) => {
   const address = getString(body.address) || null;
   const contactPhone = getString(body.contactPhone) || null;
   const contactEmail = getString(body.contactEmail) || null;
+  const supportsBuyer = typeof body.supportsBuyer === 'boolean' ? body.supportsBuyer : authReq.auth?.company?.supportsBuyer ?? true;
+  const supportsSupplier = typeof body.supportsSupplier === 'boolean' ? body.supportsSupplier : authReq.auth?.company?.supportsSupplier ?? true;
 
   if (!name) {
     sendError(res, 400, 'VALIDATION_ERROR', '기업명은 필수입니다.');
+    return;
+  }
+
+  if (!supportsBuyer && !supportsSupplier) {
+    sendError(res, 400, 'COMPANY_PERSPECTIVE_REQUIRED', '발주기관 또는 공급기관 중 하나 이상을 선택해주세요.');
     return;
   }
 
@@ -183,10 +196,23 @@ companiesRouter.patch('/me', async (req: Request, res: Response, next) => {
             address = $5,
             contact_phone = $6,
             contact_email = $7,
+            supports_buyer = $8,
+            supports_supplier = $9,
             updated_at = now()
-        where id = $8
+        where id = $10
       `,
-      [name, businessRegistrationNo, companyType, representativeName, address, contactPhone, contactEmail, companyId]
+      [
+        name,
+        businessRegistrationNo,
+        companyType,
+        representativeName,
+        address,
+        contactPhone,
+        contactEmail,
+        supportsBuyer,
+        supportsSupplier,
+        companyId
+      ]
     );
 
     const nextUser = await findUserForAuthResponse(userId);

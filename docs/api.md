@@ -148,7 +148,9 @@ Request:
   "passwordConfirm": "password",
   "company": {
     "name": "A기업",
-    "businessRegistrationNo": "123-45-67890"
+    "businessRegistrationNo": "123-45-67890",
+    "supportsBuyer": true,
+    "supportsSupplier": true
   }
 }
 ```
@@ -174,7 +176,9 @@ Response data:
     "contactPhone": null,
     "contactEmail": null,
     "status": "active",
-    "logoUrl": null
+    "logoUrl": null,
+    "supportsBuyer": true,
+    "supportsSupplier": true
   },
   "member": {
     "id": "uuid",
@@ -219,7 +223,9 @@ Response data:
     "contactPhone": null,
     "contactEmail": null,
     "status": "active",
-    "logoUrl": null
+    "logoUrl": null,
+    "supportsBuyer": true,
+    "supportsSupplier": true
   },
   "member": {
     "id": "uuid",
@@ -269,7 +275,9 @@ Request:
   "representativeName": "김대표",
   "address": "서울시 강남구",
   "contactPhone": "02-0000-0000",
-  "contactEmail": "contact@example.com"
+  "contactEmail": "contact@example.com",
+  "supportsBuyer": true,
+  "supportsSupplier": true
 }
 ```
 
@@ -294,7 +302,9 @@ Response data:
     "contactPhone": "02-0000-0000",
     "contactEmail": "contact@example.com",
     "status": "active",
-    "logoUrl": "http://localhost:3000/uploads/company-logos/logo.png"
+    "logoUrl": "http://localhost:3000/uploads/company-logos/logo.png",
+    "supportsBuyer": true,
+    "supportsSupplier": true
   },
   "member": {
     "id": "uuid",
@@ -371,6 +381,7 @@ Response data item:
 | `GET` | `/api/jobs/:jobId` | 입찰 공고 상세 조회 |
 | `POST` | `/api/jobs` | 외부 공고 내부 등록 |
 | `PATCH` | `/api/jobs/:jobId` | 내부 관리 정보 수정 |
+| `DELETE` | `/api/jobs/:jobId` | 내부 관리 공고 삭제 |
 
 ### `GET /api/jobs`
 
@@ -385,6 +396,40 @@ Query:
 - `pageSize`
 - `sort`
 - `order`
+
+Response data:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "noticeNumber": "2026-0001",
+      "title": "차세대 시스템 구축",
+      "agency": "소방청",
+      "category": "Java, Spring Boot, MSA",
+      "budget": 100000000,
+      "publishedAt": "2026-06-01",
+      "deadline": "2026-06-30",
+      "status": "draft",
+      "rfpScore": 0,
+      "recommendedPeople": 0
+    }
+  ],
+  "total": 1,
+  "summary": {
+    "open": 0,
+    "closingSoon": 0,
+    "awarded": 0,
+    "avgRfpScore": 0
+  }
+}
+```
+
+조회 범위:
+
+- 현재 로그인 사용자의 `companyId`가 발주처인 공고
+- 현재 로그인 사용자의 `companyId`와 발주처 사이에 활성 `bid_participation` 관계가 있는 공고
 
 ### `POST /api/jobs`
 
@@ -412,6 +457,30 @@ Request:
 - `buyerName`으로 발주처 기업을 찾고, 없으면 `companies`에 발주처 기업을 생성한다.
 - 현재 로그인 사용자의 `companyId`와 발주처 기업 사이에 `bid_participation` 관계를 생성하거나 갱신한다.
 - `buyerCompanyId`, `internalOwnerMemberId`, `companyId`, `role`처럼 권한이나 소속을 결정하는 값은 클라이언트 요청값으로 받지 않는다.
+
+### `PATCH /api/jobs/:jobId`
+
+Request body는 `POST /api/jobs`와 동일한 필드를 사용한다.
+
+권한 기준:
+
+- 현재 로그인 사용자의 `companyId`가 해당 공고의 발주처인 경우 수정 가능하다.
+- 또는 해당 공고의 `internalOwnerMemberId`가 현재 로그인 사용자의 회사 구성원인 경우 수정 가능하다.
+- 클라이언트가 보낸 `companyId`, `role`, `internalOwnerMemberId`는 수정 권한 판단에 사용하지 않는다.
+
+### `DELETE /api/jobs/:jobId`
+
+권한 기준은 `PATCH /api/jobs/:jobId`와 동일하다.
+
+Response data:
+
+```json
+{
+  "ok": true
+}
+```
+
+연결된 RFP, 제안, 계약 정보가 있어 DB 참조 무결성을 깨는 경우 `409 JOB_DELETE_CONFLICT`를 반환한다.
 
 ## 7. RFP Files And Analyses
 
