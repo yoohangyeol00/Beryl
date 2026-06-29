@@ -1,5 +1,6 @@
-import { BarChart3, Check, Code2, Sparkles, TrendingUp } from 'lucide-react';
+﻿import { BarChart3, Check, Code2, ShoppingBasket, Sparkles, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { Badge } from '../../../components/ui/Badge';
@@ -34,7 +35,9 @@ const analyses = {
     stack: '90%',
     publicExp: '85%',
     availabilityScore: '100%',
-    similar: '80%'
+    similar: '80%',
+    rate: '78%',
+    risk: '86%'
   },
   'match-42c9e7': {
     name: '이서연',
@@ -47,7 +50,9 @@ const analyses = {
     stack: '88%',
     publicExp: '76%',
     availabilityScore: '82%',
-    similar: '78%'
+    similar: '78%',
+    rate: '84%',
+    risk: '80%'
   },
   'match-a71d04': {
     name: '박지훈',
@@ -60,7 +65,9 @@ const analyses = {
     stack: '86%',
     publicExp: '72%',
     availabilityScore: '100%',
-    similar: '66%'
+    similar: '66%',
+    rate: '82%',
+    risk: '74%'
   },
   'match-d03b88': {
     name: '최민서',
@@ -73,13 +80,17 @@ const analyses = {
     stack: '74%',
     publicExp: '70%',
     availabilityScore: '85%',
-    similar: '68%'
+    similar: '68%',
+    rate: '76%',
+    risk: '62%'
   }
 } as const;
 
 export function OfferAnalysisPage() {
   const { offerId = 'match-8f3a21' } = useParams();
   const analysis = analyses[offerId as keyof typeof analyses] ?? analyses['match-8f3a21'];
+  const [isAdded, setIsAdded] = useState(false);
+
   const columns: DataTableColumn<CompareRow>[] = [
     { key: 'item', header: '평가 항목' },
     { key: 'requirement', header: 'RFP 핵심 요구사항' },
@@ -107,10 +118,20 @@ export function OfferAnalysisPage() {
         actions={
           <>
             <Button variant="secondary">분석 리포트</Button>
-            <Button>제안 후보로 추가</Button>
+            <Button icon={<ShoppingBasket className="h-4 w-4" />} onClick={() => setIsAdded(true)}>{isAdded ? '후보 담김' : '제안 후보로 추가'}</Button>
           </>
         }
       />
+
+      {isAdded ? (
+        <Card className="mb-6 flex items-center justify-between gap-4 border-primary bg-primary/5 p-5">
+          <div>
+            <strong className="text-primary">{analysis.name} 후보가 제안 후보군에 추가됐습니다.</strong>
+            <p className="mt-1 text-sm text-on-surface-variant">공고 상세의 제안 후보군에서 제안서 초안 생성으로 이어갈 수 있습니다.</p>
+          </div>
+          <Badge tone="success">Ready</Badge>
+        </Card>
+      ) : null}
 
       <div className="mb-8 grid gap-8 xl:grid-cols-[380px_1fr]">
         <Card className="p-9">
@@ -145,12 +166,13 @@ export function OfferAnalysisPage() {
       </div>
 
       <Card className="mb-8 p-8">
-        <h2 className="mb-8 font-headline text-[28px] font-bold">상세 평가 지표</h2>
-        <div className="grid gap-8 xl:grid-cols-4">
-          <Score icon={<Code2 />} label="기술 스택 일치도" value={analysis.stack} note="핵심 기술 요구사항 기준" />
-          <Score icon={<BarChart3 />} label="공공 사업 경험" value={analysis.publicExp} note="유사 고객사/도메인 이력" />
-          <Score icon={<Check />} label="투입 가용성" value={analysis.availabilityScore} note="착수 예정일과 현재 계약 종료일 기준" />
-          <Score icon={<TrendingUp />} label="유사 프로젝트 실적" value={analysis.similar} note="규모와 역할 유사도 기준" />
+        <h2 className="mb-8 font-headline text-[28px] font-bold">추천 신뢰도 분해</h2>
+        <div className="grid gap-8 xl:grid-cols-5">
+          <Score icon={<Code2 />} label="기술 일치" value={analysis.stack} note="핵심 기술 요구사항 기준" />
+          <Score icon={<BarChart3 />} label="공공 경험" value={analysis.publicExp} note="유사 고객사/도메인 이력" />
+          <Score icon={<Check />} label="가용일" value={analysis.availabilityScore} note="착수일과 계약 종료일 기준" />
+          <Score icon={<Wallet />} label="단가" value={analysis.rate} note="예산 대비 제안 가능성" />
+          <Score icon={<TrendingDown />} label="리스크" value={analysis.risk} note="교체/철수/일정 리스크" />
         </div>
       </Card>
 
@@ -177,3 +199,4 @@ function Score({ icon, label, value, note }: { icon: ReactNode; label: string; v
     </div>
   );
 }
+

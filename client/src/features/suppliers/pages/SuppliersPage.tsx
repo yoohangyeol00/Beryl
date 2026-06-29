@@ -1,55 +1,228 @@
-import { Building2, PlusCircle } from 'lucide-react';
+import { Building2, PlusCircle, ShieldCheck, Star, Users } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { PageToolbar } from '../../../components/common/PageToolbar';
+import { MetricCard } from '../../../components/common/MetricCard';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
+import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
+import { Modal } from '../../../components/ui/Modal';
 
-type ClientCompany = {
+type RoleMode = 'agency' | 'supplier';
+type SupplierStatus = 'preferred' | 'active' | 'review' | 'watch';
+
+type SupplierCompany = {
   id: string;
   name: string;
-  sector: string;
-  manager: string;
-  activePeople: number;
-  activeProjects: number;
-  nextEndDate: string;
-  status: '운영중' | '연장협의' | '휴면';
+  specialty: string;
+  contact: string;
+  grade: string;
+  proposalCount: number;
+  winRate: number;
+  evaluation: number;
+  tags: string;
+  status: SupplierStatus;
 };
 
-const clients: ClientCompany[] = [
-  { id: 'client-1', name: '소방청', sector: '공공/재난안전', manager: '김민준', activePeople: 6, activeProjects: 2, nextEndDate: '2026-09-30', status: '운영중' },
-  { id: 'client-2', name: '행정안전부', sector: '공공/디지털정부', manager: '이서연', activePeople: 4, activeProjects: 1, nextEndDate: '2026-08-15', status: '연장협의' },
-  { id: 'client-3', name: '한국지능정보사회진흥원', sector: '공공/클라우드', manager: '정하늘', activePeople: 5, activeProjects: 2, nextEndDate: '2026-07-31', status: '연장협의' },
-  { id: 'client-4', name: '조달청', sector: '공공/조달', manager: '오지훈', activePeople: 3, activeProjects: 1, nextEndDate: '2026-11-30', status: '운영중' }
+const ko = {
+  agencyTitle: '\uACF5\uAE09\uAE30\uC5C5 \uD480',
+  agencyDesc: '\uBC1C\uC8FC \uC0AC\uC5C5\uC5D0 \uCC38\uC5EC\uD560 \uC218 \uC788\uB294 \uACF5\uAE09\uAE30\uC5C5\uC758 \uC804\uBB38 \uC5ED\uB7C9, \uD3C9\uAC00 \uC774\uB825, \uB0B4\uBD80 \uAD00\uB9AC \uD0DC\uADF8\uB97C \uAD00\uB9AC\uD569\uB2C8\uB2E4.',
+  supplierTitle: '\uAC70\uB798\uCC98 \uAD00\uB9AC',
+  supplierDesc: '\uB2F9\uC0AC\uAC00 \uAC70\uB798\uD558\uB294 \uBC1C\uC8FC\uCC98\uC640 \uC218\uD589 \uC0AC\uC5C5, \uC5F0\uC7A5 \uAC00\uB2A5\uC131\uC744 \uAD00\uB9AC\uD569\uB2C8\uB2E4.',
+  addAgency: '\uACF5\uAE09\uAE30\uC5C5 \uB4F1\uB85D',
+  addSupplier: '\uAC70\uB798\uCC98 \uB4F1\uB85D',
+  total: '\uB4F1\uB85D \uACF5\uAE09\uAE30\uC5C5',
+  preferred: '\uC6B0\uC218 \uD611\uB825\uC0AC',
+  watch: '\uC8FC\uC758 \uAD00\uB9AC',
+  avgScore: '\uD3C9\uADE0 \uD3C9\uAC00\uC810\uC218',
+  capabilityTitle: '\uD480 \uAD6C\uC131 \uC694\uC57D',
+  capabilityDesc: '\uACC4\uC57D/\uC218\uD589 \uD654\uBA74\uC740 \uC0AC\uC5C5 \uC9C4\uD589\uC744 \uBCF4\uACE0, \uC774 \uD654\uBA74\uC740 \uC5C5\uCCB4\uBCC4 \uC5ED\uB7C9\uACFC \uD3C9\uAC00 \uAE30\uB85D\uC744 \uBCF4\uB294 \uACF3\uC785\uB2C8\uB2E4.',
+  riskTitle: '\uAD00\uB9AC \uD0DC\uADF8',
+  riskDesc: '\uC6B0\uC218, \uC8FC\uC758, \uAC80\uD1A0\uC911 \uD0DC\uADF8\uB85C \uC81C\uC548 \uC694\uCCAD\uC774\uB098 \uC6B0\uC120\uD611\uC0C1 \uC2DC \uCC38\uACE0\uD569\uB2C8\uB2E4.',
+  supplierName: '\uACF5\uAE09\uAE30\uC5C5',
+  clientName: '\uAC70\uB798\uCC98/\uBC1C\uC8FC\uCC98',
+  specialty: '\uC804\uBB38 \uC5ED\uC5ED',
+  contact: '\uB300\uD45C \uB2F4\uB2F9\uC790',
+  grade: '\uB0B4\uBD80 \uB4F1\uAE09',
+  proposalCount: '\uCC38\uC5EC \uC81C\uC548',
+  winRate: '\uC120\uC815\uB960',
+  evaluation: '\uCD5C\uADFC \uD3C9\uAC00',
+  tags: '\uAD00\uB9AC \uD0DC\uADF8',
+  status: '\uC0C1\uD0DC',
+  searchAgency: '\uACF5\uAE09\uAE30\uC5C5\uBA85, \uC804\uBB38 \uC5ED\uC5ED, \uD0DC\uADF8 \uAC80\uC0C9',
+  searchSupplier: '\uAC70\uB798\uCC98\uBA85, \uBD84\uC57C, \uB2F4\uB2F9\uC790 \uAC80\uC0C9',
+  allSpecialty: '\uC804\uBB38 \uC5ED\uC5ED \uC804\uCCB4',
+  allStatus: '\uC0C1\uD0DC \uC804\uCCB4',
+  count: '\uAC1C\uC0AC',
+  cases: '\uAC74',
+  point: '\uC810',
+  percent: '%',
+  statusPreferred: '\uC6B0\uC218',
+  statusActive: '\uC6B4\uC601\uC911',
+  statusReview: '\uAC80\uD1A0\uC911',
+  statusWatch: '\uC8FC\uC758',
+  detailTitle: '\uC0C1\uC138 \uC815\uBCF4',
+  projectHistory: '\uCC38\uC5EC/\uC218\uD589 \uC0AC\uC5C5',
+  contactInfo: '\uB2F4\uB2F9\uC790/\uC5F0\uB77D',
+  evaluationMemo: '\uD3C9\uAC00 \uBA54\uBAA8',
+  close: '\uB2EB\uAE30'
+};
+
+const statusLabel: Record<SupplierStatus, string> = {
+  preferred: ko.statusPreferred,
+  active: ko.statusActive,
+  review: ko.statusReview,
+  watch: ko.statusWatch
+};
+
+const suppliers: SupplierCompany[] = [
+  { id: 'supplier-1', name: '\uD14C\uD06C\uBE0C\uB9AC\uC9C0\uCF54\uB9AC\uC544', specialty: '\uACF5\uACF5 SI / \uD074\uB77C\uC6B0\uB4DC', contact: '\uBC15\uB3C4\uD604', grade: 'A', proposalCount: 8, winRate: 63, evaluation: 92, tags: '\uC6B0\uC218, PM \uAC15\uC810', status: 'preferred' },
+  { id: 'supplier-2', name: '\uB125\uC2A4\uD2B8\uC18C\uD504\uD2B8', specialty: '\uB370\uC774\uD130 \uD50C\uB7AB\uD3FC', contact: '\uCD5C\uBBFC\uC11C', grade: 'B+', proposalCount: 5, winRate: 40, evaluation: 84, tags: '\uC0B0\uCD9C\uBB3C \uC548\uC815', status: 'active' },
+  { id: 'supplier-3', name: '\uC5D0\uC774\uC544\uC774\uB7A9\uC2A4', specialty: 'AI / \uBD84\uC11D', contact: '\uC815\uD558\uB298', grade: 'B', proposalCount: 3, winRate: 33, evaluation: 79, tags: '\uC2E0\uADDC \uAC80\uD1A0', status: 'review' },
+  { id: 'supplier-4', name: '\uB3C4\uC2DC\uC815\uBCF4\uAE30\uC220', specialty: 'GIS / \uBAA8\uBC14\uC77C', contact: '\uC774\uC11C\uC5F0', grade: 'C+', proposalCount: 4, winRate: 25, evaluation: 68, tags: '\uC77C\uC815 \uC9C0\uC5F0 \uC774\uB825', status: 'watch' }
 ];
 
-const columns: DataTableColumn<ClientCompany>[] = [
-  { key: 'name', header: '고객사/투입처', render: (row) => <strong className="text-[18px]">{row.name}</strong> },
-  { key: 'sector', header: '분야' },
-  { key: 'manager', header: '당사 담당자' },
-  { key: 'activePeople', header: '투입 인력', align: 'right', render: (row) => `${row.activePeople}명` },
-  { key: 'activeProjects', header: '수행 사업', align: 'right', render: (row) => `${row.activeProjects}건` },
-  { key: 'nextEndDate', header: '최근 종료 예정일' },
-  {
-    key: 'status',
-    header: '관계 상태',
-    render: (row) => <Badge tone={row.status === '운영중' ? 'success' : row.status === '연장협의' ? 'info' : 'neutral'}>{row.status}</Badge>
-  }
-];
+function getInitialRole(): RoleMode {
+  if (typeof window === 'undefined') return 'agency';
+  return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
+}
 
 export function SuppliersPage() {
+  const [role, setRole] = useState<RoleMode>(getInitialRole);
+  const [selectedSupplier, setSelectedSupplier] = useState<SupplierCompany | null>(null);
+  const isAgency = role === 'agency';
+
+  useEffect(() => {
+    const handleRoleChange = (event: Event) => {
+      const nextRole = (event as CustomEvent<RoleMode>).detail;
+      setRole(nextRole === 'supplier' ? 'supplier' : 'agency');
+    };
+    const handleStorage = () => setRole(getInitialRole());
+
+    window.addEventListener('beryl-role-change', handleRoleChange);
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener('beryl-role-change', handleRoleChange);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
+
+  const columns: DataTableColumn<SupplierCompany>[] = [
+    { key: 'name', header: isAgency ? ko.supplierName : ko.clientName, render: (row) => <strong className="text-[18px]">{row.name}</strong>, sortable: true },
+    { key: 'specialty', header: ko.specialty, sortable: true },
+    { key: 'contact', header: ko.contact, sortable: true },
+    { key: 'grade', header: ko.grade, align: 'center', sortable: true },
+    { key: 'proposalCount', header: ko.proposalCount, align: 'right', sortable: true, render: (row) => `${row.proposalCount}${ko.cases}` },
+    { key: 'winRate', header: ko.winRate, align: 'right', sortable: true, render: (row) => `${row.winRate}${ko.percent}` },
+    { key: 'evaluation', header: ko.evaluation, align: 'right', sortable: true, render: (row) => `${row.evaluation}${ko.point}` },
+    { key: 'tags', header: ko.tags, cellClassName: 'whitespace-normal min-w-[180px]' },
+    { key: 'status', header: ko.status, render: (row) => <Badge tone={row.status === 'preferred' ? 'success' : row.status === 'watch' ? 'danger' : row.status === 'review' ? 'info' : 'neutral'}>{statusLabel[row.status]}</Badge> }
+  ];
+
   return (
     <section>
       <PageTitle
-        title="고객사 관리"
-        description="당사 인력이 투입된 고객사와 발주처, 수행 사업, 연장 협의 상태를 관리합니다."
-        actions={<Button icon={<PlusCircle className="h-4 w-4" />}>고객사 등록</Button>}
+        title={isAgency ? ko.agencyTitle : ko.supplierTitle}
+        description={isAgency ? ko.agencyDesc : ko.supplierDesc}
+        actions={<Button icon={<PlusCircle className="h-4 w-4" />}>{isAgency ? ko.addAgency : ko.addSupplier}</Button>}
       />
-      <PageToolbar searchPlaceholder="고객사, 분야, 담당자 검색">
-        <Button variant="secondary" icon={<Building2 className="h-4 w-4" />}>분야 전체</Button>
-        <Button variant="secondary">관계 상태 전체</Button>
+
+      {isAgency ? (
+        <>
+          <div className="mb-6 grid gap-4 md:grid-cols-4">
+            <MetricCard label={ko.total} value={`42${ko.count}`} />
+            <MetricCard label={ko.preferred} value={`12${ko.count}`} />
+            <MetricCard label={ko.watch} value={`4${ko.count}`} tone="danger" />
+            <MetricCard label={ko.avgScore} value={`84${ko.point}`} />
+          </div>
+          <div className="mb-6 grid gap-4 lg:grid-cols-2">
+            <Card className="p-5">
+              <div className="mb-3 flex items-center gap-3">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                <h2 className="font-headline text-[22px] font-bold">{ko.capabilityTitle}</h2>
+              </div>
+              <p className="text-sm leading-6 text-on-surface-variant">{ko.capabilityDesc}</p>
+            </Card>
+            <Card className="p-5">
+              <div className="mb-3 flex items-center gap-3">
+                <Star className="h-5 w-5 text-primary" />
+                <h2 className="font-headline text-[22px] font-bold">{ko.riskTitle}</h2>
+              </div>
+              <p className="text-sm leading-6 text-on-surface-variant">{ko.riskDesc}</p>
+            </Card>
+          </div>
+        </>
+      ) : null}
+
+      <PageToolbar searchPlaceholder={isAgency ? ko.searchAgency : ko.searchSupplier}>
+        <Button variant="secondary" icon={<Building2 className="h-4 w-4" />}>{ko.allSpecialty}</Button>
+        <Button variant="secondary" icon={<Users className="h-4 w-4" />}>{ko.allStatus}</Button>
       </PageToolbar>
-      <DataTable columns={columns} data={clients} getRowKey={(row) => row.id} />
+      <DataTable columns={columns} data={suppliers} getRowKey={(row) => row.id} onRowClick={(row) => setSelectedSupplier(row)} tableClassName="min-w-[1180px] w-full" />
+      <Modal open={selectedSupplier !== null} title={selectedSupplier ? `${selectedSupplier.name} ${ko.detailTitle}` : ko.detailTitle} onClose={() => setSelectedSupplier(null)}>
+        {selectedSupplier ? <SupplierDetailModal supplier={selectedSupplier} /> : null}
+      </Modal>
     </section>
   );
+}
+
+function SupplierDetailModal({ supplier }: { supplier: SupplierCompany }) {
+  const projectRows = [
+    { label: '\uCC28\uC138\uB300 \uD1B5\uD569 \uC7AC\uB09C \uC548\uC804 \uAD00\uB9AC', value: '\uD3C9\uAC00\uC911 / 8.6\uC5B5\uC6D0' },
+    { label: '\uD604\uC7A5 \uB300\uC751 \uBAA8\uBC14\uC77C \uAD00\uC81C', value: '\uC218\uD589\uC911 / 16.4\uC5B5\uC6D0' },
+    { label: '\uC18C\uBC29 \uB370\uC774\uD130 \uD1B5\uD569 \uBD84\uC11D', value: '\uAC80\uC218\uB300\uAE30 / 21.8\uC5B5\uC6D0' }
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
+          <p className="text-sm text-on-surface-variant">{ko.grade}</p>
+          <p className="mt-2 font-headline text-[24px] font-bold text-primary">{supplier.grade}</p>
+        </div>
+        <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
+          <p className="text-sm text-on-surface-variant">{ko.proposalCount}</p>
+          <p className="mt-2 font-headline text-[24px] font-bold text-primary">{supplier.proposalCount}{ko.cases}</p>
+        </div>
+        <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
+          <p className="text-sm text-on-surface-variant">{ko.evaluation}</p>
+          <p className="mt-2 font-headline text-[24px] font-bold text-primary">{supplier.evaluation}{ko.point}</p>
+        </div>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <section>
+          <h3 className="mb-3 font-headline text-[20px] font-bold">{ko.contactInfo}</h3>
+          <dl className="space-y-3 rounded-lg border border-outline-variant p-4">
+            <DetailLine label={ko.specialty} value={supplier.specialty} />
+            <DetailLine label={ko.contact} value={supplier.contact} />
+            <DetailLine label={ko.tags} value={supplier.tags} />
+            <DetailLine label={ko.status} value={statusLabel[supplier.status]} />
+          </dl>
+        </section>
+        <section>
+          <h3 className="mb-3 font-headline text-[20px] font-bold">{ko.projectHistory}</h3>
+          <div className="space-y-2">
+            {projectRows.map((project) => (
+              <div key={project.label} className="rounded-lg border border-outline-variant p-3">
+                <p className="font-semibold">{project.label}</p>
+                <p className="mt-1 text-sm text-on-surface-variant">{project.value}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <section className="rounded-lg bg-primary/5 p-4">
+        <h3 className="mb-2 font-headline text-[20px] font-bold text-primary">{ko.evaluationMemo}</h3>
+        <p className="text-sm leading-6 text-on-surface-variant">{supplier.name}은 {supplier.specialty} 영역의 수행 경험이 누적되어 있으며, 최근 평가 {supplier.evaluation}{ko.point}, 선정률 {supplier.winRate}{ko.percent} 기준으로 다음 공고 제안 요청 시 우선 검토할 수 있습니다.</p>
+      </section>
+    </div>
+  );
+}
+
+function DetailLine({ label, value }: { label: string; value: string }) {
+  return <div className="flex items-center justify-between gap-4"><dt className="text-sm text-on-surface-variant">{label}</dt><dd className="text-right font-semibold text-on-surface">{value}</dd></div>;
 }

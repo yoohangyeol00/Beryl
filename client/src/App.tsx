@@ -13,6 +13,7 @@ import { AdminDashboardPage } from './features/dashboards/pages/AdminDashboardPa
 import { AgencyDashboardPage } from './features/dashboards/pages/AgencyDashboardPage';
 import { SupplierDashboardPage } from './features/dashboards/pages/SupplierDashboardPage';
 import { BidParticipationPage } from './features/bids/pages/BidParticipationPage';
+import { ProposalCreatePage } from './features/proposals/pages/ProposalCreatePage';
 import { JobDetailPage } from './features/jobs/pages/JobDetailPage';
 import { JobCreatePage } from './features/jobs/pages/JobCreatePage';
 import { JobListPage } from './features/jobs/pages/JobListPage';
@@ -57,6 +58,7 @@ const router = createBrowserRouter([
       { path: 'agency-organizations', element: <AgencyOrganizationPage /> },
       { path: 'agency-staff', element: <AgencyStaffPage /> },
       { path: 'bid-participation', element: <BidParticipationPage /> },
+      { path: 'proposals/new', element: <ProposalCreatePage /> },
       { path: 'clients', element: <SuppliersPage /> },
       { path: 'suppliers', element: <SuppliersPage /> },
       { path: 'suppliers/new', element: <SupplierFormPage /> },

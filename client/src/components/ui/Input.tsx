@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode } from 'react';
+﻿import type { InputHTMLAttributes, ReactNode } from 'react';
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   icon?: ReactNode;
@@ -14,7 +14,7 @@ export function Input({ className = '', icon, label, id, ...props }: InputProps)
         <input
           id={id}
           className={[
-            'h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body text-[16px] text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim',
+            'h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body text-[16px] text-on-surface outline-none transition placeholder:text-on-surface-variant focus:border-primary focus:ring-2 focus:ring-primary/25',
             icon ? 'pl-10' : '',
             className
           ].join(' ')}

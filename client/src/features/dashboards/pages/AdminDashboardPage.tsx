@@ -1,4 +1,5 @@
-import { ClipboardCheck, FileSearch, Send, UserCheck } from 'lucide-react';
+﻿import { ClipboardCheck, FileSearch, Send, UserCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { MetricCard } from '../../../components/common/MetricCard';
 import { Card } from '../../../components/ui/Card';
@@ -21,11 +22,11 @@ const actions: ActionRow[] = [
 ];
 
 const columns: DataTableColumn<ActionRow>[] = [
-  { key: 'project', header: '사업/공고' },
-  { key: 'client', header: '고객사/발주처' },
-  { key: 'issue', header: '필요 조치' },
-  { key: 'owner', header: '담당' },
-  { key: 'status', header: '상태', render: (row) => <Badge tone={row.status === '긴급' ? 'danger' : 'info'}>{row.status}</Badge> }
+  { key: 'project', header: '사업/공고', sortable: true },
+  { key: 'client', header: '고객사/발주처', sortable: true },
+  { key: 'issue', header: '필요 조치', sortable: true },
+  { key: 'owner', header: '담당', sortable: true },
+  { key: 'status', header: '상태', sortable: true, render: (row) => <Badge tone={row.status === '긴급' ? 'danger' : 'info'}>{row.status}</Badge> }
 ];
 
 const weeklyCollection = [
@@ -45,16 +46,18 @@ const pipeline = [
 ];
 
 export function AdminDashboardPage() {
+  const navigate = useNavigate();
+
   return (
     <section>
       <PageTitle title="운영 대시보드" description="수집된 입찰공고, 제안 후보, 투입 인력, 계약 종료/연장 리스크를 한 곳에서 확인합니다." />
 
       <div className="mb-6 grid gap-4 md:grid-cols-5">
-        <MetricCard label="신규 수집 공고" value="42건" description="API/크롤링" />
-        <MetricCard label="검토 필요" value="17건" description="마감 14일 이내" tone="danger" />
-        <MetricCard label="제안 진행" value="9건" description="후보 확정 전" />
-        <MetricCard label="투입 인력" value="86명" description="12개 고객사" />
-        <MetricCard label="종료 임박" value="6건" description="30일 이내" tone="danger" />
+        <MetricCard label="신규 수집 공고" value="42건" description="API/크롤링" onClick={() => navigate('/jobs')} />
+        <MetricCard label="검토 필요" value="17건" description="마감 14일 이내" tone="danger" onClick={() => navigate('/jobs?deadline=urgent')} />
+        <MetricCard label="제안 진행" value="9건" description="후보 확정 전" onClick={() => navigate('/bid-participation')} />
+        <MetricCard label="투입 인력" value="86명" description="12개 고객사" onClick={() => navigate('/manpower?status=투입중')} />
+        <MetricCard label="종료 임박" value="6건" description="30일 이내" tone="danger" onClick={() => navigate('/projects/won?extension=낮음')} />
       </div>
 
       <div className="mb-6 grid gap-6 xl:grid-cols-[1fr_1fr]">
@@ -81,7 +84,7 @@ export function AdminDashboardPage() {
           </div>
           <div className="space-y-5">
             {pipeline.map((item) => (
-              <div key={item.label}>
+              <button key={item.label} type="button" className="block w-full rounded text-left focus:outline-none focus:ring-2 focus:ring-primary/25" onClick={() => navigate(item.label === '검토' ? '/jobs?deadline=urgent' : '/jobs')}>
                 <div className="mb-2 flex items-center justify-between text-sm">
                   <span className="font-bold text-on-surface">{item.label}</span>
                   <span className="text-primary">{item.value}건</span>
@@ -89,7 +92,7 @@ export function AdminDashboardPage() {
                 <div className="h-3 rounded-full bg-surface-container">
                   <div className="h-3 rounded-full bg-primary" style={{ width: `${(item.value / 42) * 100}%` }} />
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </Card>
