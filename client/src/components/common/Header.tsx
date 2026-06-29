@@ -1,7 +1,8 @@
-﻿import { Bell, BriefcaseBusiness, ChevronDown, CircleHelp, Menu, Search, ShieldCheck, UserRound, X } from 'lucide-react';
+﻿import { Bell, BriefcaseBusiness, Building2, ChevronDown, CircleHelp, Menu, Search, ShieldCheck, UserRound, X } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
+import { useAuth } from '../../features/auth/AuthContext';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
 
@@ -17,24 +18,33 @@ const roles: { label: string; value: RoleMode }[] = [
 ];
 
 const notifications = [
-  { id: 'n-1', title: '제안 마감 D-3', detail: '차세대 통합 재난 안전 관리 후보 2명 확정 필요', tone: 'danger' as const },
-  { id: 'n-2', title: '후보 미확정', detail: '공공데이터 API 연계 백엔드 후보가 부족합니다.', tone: 'info' as const },
-  { id: 'n-3', title: '계약 종료 30일 전', detail: 'AI 교과서 클라우드 운영 연장 가능성 확인 필요', tone: 'danger' as const },
-  { id: 'n-4', title: 'RFP 분석 실패', detail: '첨부파일 1건이 암호화되어 수동 확인이 필요합니다.', tone: 'info' as const }
+  { id: 'n-1', title: '제안 마감 D-3', detail: '차세대 통합 재난 안전 관리 공고의 제안 접수 마감이 임박했습니다.', tone: 'danger' as const },
+  { id: 'n-2', title: '후보 제안 초안 생성', detail: '공공데이터 API 연계 플랫폼 고도화 건의 초안을 검토할 수 있습니다.', tone: 'info' as const },
+  { id: 'n-3', title: '계약 종료 30일 전', detail: 'AI 디지털 교과서 클라우드 운영 연장 가능성 확인이 필요합니다.', tone: 'danger' as const },
+  { id: 'n-4', title: 'RFP 분석 확인 필요', detail: '첨부파일 1건의 분석 결과를 수동으로 확인해야 합니다.', tone: 'info' as const }
 ];
 
 function getInitialRole(): RoleMode {
   if (typeof window === 'undefined') return 'agency';
-  const savedRole = window.localStorage.getItem('beryl-role-mode');
-  return savedRole === 'supplier' ? 'supplier' : 'agency';
+  return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
 }
 
 export function Header({ onMenuClick }: HeaderProps) {
   const navigate = useNavigate();
+  const { session: authSession } = useAuth();
   const [search, setSearch] = useState('');
   const [role, setRole] = useState<RoleMode>(getInitialRole);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isRoleMenuOpen, setIsRoleMenuOpen] = useState(false);
+
+  const userName = authSession?.user.name ?? '김관리';
+  const companyName = authSession?.company?.name ?? 'BERYL';
+  const logoUrl = authSession?.company?.logoUrl;
+  const position = authSession?.member?.position;
+  const department = authSession?.member?.department;
+  const title = position ? `${userName} ${position}` : userName;
+  const subtitle = [companyName, department || roles.find((item) => item.value === role)?.label].filter(Boolean).join(' · ');
+  const currentRole = roles.find((item) => item.value === role) ?? roles[0];
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -48,8 +58,6 @@ export function Header({ onMenuClick }: HeaderProps) {
     window.dispatchEvent(new CustomEvent('beryl-role-change', { detail: nextRole }));
     navigate(nextRole === 'agency' ? '/dashboard/agency' : '/dashboard/supplier');
   };
-
-  const currentRole = roles.find((item) => item.value === role) ?? roles[0];
 
   return (
     <>
@@ -127,6 +135,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                 </div>
               ) : null}
             </div>
+
             <button
               type="button"
               aria-label="알림"
@@ -142,11 +151,17 @@ export function Header({ onMenuClick }: HeaderProps) {
             <div className="hidden h-8 w-px bg-outline-variant lg:block" />
             <Link to="/mypage" className="flex items-center gap-3 rounded-xl px-2 py-1 hover:bg-surface-container focus:outline-none focus:ring-2 focus:ring-primary/25">
               <div className="hidden text-right lg:block">
-                <p className="font-label text-label-md text-on-surface">김관리 팀장</p>
-                <p className="text-xs text-on-surface-variant">BERYL {currentRole.label}</p>
+                <p className="max-w-48 truncate font-label text-label-md text-on-surface">{title}</p>
+                <p className="max-w-48 truncate text-xs text-on-surface-variant">{subtitle || currentRole.label}</p>
               </div>
-              <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary text-on-primary lg:h-12 lg:w-12">
-                <UserRound className="h-6 w-6" />
+              <div className="grid h-11 w-11 place-items-center overflow-hidden rounded-xl bg-primary p-1.5 text-on-primary lg:h-12 lg:w-12">
+                {logoUrl ? (
+                  <img src={logoUrl} alt={`${companyName} 로고`} className="h-full w-full object-contain" />
+                ) : authSession?.company ? (
+                  <Building2 className="h-6 w-6" />
+                ) : (
+                  <UserRound className="h-6 w-6" />
+                )}
               </div>
             </Link>
           </div>
@@ -160,7 +175,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <div className="flex items-center justify-between border-b border-outline-variant p-5">
               <div>
                 <h2 className="font-headline text-[24px] font-bold">알림 / 해야 할 일</h2>
-                <p className="mt-1 text-sm text-on-surface-variant">마감, 후보, 계약 리스크를 확인합니다.</p>
+                <p className="mt-1 text-sm text-on-surface-variant">마감, 후보 제안, 계약 리스크를 확인합니다.</p>
               </div>
               <button type="button" aria-label="알림 닫기" className="grid h-10 w-10 place-items-center rounded-lg border border-outline-variant" onClick={() => setIsNotificationOpen(false)}>
                 <X className="h-5 w-5" />

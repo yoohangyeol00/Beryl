@@ -330,7 +330,9 @@ erDiagram
 - 일반 사용자는 `company_id`를 가진다.
 - `role` 후보는 `systemAdmin`, `companyUser`다.
 - `systemAdmin`은 전체 기업과 전체 데이터를 볼 수 있다.
+- `systemAdmin`은 일반 회원가입으로 생성하지 않고, 프로그램 초기 설정, seed, 운영 스크립트 같은 별도 경로로 생성한다.
 - `companyUser`는 본인 `company_id` 기준으로 접근 범위를 제한한다.
+- 회원가입 API는 `role` 값을 받지 않으며, 신규 가입 사용자는 `companyUser`로 생성한다.
 
 #### `company_members`
 

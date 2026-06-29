@@ -12,3 +12,4 @@ pnpm-debug.log*
 vite-dev*.log
 .DS_Store
 Thumbs.db
+server/uploads/

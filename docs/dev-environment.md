@@ -11,6 +11,7 @@
 - `AGENTS.md`: 현재 단계와 작업 원칙
 - `docs/spec.md`: 제품, 도메인, API, UI 기준
 - `docs/requirements.md`: 제품/시스템 요구사항 초안
+- `docs/auth.md`: 로그인/회원가입, 권한, 세션 기준
 - `docs/erd.md`: 예상 데이터 모델과 관계
 - `docs/api.md`: API endpoint 상세
 - `docs/stitch/DESIGN.md`: BERYL 디자인 시스템
@@ -40,8 +41,8 @@
 
 - React Router를 기준으로 한다.
 - 라우트 정의 위치는 `client/src/App.tsx`다.
-- `/`는 `/jobs`로 redirect한다.
-- `/dashboard`는 `/dashboard/agency`로 redirect한다.
+- 현재 구현 기준으로 `/`는 `/dashboard/admin`으로 redirect한다.
+- 현재 구현 기준으로 `/dashboard`는 `/dashboard/admin`으로 redirect한다.
 - 기업 기준 접근 제어는 auth 도입 후 route guard로 추가한다.
 
 ### Backend
@@ -70,17 +71,20 @@ route handler에 도메인 로직과 SQL query를 직접 누적하지 않는다.
 
 ### Auth
 
-현재 auth는 구현 전 단계로 본다.
+현재 auth는 구현 전 단계지만, MVP 인증 방식은 httpOnly Cookie 기반 서버 세션 인증으로 확정한다.
 
 권장 방향:
 
-- MVP 초기: mock/session placeholder 허용
-- 이후 확정: server-issued session 또는 JWT 중 하나로 통일
+- 서버가 session을 생성하고 브라우저에는 httpOnly cookie를 발급
+- session 저장소는 PostgreSQL 기반 session store 우선 검토
 - 권한 모델: `systemAdmin`, `companyUser`
+- `systemAdmin`은 일반 회원가입으로 생성하지 않고, 필요 시 프로그램 초기 설정, seed, 운영 스크립트로 생성
 - 발주/공급은 로그인 role이 아니라 현재 기업과 거래 관계의 관점으로 판단
 - client: route guard와 current-company-aware navigation
 - server: 모든 protected API에서 사용자 소속 기업과 접근 대상 기업 관계 검증
 - 비밀번호 저장 시 bcrypt 또는 argon2 계열 password hashing 사용
+- localStorage/sessionStorage에 access token을 저장하지 않음
+- CORS는 cookie 전송을 위해 허용 origin과 `credentials: true`를 명시
 - secret은 `.env`와 배포 secret으로만 관리
 
 인덱싱 단계에서는 auth 라이브러리를 먼저 추가하지 말고 역할 모델과 보호 대상 route/API를 문서화한다.
@@ -202,13 +206,23 @@ API mode:
 
 PostgreSQL에 `beryl` DB를 준비한다.
 
+기본 DB 연결 정보는 다음 값을 기준으로 한다.
+
+```env
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/beryl
+```
+
 예시:
 
 ```powershell
-createdb beryl
+createdb -U postgres -h localhost -p 5432 beryl
 ```
 
-환경에 따라 `createdb` 명령이 없으면 pgAdmin 또는 `psql`로 같은 이름의 DB를 만든다.
+환경에 따라 `createdb` 명령이 없거나 PATH에 잡혀 있지 않으면 pgAdmin에서 `beryl` DB를 만들거나, `psql`로 생성한다.
+
+```powershell
+psql -U postgres -h localhost -p 5432 -c "CREATE DATABASE beryl;"
+```
 
 Migration 실행:
 
@@ -222,7 +236,7 @@ Rollback:
 npm run migrate:down
 ```
 
-현재 migration은 `health_checks` 테이블을 생성한다. seed data는 아직 정의되어 있지 않다.
+현재 저장소 기준 migration은 `health_checks` 테이블을 생성한다. seed data는 아직 정의되어 있지 않다.
 
 ## 8. 로컬 실행
 

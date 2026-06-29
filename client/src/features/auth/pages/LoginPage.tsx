@@ -1,10 +1,42 @@
 import { ArrowRight, BarChart3, LockKeyhole, Mail, ShieldCheck } from 'lucide-react';
+import { useState, type FormEvent } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { login } from '../../../api/authApi';
+import { getApiErrorMessage } from '../../../api/apiResponse';
 import logo from '../../../assets/logo.png';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
+import { useAuth } from '../AuthContext';
 
 export function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { setSession } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    try {
+      const session = await login({
+        email,
+        password
+      });
+      setSession(session);
+      navigate(getRedirectPath(location.state), { replace: true });
+    } catch (error) {
+      setErrorMessage(getLoginErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <section className="relative flex flex-col justify-center overflow-hidden bg-surface-container p-12 lg:p-20">
@@ -39,25 +71,68 @@ export function LoginPage() {
           <h2 className="font-headline text-[40px] font-bold">다시 오신 것을 환영합니다</h2>
           <p className="mb-10 mt-2 text-[18px] text-on-surface-variant">BERYL 계정으로 로그인해 업무를 이어가세요.</p>
           <div className="mb-10 h-1.5 w-1/2 rounded bg-primary-container" />
-          <div className="space-y-7">
-            <Input label="업무 이메일" icon={<Mail className="h-5 w-5" />} placeholder="name@company.com" />
-            <Input label="비밀번호" icon={<LockKeyhole className="h-5 w-5" />} type="password" placeholder="비밀번호를 입력하세요" />
+          <form className="space-y-7" onSubmit={handleSubmit}>
+            <Input
+              label="업무 이메일"
+              icon={<Mail className="h-5 w-5" />}
+              placeholder="name@company.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+              required
+            />
+            <Input
+              label="비밀번호"
+              icon={<LockKeyhole className="h-5 w-5" />}
+              type="password"
+              placeholder="비밀번호를 입력하세요"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="current-password"
+              required
+            />
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 text-on-surface-variant">
                 <input className="rounded border-outline-variant text-primary focus:ring-primary" type="checkbox" />
                 로그인 상태 유지
               </label>
-              <button className="font-label font-semibold text-primary">비밀번호 찾기</button>
+              <button type="button" className="font-label font-semibold text-primary">
+                비밀번호 찾기
+              </button>
             </div>
-            <Button className="h-14 w-full" icon={<ArrowRight className="h-5 w-5" />}>
-              로그인
+            {errorMessage ? (
+              <p className="rounded-lg border border-error/30 bg-error-container px-4 py-3 text-sm font-semibold text-on-error-container">
+                {errorMessage}
+              </p>
+            ) : null}
+            <Button className="h-14 w-full" icon={<ArrowRight className="h-5 w-5" />} disabled={isSubmitting}>
+              {isSubmitting ? '로그인 중...' : '로그인'}
             </Button>
-          </div>
+          </form>
           <p className="mt-12 text-center text-[16px] text-on-surface-variant">
-            계정이 없으신가요? <span className="font-bold text-primary">회원가입</span>
+            계정이 없으신가요?{' '}
+            <Link to="/signup" className="font-bold text-primary">
+              회원가입
+            </Link>
           </p>
         </div>
       </section>
     </div>
   );
+}
+
+function getLoginErrorMessage(error: unknown) {
+  return getApiErrorMessage(error, '로그인 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+}
+
+function getRedirectPath(state: unknown) {
+  if (state && typeof state === 'object' && 'from' in state) {
+    const from = (state as { from?: { pathname?: string } }).from;
+
+    if (from?.pathname && from.pathname !== '/login' && from.pathname !== '/signup') {
+      return from.pathname;
+    }
+  }
+
+  return '/dashboard/admin';
 }

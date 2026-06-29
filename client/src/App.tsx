@@ -1,7 +1,9 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+﻿import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Navigate, RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { AuthLayout } from './layouts/AuthLayout';
 import { MainLayout } from './layouts/MainLayout';
+import { AuthProvider } from './features/auth/AuthContext';
+import { ProtectedRoute, PublicOnlyRoute } from './features/auth/components/AuthRouteGuards';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { SignupPage } from './features/auth/pages/SignupPage';
 import { AgenciesPage } from './features/agencies/pages/AgenciesPage';
@@ -31,42 +33,52 @@ const queryClient = new QueryClient();
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <AuthLayout />,
+    element: <PublicOnlyRoute />,
     children: [
-      { path: 'login', element: <LoginPage /> },
-      { path: 'signup', element: <SignupPage /> }
+      {
+        element: <AuthLayout />,
+        children: [
+          { path: 'login', element: <LoginPage /> },
+          { path: 'signup', element: <SignupPage /> }
+        ]
+      }
     ]
   },
   {
     path: '/',
-    element: <MainLayout />,
+    element: <ProtectedRoute />,
     children: [
-      { index: true, element: <Navigate to="/dashboard/admin" replace /> },
-      { path: 'mypage', element: <MyPage /> },
-      { path: 'jobs', element: <JobListPage /> },
-      { path: 'jobs/new', element: <JobCreatePage /> },
-      { path: 'jobs/:jobId', element: <JobDetailPage /> },
-      { path: 'resumes/:resumeId', element: <ResumeDetailPage /> },
-      { path: 'offers/:offerId/analysis', element: <OfferAnalysisPage /> },
-      { path: 'dashboard', element: <Navigate to="/dashboard/admin" replace /> },
-      { path: 'dashboard/admin', element: <AdminDashboardPage /> },
-      { path: 'dashboard/agency', element: <AgencyDashboardPage /> },
-      { path: 'dashboard/supplier', element: <SupplierDashboardPage /> },
-      { path: 'agencies', element: <AgenciesPage /> },
-      { path: 'agencies/new', element: <AgencyFormPage /> },
-      { path: 'agencies/:agencyId/edit', element: <AgencyFormPage /> },
-      { path: 'agency-organizations', element: <AgencyOrganizationPage /> },
-      { path: 'agency-staff', element: <AgencyStaffPage /> },
-      { path: 'bid-participation', element: <BidParticipationPage /> },
-      { path: 'proposals/new', element: <ProposalCreatePage /> },
-      { path: 'clients', element: <SuppliersPage /> },
-      { path: 'suppliers', element: <SuppliersPage /> },
-      { path: 'suppliers/new', element: <SupplierFormPage /> },
-      { path: 'suppliers/:supplierId/edit', element: <SupplierFormPage /> },
-      { path: 'suppliers/:supplierId', element: <SupplierDetailPage /> },
-      { path: 'projects/won', element: <WonProjectsPage /> },
-      { path: 'projects/won/:projectId', element: <ProjectDetailPage /> },
-      { path: 'manpower', element: <ManpowerPage /> }
+      {
+        element: <MainLayout />,
+        children: [
+          { index: true, element: <Navigate to="/dashboard/admin" replace /> },
+          { path: 'mypage', element: <MyPage /> },
+          { path: 'jobs', element: <JobListPage /> },
+          { path: 'jobs/new', element: <JobCreatePage /> },
+          { path: 'jobs/:jobId', element: <JobDetailPage /> },
+          { path: 'resumes/:resumeId', element: <ResumeDetailPage /> },
+          { path: 'offers/:offerId/analysis', element: <OfferAnalysisPage /> },
+          { path: 'dashboard', element: <Navigate to="/dashboard/admin" replace /> },
+          { path: 'dashboard/admin', element: <AdminDashboardPage /> },
+          { path: 'dashboard/agency', element: <AgencyDashboardPage /> },
+          { path: 'dashboard/supplier', element: <SupplierDashboardPage /> },
+          { path: 'agencies', element: <AgenciesPage /> },
+          { path: 'agencies/new', element: <AgencyFormPage /> },
+          { path: 'agencies/:agencyId/edit', element: <AgencyFormPage /> },
+          { path: 'agency-organizations', element: <AgencyOrganizationPage /> },
+          { path: 'agency-staff', element: <AgencyStaffPage /> },
+          { path: 'bid-participation', element: <BidParticipationPage /> },
+          { path: 'proposals/new', element: <ProposalCreatePage /> },
+          { path: 'clients', element: <SuppliersPage /> },
+          { path: 'suppliers', element: <SuppliersPage /> },
+          { path: 'suppliers/new', element: <SupplierFormPage /> },
+          { path: 'suppliers/:supplierId/edit', element: <SupplierFormPage /> },
+          { path: 'suppliers/:supplierId', element: <SupplierDetailPage /> },
+          { path: 'projects/won', element: <WonProjectsPage /> },
+          { path: 'projects/won/:projectId', element: <ProjectDetailPage /> },
+          { path: 'manpower', element: <ManpowerPage /> }
+        ]
+      }
     ]
   }
 ]);
@@ -74,7 +86,9 @@ const router = createBrowserRouter([
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

@@ -1,10 +1,51 @@
-import { ArrowRight, BarChart3, LockKeyhole, Mail, ShieldCheck, User } from 'lucide-react';
+import { ArrowRight, BarChart3, Building2, IdCard, LockKeyhole, Mail, ShieldCheck, User } from 'lucide-react';
+import { useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { signup } from '../../../api/authApi';
+import { getApiErrorMessage } from '../../../api/apiResponse';
 import logo from '../../../assets/logo.png';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
+import { useAuth } from '../AuthContext';
 
 export function SignupPage() {
+  const navigate = useNavigate();
+  const { setSession } = useAuth();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [businessRegistrationNo, setBusinessRegistrationNo] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    try {
+      const session = await signup({
+        name,
+        email,
+        password,
+        passwordConfirm,
+        company: {
+          name: companyName,
+          businessRegistrationNo: businessRegistrationNo || undefined
+        }
+      });
+      setSession(session);
+      navigate('/dashboard/admin', { replace: true });
+    } catch (error) {
+      setErrorMessage(getSignupErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <section className="relative flex flex-col justify-center overflow-hidden bg-surface-container p-12 lg:p-20">
@@ -41,20 +82,82 @@ export function SignupPage() {
             <div className="h-1.5 flex-1 rounded bg-primary-container" />
             <div className="h-1.5 flex-1 rounded bg-surface-container-highest" />
           </div>
-          <div className="space-y-7">
-            <Input label="이름" icon={<User className="h-5 w-5" />} placeholder="홍길동" />
-            <Input label="업무 이메일" icon={<Mail className="h-5 w-5" />} placeholder="name@company.com" />
-            <Input label="비밀번호" icon={<LockKeyhole className="h-5 w-5" />} type="password" placeholder="비밀번호를 입력하세요" />
-            <Input label="비밀번호 확인" icon={<LockKeyhole className="h-5 w-5" />} type="password" placeholder="비밀번호를 다시 입력하세요" />
-            <Button className="h-14 w-full" icon={<ArrowRight className="h-5 w-5" />}>
-              다음: 조직 정보 입력
+          <form className="space-y-7" onSubmit={handleSubmit}>
+            <Input
+              label="이름"
+              icon={<User className="h-5 w-5" />}
+              placeholder="홍길동"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              autoComplete="name"
+              required
+            />
+            <Input
+              label="업무 이메일"
+              icon={<Mail className="h-5 w-5" />}
+              placeholder="name@company.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+              required
+            />
+            <Input
+              label="비밀번호"
+              icon={<LockKeyhole className="h-5 w-5" />}
+              type="password"
+              placeholder="비밀번호를 입력하세요"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              autoComplete="new-password"
+              required
+            />
+            <Input
+              label="비밀번호 확인"
+              icon={<LockKeyhole className="h-5 w-5" />}
+              type="password"
+              placeholder="비밀번호를 다시 입력하세요"
+              value={passwordConfirm}
+              onChange={(event) => setPasswordConfirm(event.target.value)}
+              autoComplete="new-password"
+              required
+            />
+            <Input
+              label="기업명"
+              icon={<Building2 className="h-5 w-5" />}
+              placeholder="A기업"
+              value={companyName}
+              onChange={(event) => setCompanyName(event.target.value)}
+              autoComplete="organization"
+              required
+            />
+            <Input
+              label="사업자등록번호"
+              icon={<IdCard className="h-5 w-5" />}
+              placeholder="123-45-67890"
+              value={businessRegistrationNo}
+              onChange={(event) => setBusinessRegistrationNo(event.target.value)}
+            />
+            {errorMessage ? (
+              <p className="rounded-lg border border-error/30 bg-error-container px-4 py-3 text-sm font-semibold text-on-error-container">
+                {errorMessage}
+              </p>
+            ) : null}
+            <Button className="h-14 w-full" icon={<ArrowRight className="h-5 w-5" />} disabled={isSubmitting}>
+              {isSubmitting ? '가입 중...' : '계정 만들기'}
             </Button>
-          </div>
+          </form>
           <p className="mt-12 text-center text-[16px] text-on-surface-variant">
-            이미 계정이 있으신가요? <span className="font-bold text-primary">로그인으로 돌아가기</span>
+            이미 계정이 있으신가요?{' '}
+            <Link to="/login" className="font-bold text-primary">
+              로그인으로 돌아가기
+            </Link>
           </p>
         </div>
       </section>
     </div>
   );
+}
+
+function getSignupErrorMessage(error: unknown) {
+  return getApiErrorMessage(error, '회원가입 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
 }
