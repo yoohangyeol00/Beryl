@@ -93,6 +93,34 @@ function getCertificationExtension(mimeType: string): string | null {
   return allowedCertificationTypes.get(mimeType) ?? null;
 }
 
+function getRelationshipPayload(bodyValue: unknown) {
+  const body = asRecord(bodyValue);
+  const company = asRecord(body.company);
+  const contact = asRecord(body.contact);
+  const relationship = asRecord(body.relationship);
+
+  return {
+    companyName: getString(company.name),
+    businessRegistrationNo: getString(company.businessRegistrationNo) || null,
+    companyType: getString(company.companyType) || null,
+    representativeName: getString(company.representativeName) || null,
+    websiteUrl: getString(company.websiteUrl) || null,
+    address: getString(company.address) || null,
+    contactName: getString(contact.name),
+    contactDepartment: getString(contact.department) || null,
+    contactPosition: getString(contact.position) || null,
+    contactEmail: getString(contact.email) || null,
+    contactPhone: getString(contact.phone) || null,
+    capabilities: getStringArray(body.capabilities),
+    certifications: getStringArray(body.certifications),
+    internalGrade: getString(relationship.internalGrade) || null,
+    managementStatus: getManagementStatus(relationship.managementStatus) ?? 'active',
+    tags: getString(relationship.tags) || null,
+    memo: getString(relationship.memo) || null,
+    relationshipType: getString(relationship.relationshipType) || 'preferred_partner'
+  };
+}
+
 function toRelationshipResponse(row: CompanyRelationshipRow) {
   return {
     id: row.id,
@@ -200,29 +228,26 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
   const authReq = req as AuthenticatedRequest;
   const currentCompanyId = getCurrentCompanyId(authReq);
   const currentUserId = getCurrentUserId(authReq);
-  const body = asRecord(req.body);
-  const company = asRecord(body.company);
-  const contact = asRecord(body.contact);
-  const relationship = asRecord(body.relationship);
-
-  const companyName = getString(company.name);
-  const businessRegistrationNo = getString(company.businessRegistrationNo) || null;
-  const companyType = getString(company.companyType) || null;
-  const representativeName = getString(company.representativeName) || null;
-  const websiteUrl = getString(company.websiteUrl) || null;
-  const address = getString(company.address) || null;
-  const contactName = getString(contact.name);
-  const contactDepartment = getString(contact.department) || null;
-  const contactPosition = getString(contact.position) || null;
-  const contactEmail = getString(contact.email) || null;
-  const contactPhone = getString(contact.phone) || null;
-  const capabilities = getStringArray(body.capabilities);
-  const certifications = getStringArray(body.certifications);
-  const internalGrade = getString(relationship.internalGrade) || null;
-  const managementStatus = getManagementStatus(relationship.managementStatus) ?? 'active';
-  const tags = getString(relationship.tags) || null;
-  const memo = getString(relationship.memo) || null;
-  const relationshipType = getString(relationship.relationshipType) || 'preferred_partner';
+  const {
+    companyName,
+    businessRegistrationNo,
+    companyType,
+    representativeName,
+    websiteUrl,
+    address,
+    contactName,
+    contactDepartment,
+    contactPosition,
+    contactEmail,
+    contactPhone,
+    capabilities,
+    certifications,
+    internalGrade,
+    managementStatus,
+    tags,
+    memo,
+    relationshipType
+  } = getRelationshipPayload(req.body);
 
   if (!companyName) {
     sendError(res, 400, 'VALIDATION_ERROR', '공급기업명은 필수입니다.');
@@ -363,7 +388,7 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
       );
     }
 
-    await client.query('delete from company_certifications where company_id = $1', [targetCompanyId]);
+    await client.query('delete from company_certifications where company_id = $1 and storage_key is null', [targetCompanyId]);
     for (const certification of certifications) {
       await client.query(
         `
@@ -452,6 +477,261 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
     next(error);
   } finally {
     client.release();
+  }
+});
+
+companyRelationshipsRouter.get('/:relationshipId', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const relationshipId = getString(req.params.relationshipId);
+
+  if (!relationshipId) {
+    sendError(res, 400, 'VALIDATION_ERROR', '공급기업 관계 ID가 필요합니다.');
+    return;
+  }
+
+  try {
+    const relationship = await findRelationship(relationshipId, currentCompanyId);
+
+    if (!relationship) {
+      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', '공급기업 관계 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    sendSuccess(res, toRelationshipResponse(relationship));
+  } catch (error) {
+    next(error);
+  }
+});
+
+companyRelationshipsRouter.patch('/:relationshipId', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const currentUserId = getCurrentUserId(authReq);
+  const relationshipId = getString(req.params.relationshipId);
+  const {
+    companyName,
+    businessRegistrationNo,
+    companyType,
+    representativeName,
+    websiteUrl,
+    address,
+    contactName,
+    contactDepartment,
+    contactPosition,
+    contactEmail,
+    contactPhone,
+    capabilities,
+    certifications,
+    internalGrade,
+    managementStatus,
+    tags,
+    memo,
+    relationshipType
+  } = getRelationshipPayload(req.body);
+
+  if (!relationshipId) {
+    sendError(res, 400, 'VALIDATION_ERROR', '공급기업 관계 ID가 필요합니다.');
+    return;
+  }
+
+  if (!companyName) {
+    sendError(res, 400, 'VALIDATION_ERROR', '공급기업명은 필수입니다.');
+    return;
+  }
+
+  if (relationshipType !== 'preferred_partner' && relationshipType !== 'bid_participation' && relationshipType !== 'contract' && relationshipType !== 'won_project') {
+    sendError(res, 400, 'VALIDATION_ERROR', '지원하지 않는 관계 유형입니다.');
+    return;
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('begin');
+
+    const relationshipResult = await client.query<{ target_company_id: string }>(
+      `
+        select target_company_id
+        from company_relationships
+        where id = $1
+          and source_company_id = $2
+          and source_perspective = 'buyer'
+          and target_perspective = 'supplier'
+          and status = 'active'
+        limit 1
+      `,
+      [relationshipId, currentCompanyId]
+    );
+
+    const targetCompanyId = relationshipResult.rows[0]?.target_company_id;
+
+    if (!targetCompanyId) {
+      await client.query('rollback');
+      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', '공급기업 관계 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    await client.query(
+      `
+        update companies
+        set name = $1,
+            business_registration_no = coalesce($2, business_registration_no),
+            company_type = $3,
+            representative_name = $4,
+            website_url = $5,
+            address = $6,
+            contact_phone = $7,
+            contact_email = $8,
+            supports_supplier = true,
+            updated_at = now()
+        where id = $9
+      `,
+      [companyName, businessRegistrationNo, companyType, representativeName, websiteUrl, address, contactPhone, contactEmail, targetCompanyId]
+    );
+
+    if (contactName) {
+      const existingContact = await client.query<{ id: string }>(
+        `
+          select id
+          from company_members
+          where company_id = $1
+            and member_type = 'contact'
+            and lower(name) = lower($2)
+          limit 1
+        `,
+        [targetCompanyId, contactName]
+      );
+
+      if (existingContact.rows[0]) {
+        await client.query(
+          `
+            update company_members
+            set department = $1,
+                position = $2,
+                email = $3,
+                phone = $4,
+                status = 'active',
+                updated_at = now()
+            where id = $5
+          `,
+          [contactDepartment, contactPosition, contactEmail, contactPhone, existingContact.rows[0].id]
+        );
+      } else {
+        await client.query(
+          `
+            insert into company_members (
+              company_id,
+              name,
+              department,
+              position,
+              email,
+              phone,
+              member_type,
+              status
+            )
+            values ($1, $2, $3, $4, $5, $6, 'contact', 'active')
+          `,
+          [targetCompanyId, contactName, contactDepartment, contactPosition, contactEmail, contactPhone]
+        );
+      }
+    }
+
+    await client.query('delete from company_capabilities where company_id = $1', [targetCompanyId]);
+    for (const capability of capabilities) {
+      await client.query(
+        `
+          insert into company_capabilities (company_id, name, capability_type)
+          values ($1, $2, 'technology')
+          on conflict (company_id, name) do nothing
+        `,
+        [targetCompanyId, capability]
+      );
+    }
+
+    await client.query('delete from company_certifications where company_id = $1 and storage_key is null', [targetCompanyId]);
+    for (const certification of certifications) {
+      await client.query(
+        `
+          insert into company_certifications (company_id, name)
+          values ($1, $2)
+          on conflict (company_id, name) do nothing
+        `,
+        [targetCompanyId, certification]
+      );
+    }
+
+    const ownerMember = await client.query<{ id: string }>('select id from company_members where user_id = $1 limit 1', [currentUserId]);
+    const internalOwnerMemberId = ownerMember.rows[0]?.id ?? null;
+
+    await client.query(
+      `
+        update company_relationships
+        set relationship_type = $1,
+            last_activity_date = current_date,
+            internal_grade = $2,
+            management_status = $3,
+            tags = $4,
+            memo = $5,
+            internal_owner_member_id = $6,
+            updated_at = now()
+        where id = $7
+          and source_company_id = $8
+      `,
+      [relationshipType, internalGrade, managementStatus, tags, memo, internalOwnerMemberId, relationshipId, currentCompanyId]
+    );
+
+    await client.query('commit');
+
+    const savedRelationship = await findRelationship(relationshipId, currentCompanyId);
+
+    if (!savedRelationship) {
+      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', '수정된 공급기업 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    sendSuccess(res, toRelationshipResponse(savedRelationship));
+  } catch (error) {
+    await client.query('rollback');
+    next(error);
+  } finally {
+    client.release();
+  }
+});
+
+companyRelationshipsRouter.delete('/:relationshipId', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const relationshipId = getString(req.params.relationshipId);
+
+  if (!relationshipId) {
+    sendError(res, 400, 'VALIDATION_ERROR', '공급기업 관계 ID가 필요합니다.');
+    return;
+  }
+
+  try {
+    const result = await pool.query(
+      `
+        update company_relationships
+        set status = 'inactive',
+            updated_at = now()
+        where id = $1
+          and source_company_id = $2
+          and source_perspective = 'buyer'
+          and target_perspective = 'supplier'
+          and status = 'active'
+      `,
+      [relationshipId, currentCompanyId]
+    );
+
+    if ((result.rowCount ?? 0) === 0) {
+      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', '공급기업 관계 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    sendSuccess(res, { id: relationshipId });
+  } catch (error) {
+    next(error);
   }
 });
 

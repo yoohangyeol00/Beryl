@@ -91,8 +91,23 @@ export async function getSupplierRelationships(params?: GetSupplierRelationships
   return unwrapApiResponse(response.data);
 }
 
+export async function getSupplierRelationship(relationshipId: string) {
+  const response = await axiosInstance.get<ApiResponse<SupplierRelationship>>(`/company-relationships/${relationshipId}`);
+  return unwrapApiResponse(response.data);
+}
+
 export async function createSupplierRelationship(payload: CreateSupplierRelationshipRequest) {
   const response = await axiosInstance.post<ApiResponse<SupplierRelationship>>('/company-relationships', payload);
+  return unwrapApiResponse(response.data);
+}
+
+export async function updateSupplierRelationship(relationshipId: string, payload: CreateSupplierRelationshipRequest) {
+  const response = await axiosInstance.patch<ApiResponse<SupplierRelationship>>(`/company-relationships/${relationshipId}`, payload);
+  return unwrapApiResponse(response.data);
+}
+
+export async function deleteSupplierRelationship(relationshipId: string) {
+  const response = await axiosInstance.delete<ApiResponse<{ id: string }>>(`/company-relationships/${relationshipId}`);
   return unwrapApiResponse(response.data);
 }
 

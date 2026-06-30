@@ -9,5 +9,8 @@ export const config = {
   publicBaseUrl: process.env.SERVER_PUBLIC_BASE_URL ?? `http://localhost:${Number(process.env.PORT ?? 3000)}`,
   sessionCookieName: process.env.SESSION_COOKIE_NAME ?? 'beryl.sid',
   sessionTtlHours: Number(process.env.SESSION_TTL_HOURS ?? 24),
+  resendApiKey: process.env.RESEND_API_KEY ?? '',
+  invitationFromEmail: process.env.INVITATION_FROM_EMAIL ?? '',
+  invitationTtlHours: Number(process.env.INVITATION_TTL_HOURS ?? 72),
   isProduction: process.env.NODE_ENV === 'production'
 };

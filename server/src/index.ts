@@ -6,6 +6,7 @@ import { config } from './config.js';
 import { pool } from './db.js';
 import { attachAuthContext } from './middleware/auth.js';
 import { authRouter } from './routes/auth.js';
+import { companyMembersRouter } from './routes/companyMembers.js';
 import { companyRelationshipsRouter } from './routes/companyRelationships.js';
 import { companiesRouter } from './routes/companies.js';
 import { jobsRouter } from './routes/jobs.js';
@@ -35,6 +36,7 @@ app.use(attachAuthContext);
 
 app.use('/api/auth', authRouter);
 app.use('/api/companies', companiesRouter);
+app.use('/api/company-members', companyMembersRouter);
 app.use('/api/company-relationships', companyRelationshipsRouter);
 app.use('/api/jobs', jobsRouter);
 app.use('/api/offers', offersRouter);
