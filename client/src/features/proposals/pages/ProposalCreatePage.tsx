@@ -3,7 +3,7 @@ import { Calendar, FileText, Save, Send, Sparkles, Users } from 'lucide-react';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
-import { getJobs } from '../../../api/jobsApi';
+import { getJobDetail, getJobs } from '../../../api/jobsApi';
 import { createOffer, getOffer, recordOfferSubmission, updateOffer } from '../../../api/offersApi';
 import { getResumes } from '../../../api/resumesApi';
 import { PageTitle } from '../../../components/common/PageTitle';
@@ -65,7 +65,8 @@ export function ProposalCreatePage() {
   const { offerId } = useParams();
   const [searchParams] = useSearchParams();
   const isEdit = Boolean(offerId);
-  const [form, setForm] = useState<FormState>({ ...initialForm, jobId: searchParams.get('jobId') ?? '' });
+  const initialJobId = searchParams.get('jobId') ?? '';
+  const [form, setForm] = useState<FormState>({ ...initialForm, jobId: initialJobId });
   const [isSubmissionFormOpen, setIsSubmissionFormOpen] = useState(false);
   const [submissionForm, setSubmissionForm] = useState<SubmissionFormState>({
     submittedAt: getNowInputValue(),
@@ -84,13 +85,18 @@ export function ProposalCreatePage() {
     queryKey: ['jobs', { perspective: 'accessible', status: 'open', pageSize: 100 }],
     queryFn: () => getJobs({ perspective: 'accessible', status: 'open', pageSize: 100 })
   });
+  const selectedJobQuery = useQuery({
+    queryKey: ['jobs', initialJobId],
+    queryFn: () => getJobDetail(initialJobId),
+    enabled: !isEdit && Boolean(initialJobId)
+  });
   const resumesQuery = useQuery({
     queryKey: ['resumes', { pageSize: 100 }],
     queryFn: () => getResumes({ pageSize: 100 })
   });
   const selectedJob = useMemo(() => jobsQuery.data?.items.find((job) => job.id === form.jobId), [form.jobId, jobsQuery.data?.items]);
   const latestSubmission = offerQuery.data?.latestSubmission ?? null;
-  const displayJob = selectedJob ?? (offerQuery.data ? {
+  const displayJob = selectedJob ?? selectedJobQuery.data ?? (offerQuery.data ? {
     id: offerQuery.data.jobId,
     title: offerQuery.data.jobTitle,
     agency: offerQuery.data.buyerName,
@@ -98,6 +104,7 @@ export function ProposalCreatePage() {
     budget: 0,
     deadline: ''
   } : null);
+  const shouldRenderSelectedJobOption = Boolean(!isEdit && displayJob && form.jobId && !jobsQuery.data?.items.some((job) => job.id === form.jobId));
   const selectedResumes = resumesQuery.data?.items.filter((resume) => form.selectedResumeIds.includes(resume.id)) ?? [];
 
   useEffect(() => {
@@ -264,6 +271,7 @@ export function ProposalCreatePage() {
                   disabled={isEdit}
                 >
                   {isEdit && displayJob ? <option value={form.jobId}>{displayJob.title}</option> : <option value="">공고를 선택하세요</option>}
+                  {shouldRenderSelectedJobOption && displayJob ? <option value={form.jobId}>{displayJob.title}</option> : null}
                   {jobsQuery.data?.items.map((job) => (
                     <option key={job.id} value={job.id}>
                       {job.title} / {job.agency}

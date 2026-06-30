@@ -259,7 +259,7 @@ export function JobDetailPage() {
           </div>
         </Card>
 
-        {isAgency ? <AgencyReviewPanel /> : <SupplierProposalPanel onCreateProposal={() => navigate(`/proposals/new?jobId=${job.id}`)} />}
+        {isAgency ? <AgencyReviewPanel /> : <SupplierProposalPanel job={job} onCreateProposal={() => navigate(`/proposals/new?jobId=${job.id}`)} />}
       </div>
 
       <Card className="overflow-hidden">
@@ -380,26 +380,71 @@ function AgencyReviewPanel() {
   );
 }
 
-function SupplierProposalPanel({ onCreateProposal }: { onCreateProposal: () => void }) {
+function SupplierProposalPanel({ job, onCreateProposal }: { job: JobDetail; onCreateProposal: () => void }) {
+  const daysLeft = getDaysLeft(job.deadline);
+  const urgencyLabel = daysLeft === null ? '마감일 미정' : daysLeft <= 3 ? `마감 ${daysLeft}일 전` : daysLeft <= 7 ? `마감 임박 D-${daysLeft}` : `D-${daysLeft}`;
+  const fitLabel = job.rfpScore >= 85 ? '매우 적합' : job.rfpScore >= 70 ? '검토 적합' : '추가 검토';
+  const skills = job.category
+    ? job.category.split(',').map((item) => item.trim()).filter(Boolean).slice(0, 4)
+    : [];
+
   return (
     <Card className="p-6">
       <div className="mb-5 border-b border-outline-variant pb-5">
-        <h2 className="font-headline text-[24px] font-bold">{labels.candidatePanel}</h2>
-        <p className="mt-2 text-sm text-on-surface-variant">{labels.candidatePanelDesc}</p>
+        <h2 className="font-headline text-[24px] font-bold">AI 분석 정보</h2>
+        <p className="mt-2 text-sm leading-6 text-on-surface-variant">RFP 요건과 보유 인력 정보를 기준으로 제안 준비 우선순위를 요약합니다.</p>
       </div>
-      <div className="space-y-3">
-        {recommendedPeople.slice(0, 3).map((person) => (
-          <div key={person.id} className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
-            <div className="flex items-center justify-between gap-3">
-              <strong>{person.name}</strong>
-              <span className="font-bold text-primary">{person.fitScore}{labels.point}</span>
-            </div>
-            <p className="mt-1 text-sm text-on-surface-variant">{person.role} · {person.availableFrom}</p>
-          </div>
-        ))}
+      <div className="grid grid-cols-2 gap-3">
+        <AnalysisMetric label="RFP 적합도" value={`${job.rfpScore}점`} emphasis />
+        <AnalysisMetric label="판정" value={fitLabel} />
+        <AnalysisMetric label="마감 긴급도" value={urgencyLabel} danger={daysLeft !== null && daysLeft <= 7} />
+        <AnalysisMetric label="추천 인력" value={`${job.recommendedPeople}명`} />
+      </div>
+      <div className="mt-5 space-y-4">
+        <AnalysisNote
+          title="제안 포인트"
+          items={[
+            `${job.agency} 요구사항에 맞춰 ${skills[0] ?? '핵심 기술'} 경험을 전면에 배치`,
+            `${formatCurrency(job.budget)} 예산 범위 안에서 단계별 투입 계획 제시`
+          ]}
+        />
+        <AnalysisNote
+          title="주의 사항"
+          items={[
+            daysLeft !== null && daysLeft <= 7 ? '마감이 가까워 산출물과 첨부파일 검토를 우선 처리' : '제출 전 요구 기술과 투입 가능일 재검증 필요',
+            skills.length ? `필수 역량: ${skills.join(', ')}` : '필수 역량 정보가 부족해 RFP 원문 확인 필요'
+          ]}
+        />
       </div>
       <Button className="mt-5 w-full" icon={<Send className="h-4 w-4" />} onClick={onCreateProposal}>{labels.createProposal}</Button>
     </Card>
+  );
+}
+
+function AnalysisMetric({ label, value, emphasis = false, danger = false }: { label: string; value: string; emphasis?: boolean; danger?: boolean }) {
+  return (
+    <div className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
+      <p className="text-xs font-semibold text-on-surface-variant">{label}</p>
+      <p className={['mt-2 font-headline text-[20px] font-bold', emphasis ? 'text-primary' : '', danger ? 'text-error' : ''].join(' ')}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function AnalysisNote({ title, items }: { title: string; items: string[] }) {
+  return (
+    <div>
+      <h3 className="mb-2 font-label text-[14px] font-bold text-on-surface">{title}</h3>
+      <ul className="space-y-2 text-sm leading-6 text-on-surface-variant">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2">
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -492,6 +537,19 @@ function formatDate(value: string) {
   if (!value) return '-';
 
   return value.slice(0, 10);
+}
+
+function getDaysLeft(value: string) {
+  if (!value) return null;
+
+  const deadline = new Date(value);
+  if (Number.isNaN(deadline.getTime())) return null;
+
+  const today = new Date();
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  const startOfDeadline = new Date(deadline.getFullYear(), deadline.getMonth(), deadline.getDate()).getTime();
+
+  return Math.ceil((startOfDeadline - startOfToday) / 86400000);
 }
 
 function formatSourceType(value: string | undefined) {
