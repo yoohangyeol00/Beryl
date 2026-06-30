@@ -10,6 +10,7 @@ import { AgenciesPage } from './features/agencies/pages/AgenciesPage';
 import { AgencyFormPage } from './features/agencies/pages/AgencyFormPage';
 import { AgencyOrganizationPage } from './features/agencies/pages/AgencyOrganizationPage';
 import { BuyerCompanyMembersPage } from './features/company-members/pages/BuyerCompanyMembersPage';
+import { BuyerCompanyMemberFormPage } from './features/company-members/pages/BuyerCompanyMemberFormPage';
 import { MyPage } from './features/account/pages/MyPage';
 import { AdminDashboardPage } from './features/dashboards/pages/AdminDashboardPage';
 import { BuyerDashboardPage } from './features/dashboards/pages/BuyerDashboardPage';
@@ -73,6 +74,7 @@ const router = createBrowserRouter([
           { path: 'buyer/suppliers/new', element: <BuyerSupplierFormPage /> },
           { path: 'buyer/suppliers/:supplierId/edit', element: <BuyerSupplierFormPage /> },
           { path: 'buyer/company-members', element: <BuyerCompanyMembersPage /> },
+          { path: 'buyer/company-members/new', element: <BuyerCompanyMemberFormPage /> },
           { path: 'supplier/dashboard', element: <SupplierDashboardPage /> },
           { path: 'supplier/jobs', element: <SupplierJobListPage /> },
           { path: 'supplier/jobs/:jobId', element: <SupplierJobDetailPage /> },

@@ -113,6 +113,7 @@ A기업 로그인
 | `/buyer/suppliers/new` | 공급기업 등록 | 발주 관점에서 관계 공급기업 입력 |
 | `/buyer/suppliers/:supplierId/edit` | 공급기업 수정 | 관계 공급기업 정보 수정 |
 | `/buyer/company-members` | 기관 사용자/권한 | 현재 기업의 사용자와 초대/권한 관리 |
+| `/buyer/company-members/new` | 기관 사용자 등록 | 현재 기업 소속 사용자를 초대 등록 |
 | `/supplier/bid-participation` | 입찰참여관리 | 현재 기업의 입찰 참여 상태 관리 |
 | `/supplier/clients` | 거래처 관리 | 현재 기업이 공급 관점에서 관계 있는 발주처/고객사 관리 |
 | `/supplier/projects` | 수행 사업 관리 | 공급 관점에서 낙찰 이후 사업/투입/위험 관리 |

@@ -114,6 +114,7 @@
 - `/buyer/suppliers/new`
 - `/buyer/suppliers/:supplierId/edit`
 - `/buyer/company-members`
+- `/buyer/company-members/new`
 - `/supplier/dashboard`
 - `/supplier/jobs`
 - `/supplier/jobs/:jobId`
