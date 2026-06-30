@@ -1,12 +1,27 @@
-import type { Request, Response } from 'express';
+import { randomUUID } from 'crypto';
+import express, { type Request, type Response } from 'express';
+import { mkdir, writeFile } from 'fs/promises';
+import path from 'path';
 import { pool } from '../db.js';
 import { getCurrentCompanyId, getCurrentUserId, type AuthenticatedRequest } from '../middleware/auth.js';
 import { sendError, sendSuccess } from '../utils/apiResponse.js';
+import { parseMultipartFile } from '../utils/multipart.js';
 import { createCompanyScopedRouter } from './companyScopedRouter.js';
 
 export const companyRelationshipsRouter = createCompanyScopedRouter();
 
 type ManagementStatus = 'preferred' | 'active' | 'review' | 'watch';
+
+const certificationUpload = express.raw({
+  type: (req) => (req.headers['content-type'] ?? '').startsWith('multipart/form-data'),
+  limit: '10mb'
+});
+
+const allowedCertificationTypes = new Map([
+  ['application/pdf', 'pdf'],
+  ['image/jpeg', 'jpg'],
+  ['image/png', 'png']
+]);
 
 interface CompanyRelationshipRow {
   id: string;
@@ -36,6 +51,14 @@ interface CompanyRelationshipRow {
   contact_member_phone: string | null;
   capabilities: string[] | null;
   certifications: string[] | null;
+  certification_files: Array<{
+    id: string;
+    name: string;
+    fileName: string | null;
+    url: string | null;
+    mimeType: string | null;
+    fileSize: string | number | null;
+  }> | null;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -64,6 +87,10 @@ function getManagementStatus(value: unknown): ManagementStatus | null {
   }
 
   return null;
+}
+
+function getCertificationExtension(mimeType: string): string | null {
+  return allowedCertificationTypes.get(mimeType) ?? null;
 }
 
 function toRelationshipResponse(row: CompanyRelationshipRow) {
@@ -101,7 +128,8 @@ function toRelationshipResponse(row: CompanyRelationshipRow) {
         }
       : null,
     capabilities: row.capabilities ?? [],
-    certifications: row.certifications ?? []
+    certifications: row.certifications ?? [],
+    certificationFiles: row.certification_files ?? []
   };
 }
 
@@ -135,7 +163,20 @@ async function findRelationship(relationshipId: string, currentCompanyId: string
         cm.email as contact_member_email,
         cm.phone as contact_member_phone,
         coalesce(array_agg(distinct cc.name) filter (where cc.name is not null), '{}') as capabilities,
-        coalesce(array_agg(distinct cert.name) filter (where cert.name is not null), '{}') as certifications
+        coalesce(array_agg(distinct cert.name) filter (where cert.name is not null), '{}') as certifications,
+        coalesce(
+          jsonb_agg(
+            distinct jsonb_build_object(
+              'id', cert.id,
+              'name', cert.name,
+              'fileName', cert.file_name,
+              'url', concat('/api/company-relationships/', cr.id, '/certification-files/', cert.id, '/download'),
+              'mimeType', cert.mime_type,
+              'fileSize', cert.file_size
+            )
+          ) filter (where cert.storage_key is not null),
+          '[]'::jsonb
+        ) as certification_files
       from company_relationships cr
       join companies c on c.id = cr.target_company_id
       left join company_members cm
@@ -146,7 +187,7 @@ async function findRelationship(relationshipId: string, currentCompanyId: string
       left join company_certifications cert on cert.company_id = c.id
       where cr.id = $1
         and cr.source_company_id = $2
-      group by cr.id, c.id, cm.id
+      group by cr.id, c.id, cm.id, cm.name, cm.department, cm.position, cm.email, cm.phone
       limit 1
     `,
     [relationshipId, currentCompanyId]
@@ -414,6 +455,150 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
   }
 });
 
+companyRelationshipsRouter.post(
+  '/:relationshipId/certification-files',
+  certificationUpload,
+  async (req: Request, res: Response, next) => {
+    const authReq = req as AuthenticatedRequest;
+    const currentCompanyId = getCurrentCompanyId(authReq);
+    const relationshipId = req.params.relationshipId;
+
+    if (!Buffer.isBuffer(req.body)) {
+      sendError(res, 400, 'INVALID_UPLOAD', '업로드할 인증서 파일이 필요합니다.');
+      return;
+    }
+
+    const relationship = await pool.query<{ target_company_id: string }>(
+      `
+        select target_company_id
+        from company_relationships
+        where id = $1
+          and source_company_id = $2
+          and source_perspective = 'buyer'
+          and target_perspective = 'supplier'
+        limit 1
+      `,
+      [relationshipId, currentCompanyId]
+    );
+
+    const targetCompanyId = relationship.rows[0]?.target_company_id;
+
+    if (!targetCompanyId) {
+      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', '공급기업 관계 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    const file = parseMultipartFile(req.body, req.headers['content-type'] ?? '');
+
+    if (!file) {
+      sendError(res, 400, 'INVALID_UPLOAD', '업로드할 인증서 파일이 필요합니다.');
+      return;
+    }
+
+    const extension = getCertificationExtension(file.mimeType);
+
+    if (!extension) {
+      sendError(res, 400, 'UNSUPPORTED_FILE_TYPE', 'PDF, JPG, PNG 파일만 업로드할 수 있습니다.');
+      return;
+    }
+
+    const fileName = `${targetCompanyId}-${Date.now()}-${randomUUID()}.${extension}`;
+    const storageKey = path.join('company-certifications', fileName);
+    const uploadDir = path.resolve(process.cwd(), 'private-uploads', 'company-certifications');
+    const storagePath = path.join(uploadDir, fileName);
+
+    try {
+      await mkdir(uploadDir, { recursive: true });
+      await writeFile(storagePath, file.data);
+
+      const result = await pool.query(
+        `
+          insert into company_certifications (
+            company_id,
+            name,
+            file_name,
+            storage_key,
+            mime_type,
+            file_size
+          )
+          values ($1, $2, $3, $4, $5, $6)
+          on conflict (company_id, name)
+          do update set
+            file_name = excluded.file_name,
+            storage_key = excluded.storage_key,
+            mime_type = excluded.mime_type,
+            file_size = excluded.file_size,
+            updated_at = now()
+          returning id, name, file_name, storage_key, mime_type, file_size
+        `,
+        [targetCompanyId, file.originalName, file.originalName, storageKey, file.mimeType, file.data.length]
+      );
+
+      sendSuccess(res, result.rows[0], 201);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+companyRelationshipsRouter.get(
+  '/:relationshipId/certification-files/:fileId/download',
+  async (req: Request, res: Response, next) => {
+    const authReq = req as AuthenticatedRequest;
+    const currentCompanyId = getCurrentCompanyId(authReq);
+    const { relationshipId, fileId } = req.params;
+
+    try {
+      const result = await pool.query<{
+        name: string;
+        file_name: string | null;
+        storage_key: string | null;
+        mime_type: string | null;
+      }>(
+        `
+          select cert.name, cert.file_name, cert.storage_key, cert.mime_type
+          from company_certifications cert
+          join company_relationships cr on cr.target_company_id = cert.company_id
+          where cert.id = $1
+            and cr.id = $2
+            and cr.source_company_id = $3
+            and cr.source_perspective = 'buyer'
+            and cr.target_perspective = 'supplier'
+          limit 1
+        `,
+        [fileId, relationshipId, currentCompanyId]
+      );
+
+      const file = result.rows[0];
+
+      if (!file?.storage_key) {
+        sendError(res, 404, 'CERTIFICATION_FILE_NOT_FOUND', '첨부 파일을 찾을 수 없습니다.');
+        return;
+      }
+
+      const privateRoot = path.resolve(process.cwd(), 'private-uploads');
+      const filePath = path.resolve(privateRoot, file.storage_key);
+
+      if (!filePath.startsWith(privateRoot + path.sep)) {
+        sendError(res, 400, 'INVALID_FILE_PATH', '첨부 파일 경로가 올바르지 않습니다.');
+        return;
+      }
+
+      if (file.mime_type) {
+        res.setHeader('Content-Type', file.mime_type);
+      }
+
+      res.download(filePath, file.file_name ?? file.name, (error) => {
+        if (error && !res.headersSent) {
+          next(error);
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) => {
   const authReq = req as AuthenticatedRequest;
   const currentCompanyId = getCurrentCompanyId(authReq);
@@ -439,7 +624,39 @@ companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) =>
 
   if (q) {
     values.push(`%${q}%`);
-    conditions.push(`(c.name ilike $${values.length} or c.business_registration_no ilike $${values.length})`);
+    conditions.push(`
+      (
+        c.name ilike $${values.length}
+        or c.business_registration_no ilike $${values.length}
+        or cr.tags ilike $${values.length}
+        or cr.memo ilike $${values.length}
+        or exists (
+          select 1
+          from company_members search_cm
+          where search_cm.company_id = c.id
+            and search_cm.status = 'active'
+            and (
+              search_cm.name ilike $${values.length}
+              or search_cm.department ilike $${values.length}
+              or search_cm.position ilike $${values.length}
+              or search_cm.email ilike $${values.length}
+              or search_cm.phone ilike $${values.length}
+            )
+        )
+        or exists (
+          select 1
+          from company_capabilities search_cc
+          where search_cc.company_id = c.id
+            and search_cc.name ilike $${values.length}
+        )
+        or exists (
+          select 1
+          from company_certifications search_cert
+          where search_cert.company_id = c.id
+            and search_cert.name ilike $${values.length}
+        )
+      )
+    `);
   }
 
   try {
@@ -472,7 +689,20 @@ companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) =>
           cm.email as contact_member_email,
           cm.phone as contact_member_phone,
           coalesce(array_agg(distinct cc.name) filter (where cc.name is not null), '{}') as capabilities,
-          coalesce(array_agg(distinct cert.name) filter (where cert.name is not null), '{}') as certifications
+          coalesce(array_agg(distinct cert.name) filter (where cert.name is not null), '{}') as certifications,
+          coalesce(
+            jsonb_agg(
+              distinct jsonb_build_object(
+                'id', cert.id,
+                'name', cert.name,
+                'fileName', cert.file_name,
+                'url', concat('/api/company-relationships/', cr.id, '/certification-files/', cert.id, '/download'),
+                'mimeType', cert.mime_type,
+                'fileSize', cert.file_size
+              )
+            ) filter (where cert.storage_key is not null),
+            '[]'::jsonb
+          ) as certification_files
         from company_relationships cr
         join companies c on c.id = cr.target_company_id
         left join lateral (
@@ -487,7 +717,7 @@ companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) =>
         left join company_capabilities cc on cc.company_id = c.id
         left join company_certifications cert on cert.company_id = c.id
         where ${conditions.join('\n          and ')}
-        group by cr.id, c.id, cm.id
+        group by cr.id, c.id, cm.id, cm.name, cm.department, cm.position, cm.email, cm.phone
         order by cr.updated_at desc
       `,
       values

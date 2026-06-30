@@ -66,6 +66,14 @@ export interface SupplierRelationship {
   } | null;
   capabilities: string[];
   certifications: string[];
+  certificationFiles: Array<{
+    id: string;
+    name: string;
+    fileName: string | null;
+    url: string | null;
+    mimeType: string | null;
+    fileSize: string | number | null;
+  }>;
 }
 
 export interface SupplierRelationshipList {
@@ -85,5 +93,22 @@ export async function getSupplierRelationships(params?: GetSupplierRelationships
 
 export async function createSupplierRelationship(payload: CreateSupplierRelationshipRequest) {
   const response = await axiosInstance.post<ApiResponse<SupplierRelationship>>('/company-relationships', payload);
+  return unwrapApiResponse(response.data);
+}
+
+export async function uploadSupplierCertificationFile(relationshipId: string, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await axiosInstance.post<ApiResponse<unknown>>(
+    `/company-relationships/${relationshipId}/certification-files`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+  );
+
   return unwrapApiResponse(response.data);
 }

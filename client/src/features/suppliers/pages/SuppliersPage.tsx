@@ -1,4 +1,4 @@
-import { Building2, PlusCircle, ShieldCheck, Star, Users } from 'lucide-react';
+import { Building2, Download, FileText, PlusCircle, ShieldCheck, Star, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
@@ -28,6 +28,12 @@ type SupplierCompany = {
   evaluation: number;
   tags: string;
   status: SupplierStatus;
+  certificationFiles: Array<{
+    id: string;
+    name: string;
+    fileName: string | null;
+    url: string | null;
+  }>;
 };
 
 const ko = {
@@ -89,9 +95,13 @@ function getInitialRole(): RoleMode {
 export function SuppliersPage() {
   const navigate = useNavigate();
   const [role, setRole] = useState<RoleMode>(getInitialRole);
+  const [searchValue, setSearchValue] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState<SupplierCompany | null>(null);
   const isAgency = role === 'agency';
-  const { data, isLoading, isError, error } = useSupplierRelationships({ perspective: isAgency ? 'buyer' : 'supplier' });
+  const { data, isLoading, isError, error } = useSupplierRelationships({
+    perspective: isAgency ? 'buyer' : 'supplier',
+    q: searchValue.trim() || undefined
+  });
   const suppliers = (data?.items ?? []).map((relationship) => ({
     id: relationship.id,
     name: relationship.targetCompany.name,
@@ -102,7 +112,8 @@ export function SuppliersPage() {
     winRate: 0,
     evaluation: 0,
     tags: relationship.tags ?? '-',
-    status: relationship.managementStatus ?? 'active'
+    status: relationship.managementStatus ?? 'active',
+    certificationFiles: relationship.certificationFiles
   } satisfies SupplierCompany));
 
   useEffect(() => {
@@ -172,7 +183,12 @@ export function SuppliersPage() {
         </>
       ) : null}
 
-      <PageToolbar searchPlaceholder={isAgency ? ko.searchAgency : ko.searchSupplier}>
+      <PageToolbar
+        searchPlaceholder={isAgency ? ko.searchAgency : ko.searchSupplier}
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        resultCount={suppliers.length}
+      >
         <Button variant="secondary" icon={<Building2 className="h-4 w-4" />}>{ko.allSpecialty}</Button>
         <Button variant="secondary" icon={<Users className="h-4 w-4" />}>{ko.allStatus}</Button>
       </PageToolbar>
@@ -228,6 +244,31 @@ function SupplierDetailModal({ supplier }: { supplier: SupplierCompany }) {
             <DetailLine label={ko.tags} value={supplier.tags} />
             <DetailLine label={ko.status} value={statusLabel[supplier.status]} />
           </dl>
+            <h4 className="mt-3 mb-3 font-headline text-[18px] font-bold">첨부 파일</h4>
+          <div className="rounded-lg border border-outline-variant p-2">
+            {supplier.certificationFiles.length > 0 ? (
+              <div className="space-y-2">
+                {supplier.certificationFiles.map((file) => (
+                  <a
+                    key={file.id}
+                    href={file.url ?? '#'}
+                    download={file.fileName ?? file.name}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center justify-between gap-3 rounded-lg bg-surface-container-lowest px-3 py-2 text-sm font-semibold text-on-surface transition hover:bg-surface-container-low"
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <FileText className="h-4 w-4 shrink-0 text-primary" />
+                      <span className="truncate">{file.fileName ?? file.name}</span>
+                    </span>
+                    <Download className="h-4 w-4 shrink-0 text-primary" />
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-on-surface-variant p-1">등록된 첨부 파일이 없습니다.</p>
+            )}
+          </div>
         </section>
         <section>
           <h3 className="mb-3 font-headline text-[20px] font-bold">{ko.projectHistory}</h3>

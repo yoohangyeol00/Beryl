@@ -1,14 +1,13 @@
 import { ArrowLeft, Brain, Building2, Save, UploadCloud, UserRound, X } from 'lucide-react';
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
-import { createSupplierRelationship, type SupplierManagementStatus } from '../../../api/suppliersApi';
+import { createSupplierRelationship, uploadSupplierCertificationFile, type SupplierManagementStatus } from '../../../api/suppliersApi';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
 
-const defaultTechnologies = ['Cloud Computing', 'Big Data Analysis', 'AI/ML Integration'];
 const certificationOptions = [
   { title: 'GS 인증 (1등급)', description: 'Good Software' },
   { title: 'CMMI (Level 3+)', description: 'Process Capability' },
@@ -54,6 +53,7 @@ export function SupplierFormPage() {
   const navigate = useNavigate();
   const { supplierId } = useParams();
   const isEdit = Boolean(supplierId);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [companyName, setCompanyName] = useState('');
   const [businessNumber, setBusinessNumber] = useState('');
   const [companyType, setCompanyType] = useState('');
@@ -64,9 +64,10 @@ export function SupplierFormPage() {
   const [contactDepartment, setContactDepartment] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [contactPhone, setContactPhone] = useState('');
-  const [technologies, setTechnologies] = useState(defaultTechnologies);
+  const [technologies, setTechnologies] = useState<string[]>([]);
   const [technologyInput, setTechnologyInput] = useState('');
   const [certifications, setCertifications] = useState<string[]>([]);
+  const [certificationFiles, setCertificationFiles] = useState<File[]>([]);
   const [internalGrade, setInternalGrade] = useState('');
   const [managementStatus, setManagementStatus] = useState<SupplierManagementStatus>('active');
   const [tags, setTags] = useState('');
@@ -92,7 +93,7 @@ export function SupplierFormPage() {
     setIsSubmitting(true);
 
     try {
-      await createSupplierRelationship({
+      const savedSupplier = await createSupplierRelationship({
         company: {
           name: companyName,
           businessRegistrationNo: businessNumber,
@@ -119,6 +120,10 @@ export function SupplierFormPage() {
           memo
         }
       });
+
+      for (const file of certificationFiles) {
+        await uploadSupplierCertificationFile(savedSupplier.id, file);
+      }
 
       navigate('/suppliers', { replace: true });
     } catch (error) {
@@ -227,12 +232,25 @@ export function SupplierFormPage() {
               <p className="mb-2 font-label text-label-sm font-semibold text-on-surface-variant">{ko.certificationFile}</p>
               <button
                 type="button"
+                onClick={() => fileInputRef.current?.click()}
                 className="flex min-h-36 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-outline-variant bg-surface-container-lowest p-8 text-center transition hover:bg-surface-container-low"
               >
                 <UploadCloud className="mb-2 h-10 w-10 text-primary" />
-                <span className="font-label text-[15px] font-semibold text-on-surface">{ko.uploadGuide}</span>
-                <span className="mt-1 text-sm text-on-surface-variant">{ko.uploadHelp}</span>
+                <span className="font-label text-[15px] font-semibold text-on-surface">
+                  {certificationFiles.length > 0 ? `${certificationFiles.length}개 파일 선택됨` : '클릭해서 인증서 파일을 선택하세요'}
+                </span>
+                <span className="mt-1 break-all text-sm text-on-surface-variant">
+                  {certificationFiles.length > 0 ? certificationFiles.map((file) => file.name).join(', ') : 'PDF, JPG, PNG (최대 10MB)'}
+                </span>
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,image/png,image/jpeg"
+                multiple
+                className="hidden"
+                onChange={(event) => setCertificationFiles(Array.from(event.target.files ?? []))}
+              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
