@@ -18,7 +18,7 @@ import { Input } from '../../../components/ui/Input';
 import { getSupplierPoolPath } from '../../modes/roleMode';
 import { certificationOptions, supplierFormLabels, supplierStatusLabel } from '../labels';
 
-export function SupplierFormPage() {
+export function BuyerSupplierFormPage() {
   const navigate = useNavigate();
   const { supplierId } = useParams();
   const isEdit = Boolean(supplierId);

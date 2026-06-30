@@ -84,7 +84,7 @@ const rows: ContractProject[] = [
   { id: 'p-3', name: '\uC18C\uBC29 \uB370\uC774\uD130 \uD1B5\uD569 \uBD84\uC11D \uD50C\uB7AB\uD3FC', agency: '\uC18C\uBC29\uCCAD', supplier: '\uB125\uC2A4\uD2B8\uC18C\uD504\uD2B8', stage: 'inspection', assignedPeople: '\uBC15\uC9C0\uD6C8 \uC678 3\uBA85', amount: 2180000000, endDate: '2026-11-30', deliverables: '\uC0B0\uCD9C\uBB3C \uBCF4\uC644\uC694\uCCAD', mmProgress: 81, health: 'risk', nextAction: '\uC0B0\uCD9C\uBB3C \uC7AC\uAC80\uC218' }
 ];
 
-export function WonProjectsPage() {
+export function SupplierProjectsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();

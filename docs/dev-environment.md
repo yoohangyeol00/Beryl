@@ -41,8 +41,10 @@
 
 - React Router를 기준으로 한다.
 - 라우트 정의 위치는 `client/src/App.tsx`다.
-- 현재 구현 기준으로 `/`는 `/dashboard/admin`으로 redirect한다.
-- 현재 구현 기준으로 `/dashboard`는 `/dashboard/admin`으로 redirect한다.
+- 현재 구현 기준으로 `/`는 `/buyer/dashboard`로 redirect한다.
+- 현재 구현 기준으로 `/dashboard`는 `/buyer/dashboard`로 redirect한다.
+- 발주기관 모드 화면은 `/buyer/*`, 공급기관 모드 화면은 `/supplier/*` 경로를 기준으로 분리한다.
+- 기존 `/jobs`, `/suppliers`, `/clients`, `/bid-participation`, `/manpower`, `/projects/won`, `/dashboard/agency`, `/dashboard/supplier` 경로는 호환을 위해 새 경로로 redirect한다.
 - 기업 기준 접근 제어는 auth 도입 후 route guard로 추가한다.
 
 ### Backend

@@ -35,11 +35,11 @@ function TitleCell({ row, label = '공고번호' }: { row: Job; label?: string }
   );
 }
 
-type JobListPageProps = {
+type JobListViewProps = {
   mode?: RoleMode;
 };
 
-export function JobListPage({ mode }: JobListPageProps = {}) {
+export function JobListView({ mode }: JobListViewProps = {}) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);

@@ -93,30 +93,35 @@ A기업 로그인
 | --- | --- | --- |
 | `/login` | 로그인 | 사용자 인증 진입 |
 | `/signup` | 회원가입 | 사용자/기업 등록 신청 |
-| `/jobs` | 발주기관별 입찰공고 관리 | 현재 기업 기준 입찰 공고 목록, 필터, 상태 관리 |
-| `/jobs/new` | 공고 등록 | 외부 입찰 공고를 BERYL 내부 관리 대상으로 등록 |
-| `/jobs/:jobId` | 입찰 공고 상세 및 RFP 분석 정보 | 공고 상세, RFP 요건, 추천 인력 요약 |
+| `/buyer/jobs` | 발주 사업 관리 | 현재 기업이 발주 관점에서 관리하는 입찰 공고 목록, 필터, 상태 관리 |
+| `/buyer/jobs/new` | 공고 등록 | 외부 입찰 공고를 BERYL 내부 관리 대상으로 등록 |
+| `/buyer/jobs/:jobId` | 발주 공고 상세 및 RFP 분석 정보 | 공고 상세, RFP 요건, 접수 제안/추천 인력 요약 |
+| `/buyer/jobs/:jobId/edit` | 공고 수정 | 발주 관점에서 등록한 공고의 내부 관리 정보 수정 |
+| `/supplier/jobs` | 입찰공고 확인 | 공급 관점에서 참여 가능한 공고 목록과 RFP 분석 정보 확인 |
+| `/supplier/jobs/:jobId` | 참여 공고 상세 | 공급 관점에서 공고 상세, RFP 요건, 제안 준비 정보 확인 |
 | `/resumes/:resumeId` | 인력 상세 정보 및 이력 관리 | 인력 프로필, 기술, 프로젝트 이력 |
 | `/offers/:offerId/analysis` | 추천 인력 매칭 알고리즘 상세 분석 | 추천 근거, 점수, 매칭 항목 분석 |
 | `/dashboard/admin` | 관리자 대시보드 | 전체 운영 현황 요약 |
-| `/dashboard/agency` | 발주기관 관리 대시보드 | 현재 기업의 발주 관점 운영 현황 요약 |
-| `/dashboard/supplier` | 공급기업 관리 대시보드 | 현재 기업의 공급 관점 운영 현황 요약 |
+| `/buyer/dashboard` | 내 발주 대시보드 | 현재 기업의 발주 관점 운영 현황 요약 |
+| `/supplier/dashboard` | 내 사업 대시보드 | 현재 기업의 공급 관점 운영 현황 요약 |
 | `/agencies` | 발주기관 조직 및 직원 관리 | 현재 기업과 관계 있는 발주처/기관 목록 관리 |
 | `/agencies/new` | 발주기관 등록 | 관계 기업/기관 입력 |
 | `/agencies/:agencyId/edit` | 발주기관 수정 | 관계 기업/기관 정보 수정 |
 | `/agency-organizations` | 발주기관 조직관리 | 발주처 조직 구조 관리 |
 | `/agency-staff` | 발주기관 직원관리 | 발주처 담당자와 직원 정보 관리 |
-| `/bid-participation` | 입찰참여관리 | 현재 기업의 입찰 참여 상태 관리 |
-| `/clients` | 공급기업 목록 alias | 공급기업 관리 화면의 호환 라우트 |
-| `/suppliers` | 공급기업별 계약사업 관리 | 현재 기업과 관계 있는 공급사별 계약/사업 현황 |
-| `/suppliers/new` | 공급기업 등록 | 관계 공급기업 입력 |
-| `/suppliers/:supplierId/edit` | 공급기업 수정 | 관계 공급기업 정보 수정 |
-| `/suppliers/:supplierId` | 공급기업 상세 | 관계 공급기업 상세 및 계약/사업 흐름 |
-| `/projects/won` | 수주 사업 관리 현황 | 낙찰 이후 사업/투입/위험 관리 |
-| `/projects/won/:projectId` | 수주 사업 상세 | 사업 상세, 계약, 투입 인력 현황 |
-| `/manpower` | 투입인력 관리 및 M/M 현황 | 인력 가용성, 투입률, M/M 관리 |
+| `/buyer/suppliers` | 공급기업 풀 | 현재 기업이 발주 관점에서 관리하는 공급기업 관계 목록 |
+| `/buyer/suppliers/new` | 공급기업 등록 | 발주 관점에서 관계 공급기업 입력 |
+| `/buyer/suppliers/:supplierId/edit` | 공급기업 수정 | 관계 공급기업 정보 수정 |
+| `/buyer/company-members` | 기관 사용자/권한 | 현재 기업의 사용자와 초대/권한 관리 |
+| `/supplier/bid-participation` | 입찰참여관리 | 현재 기업의 입찰 참여 상태 관리 |
+| `/supplier/clients` | 거래처 관리 | 현재 기업이 공급 관점에서 관계 있는 발주처/고객사 관리 |
+| `/supplier/projects` | 수행 사업 관리 | 공급 관점에서 낙찰 이후 사업/투입/위험 관리 |
+| `/supplier/projects/:projectId` | 수행 사업 상세 | 사업 상세, 계약, 투입 인력 현황 |
+| `/supplier/manpower` | 인력/이력 관리 및 M/M 현황 | 인력 가용성, 투입률, M/M 관리 |
 
-현재 구현 기준으로 `/`와 `/dashboard`는 `/dashboard/admin`으로 이동한다.
+현재 구현 기준으로 `/`와 `/dashboard`는 `/buyer/dashboard`로 이동한다.
+
+기존 `/jobs`, `/suppliers`, `/clients`, `/bid-participation`, `/manpower`, `/projects/won`, `/dashboard/agency`, `/dashboard/supplier` 경로는 호환을 위해 새 `/buyer/*`, `/supplier/*` 경로로 redirect한다.
 
 ## 6. Core Domains
 

@@ -107,11 +107,11 @@ const tabs: { id: DetailTab; label: string; icon: typeof Info }[] = [
   { id: 'files', label: labels.files, icon: Paperclip }
 ];
 
-type JobDetailPageProps = {
+type JobDetailViewProps = {
   mode?: RoleMode;
 };
 
-export function JobDetailPage({ mode }: JobDetailPageProps = {}) {
+export function JobDetailView({ mode }: JobDetailViewProps = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { jobId = '' } = useParams();

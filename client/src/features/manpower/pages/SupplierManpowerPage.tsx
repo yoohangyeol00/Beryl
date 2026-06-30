@@ -53,7 +53,7 @@ function isAvailabilityStatus(value: string): value is AvailabilityStatus {
   return value === 'available' || value === 'assigned' || value === 'partiallyAssigned' || value === 'unavailable';
 }
 
-export function ManpowerPage() {
+export function SupplierManpowerPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const status = searchParams.get('status') ?? 'all';

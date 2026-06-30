@@ -9,25 +9,28 @@ import { SignupPage } from './features/auth/pages/SignupPage';
 import { AgenciesPage } from './features/agencies/pages/AgenciesPage';
 import { AgencyFormPage } from './features/agencies/pages/AgencyFormPage';
 import { AgencyOrganizationPage } from './features/agencies/pages/AgencyOrganizationPage';
-import { AgencyStaffPage } from './features/agencies/pages/AgencyStaffPage';
+import { BuyerCompanyMembersPage } from './features/company-members/pages/BuyerCompanyMembersPage';
 import { MyPage } from './features/account/pages/MyPage';
 import { AdminDashboardPage } from './features/dashboards/pages/AdminDashboardPage';
-import { AgencyDashboardPage } from './features/dashboards/pages/AgencyDashboardPage';
+import { BuyerDashboardPage } from './features/dashboards/pages/BuyerDashboardPage';
 import { SupplierDashboardPage } from './features/dashboards/pages/SupplierDashboardPage';
-import { BidParticipationPage } from './features/bids/pages/BidParticipationPage';
+import { SupplierBidParticipationPage } from './features/bids/pages/SupplierBidParticipationPage';
 import { ProposalCreatePage } from './features/proposals/pages/ProposalCreatePage';
-import { JobDetailPage } from './features/jobs/pages/JobDetailPage';
-import { JobCreatePage } from './features/jobs/pages/JobCreatePage';
-import { JobListPage } from './features/jobs/pages/JobListPage';
-import { ManpowerPage } from './features/manpower/pages/ManpowerPage';
+import { BuyerJobDetailPage } from './features/jobs/pages/BuyerJobDetailPage';
+import { BuyerJobFormPage } from './features/jobs/pages/BuyerJobFormPage';
+import { BuyerJobListPage } from './features/jobs/pages/BuyerJobListPage';
+import { SupplierJobDetailPage } from './features/jobs/pages/SupplierJobDetailPage';
+import { SupplierJobListPage } from './features/jobs/pages/SupplierJobListPage';
+import { SupplierManpowerPage } from './features/manpower/pages/SupplierManpowerPage';
 import { OfferAnalysisPage } from './features/offers/pages/OfferAnalysisPage';
-import { WonProjectsPage } from './features/projects/pages/WonProjectsPage';
-import { ProjectDetailPage } from './features/projects/pages/ProjectDetailPage';
+import { SupplierProjectsPage } from './features/projects/pages/SupplierProjectsPage';
+import { SupplierProjectDetailPage } from './features/projects/pages/SupplierProjectDetailPage';
 import { ResumeDetailPage } from './features/resumes/pages/ResumeDetailPage';
 import { ResumeFormPage } from './features/resumes/pages/ResumeFormPage';
-import { SupplierDetailPage } from './features/suppliers/pages/SupplierDetailPage';
-import { SupplierFormPage } from './features/suppliers/pages/SupplierFormPage';
-import { SuppliersPage } from './features/suppliers/pages/SuppliersPage';
+import { BuyerSupplierFormPage } from './features/company-relationships/pages/BuyerSupplierFormPage';
+import { BuyerSupplierPoolPage } from './features/company-relationships/pages/BuyerSupplierPoolPage';
+import { SupplierClientListPage } from './features/company-relationships/pages/SupplierClientListPage';
+import { BuyerSupplierDetailPage } from './features/company-relationships/pages/BuyerSupplierDetailPage';
 
 const queryClient = new QueryClient();
 
@@ -61,23 +64,23 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/buyer/dashboard" replace /> },
           { path: 'mypage', element: <MyPage /> },
-          { path: 'buyer/dashboard', element: <AgencyDashboardPage /> },
-          { path: 'buyer/jobs', element: <JobListPage mode="agency" /> },
-          { path: 'buyer/jobs/new', element: <JobCreatePage /> },
-          { path: 'buyer/jobs/:jobId/edit', element: <JobCreatePage /> },
-          { path: 'buyer/jobs/:jobId', element: <JobDetailPage mode="agency" /> },
-          { path: 'buyer/suppliers', element: <SuppliersPage mode="agency" /> },
-          { path: 'buyer/suppliers/new', element: <SupplierFormPage /> },
-          { path: 'buyer/suppliers/:supplierId/edit', element: <SupplierFormPage /> },
-          { path: 'buyer/company-members', element: <AgencyStaffPage /> },
+          { path: 'buyer/dashboard', element: <BuyerDashboardPage /> },
+          { path: 'buyer/jobs', element: <BuyerJobListPage /> },
+          { path: 'buyer/jobs/new', element: <BuyerJobFormPage /> },
+          { path: 'buyer/jobs/:jobId/edit', element: <BuyerJobFormPage /> },
+          { path: 'buyer/jobs/:jobId', element: <BuyerJobDetailPage /> },
+          { path: 'buyer/suppliers', element: <BuyerSupplierPoolPage /> },
+          { path: 'buyer/suppliers/new', element: <BuyerSupplierFormPage /> },
+          { path: 'buyer/suppliers/:supplierId/edit', element: <BuyerSupplierFormPage /> },
+          { path: 'buyer/company-members', element: <BuyerCompanyMembersPage /> },
           { path: 'supplier/dashboard', element: <SupplierDashboardPage /> },
-          { path: 'supplier/jobs', element: <JobListPage mode="supplier" /> },
-          { path: 'supplier/jobs/:jobId', element: <JobDetailPage mode="supplier" /> },
-          { path: 'supplier/bid-participation', element: <BidParticipationPage /> },
-          { path: 'supplier/clients', element: <SuppliersPage mode="supplier" /> },
-          { path: 'supplier/manpower', element: <ManpowerPage /> },
-          { path: 'supplier/projects', element: <WonProjectsPage /> },
-          { path: 'supplier/projects/:projectId', element: <ProjectDetailPage /> },
+          { path: 'supplier/jobs', element: <SupplierJobListPage /> },
+          { path: 'supplier/jobs/:jobId', element: <SupplierJobDetailPage /> },
+          { path: 'supplier/bid-participation', element: <SupplierBidParticipationPage /> },
+          { path: 'supplier/clients', element: <SupplierClientListPage /> },
+          { path: 'supplier/manpower', element: <SupplierManpowerPage /> },
+          { path: 'supplier/projects', element: <SupplierProjectsPage /> },
+          { path: 'supplier/projects/:projectId', element: <SupplierProjectDetailPage /> },
           { path: 'jobs', element: <Navigate to="/buyer/jobs" replace /> },
           { path: 'jobs/new', element: <Navigate to="/buyer/jobs/new" replace /> },
           { path: 'jobs/:jobId/edit', element: <RedirectWithParam param="jobId" to={(jobId) => `/buyer/jobs/${jobId}/edit`} /> },
@@ -102,7 +105,7 @@ const router = createBrowserRouter([
           { path: 'suppliers', element: <Navigate to="/buyer/suppliers" replace /> },
           { path: 'suppliers/new', element: <Navigate to="/buyer/suppliers/new" replace /> },
           { path: 'suppliers/:supplierId/edit', element: <RedirectWithParam param="supplierId" to={(supplierId) => `/buyer/suppliers/${supplierId}/edit`} /> },
-          { path: 'suppliers/:supplierId', element: <SupplierDetailPage /> },
+          { path: 'suppliers/:supplierId', element: <BuyerSupplierDetailPage /> },
           { path: 'projects/won', element: <Navigate to="/supplier/projects" replace /> },
           { path: 'projects/won/:projectId', element: <RedirectWithParam param="projectId" to={(projectId) => `/supplier/projects/${projectId}`} /> },
           { path: 'manpower', element: <Navigate to="/supplier/manpower" replace /> }

@@ -21,11 +21,11 @@ import { supplierLabels, supplierStatusLabel } from '../labels';
 import type { SupplierAttachment, SupplierCompany } from '../types';
 import { mapSupplierRelationshipToCompany } from '../utils/supplierMappers';
 
-type SuppliersPageProps = {
+type CompanyRelationshipListViewProps = {
   mode?: RoleMode;
 };
 
-export function SuppliersPage({ mode }: SuppliersPageProps = {}) {
+export function CompanyRelationshipListView({ mode }: CompanyRelationshipListViewProps = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [role, setRole] = useState<RoleMode>(mode ?? 'agency');

@@ -16,7 +16,7 @@ type SourceType = NonNullable<CreateJobRequest['sourceType']>;
 
 const checklist = ['사업 기본 정보 확인', 'RFP 및 첨부파일 등록', '제안 마감/평가 일정 입력', '평가 기준과 배점 검토', '공개 범위와 담당자 지정'];
 
-export function JobCreatePage() {
+export function BuyerJobFormPage() {
   const navigate = useNavigate();
   const { jobId } = useParams();
   const isEditMode = Boolean(jobId);

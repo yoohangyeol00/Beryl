@@ -23,7 +23,7 @@ const columns: DataTableColumn<Contract>[] = [
   { key: 'status', header: '상태', render: (row) => <Badge tone={row.status === '마감임박' ? 'danger' : row.status === '정상' ? 'neutral' : 'success'}>{row.status}</Badge> }
 ];
 
-export function SupplierDetailPage() {
+export function BuyerSupplierDetailPage() {
   return (
     <section>
       <div className="mb-8">

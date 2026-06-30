@@ -61,7 +61,7 @@ const columns: DataTableColumn<AssignedPerson>[] = [
   }
 ];
 
-export function ProjectDetailPage() {
+export function SupplierProjectDetailPage() {
   const { projectId = 'p-1' } = useParams();
   const project = projects[projectId] ?? projects['p-1'];
   const people = assignedPeople[project.id] ?? [];

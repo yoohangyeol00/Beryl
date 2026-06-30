@@ -82,7 +82,7 @@ function isOfferStatus(value: string): value is OfferStatus {
   return value === 'draft' || value === 'submitted' || value === 'awarded' || value === 'rejected';
 }
 
-export function BidParticipationPage() {
+export function SupplierBidParticipationPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();

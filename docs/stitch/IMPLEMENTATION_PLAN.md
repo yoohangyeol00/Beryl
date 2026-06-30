@@ -41,18 +41,18 @@ Connected.
 | --- | --- | --- | --- |
 | 로그인 | 인증 진입 | `StitchScreenPage(login)` | `/login` |
 | 회원가입 | 사용자 등록 | `StitchScreenPage(signup)` | `/signup` |
-| 발주기관별 입찰공고 관리 | 공고 목록 관리 | `StitchScreenPage(agencyBidManagement)` | `/jobs` |
-| 입찰 공고 상세 및 RFP 분석 정보 | 공고 상세와 RFP 분석 정보 | `StitchScreenPage(bidDetail)` | `/jobs/:jobId` |
+| 발주기관별 입찰공고 관리 | 공고 목록 관리 | `BuyerJobListPage`, `SupplierJobListPage` | `/buyer/jobs`, `/supplier/jobs` |
+| 입찰 공고 상세 및 RFP 분석 정보 | 공고 상세와 RFP 분석 정보 | `BuyerJobDetailPage`, `SupplierJobDetailPage` | `/buyer/jobs/:jobId`, `/supplier/jobs/:jobId` |
 | 인력 상세 정보 및 이력 관리 | 인력 프로필 및 이력 관리 | `StitchScreenPage(personDetail)` | `/resumes/:resumeId` |
 | 추천 인력 매칭 알고리즘 상세 분석 | 추천 근거와 점수 분석 | `StitchScreenPage(matchingAnalysis)` | `/offers/:offerId/analysis` |
-| 발주기관 관리 대시보드 | 발주기관 현황 | `StitchScreenPage(agencyDashboard)` | `/dashboard/agency` |
-| 공급기업 관리 대시보드 | 공급기업 현황 | `StitchScreenPage(supplierDashboard)` | `/dashboard/supplier` |
+| 발주기관 관리 대시보드 | 발주기관 현황 | `BuyerDashboardPage` | `/buyer/dashboard` |
+| 공급기업 관리 대시보드 | 공급기업 현황 | `StitchScreenPage(supplierDashboard)` | `/supplier/dashboard` |
 | 발주기관 조직 및 직원 관리 | 기관/직원 관리 | `StitchScreenPage(agencyStaff)` | `/agencies` |
 | 발주기관 등록 및 수정 | 기관 입력 폼 | `StitchScreenPage(agencyForm)` | `/agencies/new`, `/agencies/:agencyId/edit` |
-| 공급기업별 계약사업 관리 | 공급기업 계약 관리 | `StitchScreenPage(supplierContracts)` | `/suppliers` |
-| 공급기업 등록 및 수정 | 공급기업 입력 폼 | `StitchScreenPage(supplierForm)` | `/suppliers/new`, `/suppliers/:supplierId/edit` |
-| 수주 사업 관리 현황 | 수주 사업 관리 | `StitchScreenPage(wonProjects)` | `/projects/won` |
-| 투입인력 관리 및 M/M 현황 | 인력 투입률 관리 | `StitchScreenPage(manpower)` | `/manpower` |
+| 공급기업별 계약사업 관리 | 공급기업 계약 관리 | `BuyerSupplierPoolPage`, `SupplierClientListPage` | `/buyer/suppliers`, `/supplier/clients` |
+| 공급기업 등록 및 수정 | 공급기업 입력 폼 | `BuyerSupplierFormPage` | `/buyer/suppliers/new`, `/buyer/suppliers/:supplierId/edit` |
+| 수주 사업 관리 현황 | 수주 사업 관리 | `SupplierProjectsPage` | `/supplier/projects` |
+| 투입인력 관리 및 M/M 현황 | 인력 투입률 관리 | `SupplierManpowerPage` | `/supplier/manpower` |
 
 ## Common Layout Structure
 
@@ -100,7 +100,7 @@ Use `docs/stitch/DESIGN.md` as the source of truth.
 
 ## API Integration Data
 
-Initial `/jobs` data:
+Initial `/buyer/jobs` and `/supplier/jobs` data:
 
 - notice number
 - title
@@ -128,9 +128,9 @@ Initial `/jobs` data:
 
 ## Backend API Specification Items
 
-- `GET /jobs`
-- `GET /jobs/:jobId`
-- `GET /resumes`
+- `GET /api/jobs`
+- `GET /api/jobs/:jobId`
+- `GET /api/resumes`
 - `GET /offers`
 - Common response envelope: `{ success, data, error }`
 - Pagination format for tables.

@@ -72,7 +72,7 @@ const columns: DataTableColumn<AgencyProjectRow>[] = [
   { key: 'nextAction', header: t.nextActionColumn, sortable: true }
 ];
 
-export function AgencyDashboardPage() {
+export function BuyerDashboardPage() {
   const navigate = useNavigate();
   const { data, isLoading, isError, error } = useJobs({ perspective: 'buyer' });
   const jobs = data?.items ?? [];

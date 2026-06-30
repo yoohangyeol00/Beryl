@@ -52,10 +52,10 @@
 
 수용 기준:
 
-- `/dashboard/agency`는 현재 기업의 발주 관점 현황을 보여준다.
-- `/dashboard/supplier`는 현재 기업의 공급 관점 현황을 보여준다.
-- `/jobs`, `/jobs/:jobId`, `/offers/:offerId/analysis`는 현재 기업과 관련된 공고/RFP/매칭 흐름을 보여준다.
-- `/suppliers`, `/projects/won`, `/manpower`는 현재 기업의 거래 관계, 수주 사업, 투입 인력 흐름과 연결되어야 한다.
+- `/buyer/dashboard`는 현재 기업의 발주 관점 현황을 보여준다.
+- `/supplier/dashboard`는 현재 기업의 공급 관점 현황을 보여준다.
+- `/buyer/jobs`, `/buyer/jobs/:jobId`, `/supplier/jobs`, `/supplier/jobs/:jobId`, `/offers/:offerId/analysis`는 현재 기업과 관련된 공고/RFP/매칭 흐름을 보여준다.
+- `/buyer/suppliers`, `/supplier/clients`, `/supplier/projects`, `/supplier/manpower`는 현재 기업의 거래 관계, 수행 사업, 투입 인력 흐름과 연결되어야 한다.
 - `/dashboard/admin`은 시스템 관리자 관점의 전체 운영 현황을 보여준다.
 
 ### REQ-ROLE-004: 관점 전환
@@ -99,39 +99,42 @@
 
 ### REQ-SCR-002: 라우팅 유지
 
-현재 주요 라우트는 유지한다.
+현재 주요 라우트는 발주 관점과 공급 관점이 URL에서 명확히 구분되도록 유지한다.
 
 필수 라우트:
 
 - `/login`
 - `/signup`
-- `/jobs`
-- `/jobs/new`
-- `/jobs/:jobId`
+- `/buyer/dashboard`
+- `/buyer/jobs`
+- `/buyer/jobs/new`
+- `/buyer/jobs/:jobId`
+- `/buyer/jobs/:jobId/edit`
+- `/buyer/suppliers`
+- `/buyer/suppliers/new`
+- `/buyer/suppliers/:supplierId/edit`
+- `/buyer/company-members`
+- `/supplier/dashboard`
+- `/supplier/jobs`
+- `/supplier/jobs/:jobId`
+- `/supplier/bid-participation`
+- `/supplier/clients`
+- `/supplier/manpower`
+- `/supplier/projects`
+- `/supplier/projects/:projectId`
 - `/resumes/:resumeId`
 - `/offers/:offerId/analysis`
 - `/dashboard/admin`
-- `/dashboard/agency`
-- `/dashboard/supplier`
 - `/agencies`
 - `/agencies/new`
 - `/agencies/:agencyId/edit`
 - `/agency-organizations`
-- `/agency-staff`
-- `/bid-participation`
-- `/clients`
-- `/suppliers`
-- `/suppliers/new`
-- `/suppliers/:supplierId/edit`
-- `/suppliers/:supplierId`
-- `/projects/won`
-- `/projects/won/:projectId`
-- `/manpower`
 
 수용 기준:
 
-- 현재 구현 기준으로 `/`는 `/dashboard/admin`으로 이동한다.
-- 현재 구현 기준으로 `/dashboard`는 `/dashboard/admin`으로 이동한다.
+- 현재 구현 기준으로 `/`는 `/buyer/dashboard`로 이동한다.
+- 현재 구현 기준으로 `/dashboard`는 `/buyer/dashboard`로 이동한다.
+- 기존 `/jobs`, `/suppliers`, `/clients`, `/bid-participation`, `/manpower`, `/projects/won`, `/dashboard/agency`, `/dashboard/supplier` 경로는 새 관점별 경로로 redirect한다.
 - 라우트 변경은 관련 문서와 함께 갱신되어야 한다.
 
 ### REQ-SCR-003: 상태 화면

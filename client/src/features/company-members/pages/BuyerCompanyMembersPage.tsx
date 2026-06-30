@@ -30,7 +30,7 @@ const columns: DataTableColumn<Staff>[] = [
   { key: 'status', header: '계정 상태', render: (row) => <Badge tone={row.status === '재직' ? 'success' : 'neutral'}>{row.status}</Badge> }
 ];
 
-export function AgencyStaffPage() {
+export function BuyerCompanyMembersPage() {
   return (
     <section>
       <PageTitle
