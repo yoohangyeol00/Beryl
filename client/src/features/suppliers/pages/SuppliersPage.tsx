@@ -1,5 +1,9 @@
 import { Building2, PlusCircle, ShieldCheck, Star, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getApiErrorMessage } from '../../../api/apiResponse';
+import { EmptyState } from '../../../components/common/EmptyState';
+import { LoadingState } from '../../../components/common/LoadingState';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { PageToolbar } from '../../../components/common/PageToolbar';
 import { MetricCard } from '../../../components/common/MetricCard';
@@ -8,6 +12,7 @@ import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
 import { Modal } from '../../../components/ui/Modal';
+import { useSupplierRelationships } from '../hooks/useSupplierRelationships';
 
 type RoleMode = 'agency' | 'supplier';
 type SupplierStatus = 'preferred' | 'active' | 'review' | 'watch';
@@ -76,22 +81,29 @@ const statusLabel: Record<SupplierStatus, string> = {
   watch: ko.statusWatch
 };
 
-const suppliers: SupplierCompany[] = [
-  { id: 'supplier-1', name: '\uD14C\uD06C\uBE0C\uB9AC\uC9C0\uCF54\uB9AC\uC544', specialty: '\uACF5\uACF5 SI / \uD074\uB77C\uC6B0\uB4DC', contact: '\uBC15\uB3C4\uD604', grade: 'A', proposalCount: 8, winRate: 63, evaluation: 92, tags: '\uC6B0\uC218, PM \uAC15\uC810', status: 'preferred' },
-  { id: 'supplier-2', name: '\uB125\uC2A4\uD2B8\uC18C\uD504\uD2B8', specialty: '\uB370\uC774\uD130 \uD50C\uB7AB\uD3FC', contact: '\uCD5C\uBBFC\uC11C', grade: 'B+', proposalCount: 5, winRate: 40, evaluation: 84, tags: '\uC0B0\uCD9C\uBB3C \uC548\uC815', status: 'active' },
-  { id: 'supplier-3', name: '\uC5D0\uC774\uC544\uC774\uB7A9\uC2A4', specialty: 'AI / \uBD84\uC11D', contact: '\uC815\uD558\uB298', grade: 'B', proposalCount: 3, winRate: 33, evaluation: 79, tags: '\uC2E0\uADDC \uAC80\uD1A0', status: 'review' },
-  { id: 'supplier-4', name: '\uB3C4\uC2DC\uC815\uBCF4\uAE30\uC220', specialty: 'GIS / \uBAA8\uBC14\uC77C', contact: '\uC774\uC11C\uC5F0', grade: 'C+', proposalCount: 4, winRate: 25, evaluation: 68, tags: '\uC77C\uC815 \uC9C0\uC5F0 \uC774\uB825', status: 'watch' }
-];
-
 function getInitialRole(): RoleMode {
   if (typeof window === 'undefined') return 'agency';
   return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
 }
 
 export function SuppliersPage() {
+  const navigate = useNavigate();
   const [role, setRole] = useState<RoleMode>(getInitialRole);
   const [selectedSupplier, setSelectedSupplier] = useState<SupplierCompany | null>(null);
   const isAgency = role === 'agency';
+  const { data, isLoading, isError, error } = useSupplierRelationships({ perspective: isAgency ? 'buyer' : 'supplier' });
+  const suppliers = (data?.items ?? []).map((relationship) => ({
+    id: relationship.id,
+    name: relationship.targetCompany.name,
+    specialty: relationship.capabilities.length ? relationship.capabilities.join(', ') : relationship.targetCompany.companyType ?? '-',
+    contact: relationship.contact?.name ?? '-',
+    grade: relationship.internalGrade ?? '-',
+    proposalCount: 0,
+    winRate: 0,
+    evaluation: 0,
+    tags: relationship.tags ?? '-',
+    status: relationship.managementStatus ?? 'active'
+  } satisfies SupplierCompany));
 
   useEffect(() => {
     const handleRoleChange = (event: Event) => {
@@ -126,16 +138,20 @@ export function SuppliersPage() {
       <PageTitle
         title={isAgency ? ko.agencyTitle : ko.supplierTitle}
         description={isAgency ? ko.agencyDesc : ko.supplierDesc}
-        actions={<Button icon={<PlusCircle className="h-4 w-4" />}>{isAgency ? ko.addAgency : ko.addSupplier}</Button>}
+        actions={
+          <Button icon={<PlusCircle className="h-4 w-4" />} onClick={() => navigate('/suppliers/new')}>
+            {isAgency ? ko.addAgency : ko.addSupplier}
+          </Button>
+        }
       />
 
       {isAgency ? (
         <>
           <div className="mb-6 grid gap-4 md:grid-cols-4">
-            <MetricCard label={ko.total} value={`42${ko.count}`} />
-            <MetricCard label={ko.preferred} value={`12${ko.count}`} />
-            <MetricCard label={ko.watch} value={`4${ko.count}`} tone="danger" />
-            <MetricCard label={ko.avgScore} value={`84${ko.point}`} />
+            <MetricCard label={ko.total} value={`${suppliers.length}${ko.count}`} />
+            <MetricCard label={ko.preferred} value={`${suppliers.filter((supplier) => supplier.status === 'preferred').length}${ko.count}`} />
+            <MetricCard label={ko.watch} value={`${suppliers.filter((supplier) => supplier.status === 'watch').length}${ko.count}`} tone="danger" />
+            <MetricCard label={ko.avgScore} value={`-${ko.point}`} />
           </div>
           <div className="mb-6 grid gap-4 lg:grid-cols-2">
             <Card className="p-5">
@@ -160,7 +176,18 @@ export function SuppliersPage() {
         <Button variant="secondary" icon={<Building2 className="h-4 w-4" />}>{ko.allSpecialty}</Button>
         <Button variant="secondary" icon={<Users className="h-4 w-4" />}>{ko.allStatus}</Button>
       </PageToolbar>
-      <DataTable columns={columns} data={suppliers} getRowKey={(row) => row.id} onRowClick={(row) => setSelectedSupplier(row)} tableClassName="min-w-[1180px] w-full" />
+      {isLoading ? <LoadingState /> : null}
+      {isError ? (
+        <Card className="p-6">
+          <p className="font-semibold text-error">{getApiErrorMessage(error, '공급기업 목록을 불러오지 못했습니다.')}</p>
+        </Card>
+      ) : null}
+      {!isLoading && !isError && suppliers.length === 0 ? (
+        <EmptyState title="등록된 공급기업이 없습니다." description="공급기업 등록 버튼으로 협력사를 추가하세요." />
+      ) : null}
+      {!isLoading && !isError && suppliers.length > 0 ? (
+        <DataTable columns={columns} data={suppliers} getRowKey={(row) => row.id} onRowClick={(row) => setSelectedSupplier(row)} tableClassName="min-w-[1180px] w-full" />
+      ) : null}
       <Modal open={selectedSupplier !== null} title={selectedSupplier ? `${selectedSupplier.name} ${ko.detailTitle}` : ko.detailTitle} onClose={() => setSelectedSupplier(null)}>
         {selectedSupplier ? <SupplierDetailModal supplier={selectedSupplier} /> : null}
       </Modal>
