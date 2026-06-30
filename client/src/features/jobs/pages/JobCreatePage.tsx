@@ -153,6 +153,8 @@ export function JobCreatePage() {
                   onChange={(event) => setSourceType(event.target.value as SourceType)}
                 >
                   <option value="nara">나라장터 API</option>
+                  <option value="nipa">NIPA</option>
+                  <option value="nia">NIA</option>
                   <option value="private_bid">민간 입찰</option>
                   <option value="manual">수동 등록</option>
                   <option value="email">이메일</option>

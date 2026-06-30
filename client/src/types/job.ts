@@ -11,7 +11,7 @@ export type Job = {
   deadline: string;
   status: JobStatus;
   procurementType?: 'public' | 'private';
-  sourceType?: 'nara' | 'private_bid' | 'manual' | 'email' | 'other';
+  sourceType?: 'nara' | 'nipa' | 'nia' | 'private_bid' | 'manual' | 'email' | 'other';
   sourceUrl?: string;
   rfpScore: number;
   recommendedPeople: number;

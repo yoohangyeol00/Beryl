@@ -1,84 +1,127 @@
-import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Pencil, Trash2 } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { getApiErrorMessage } from '../../../api/apiResponse';
+import { deleteResume, getResume } from '../../../api/resumesApi';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { MetricCard } from '../../../components/common/MetricCard';
 import { Badge } from '../../../components/ui/Badge';
+import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
+import type { AvailabilityStatus, ResumeProject } from '../../../types/resume';
 
-type PersonProfile = {
-  name: string;
-  role: string;
-  career: string;
-  availableFrom: string;
-  currentClient: string;
-  skills: string[];
+const statusLabels: Record<AvailabilityStatus, string> = {
+  available: '가용',
+  assigned: '투입중',
+  partiallyAssigned: '부분투입',
+  unavailable: '교체검토'
 };
 
-type History = { id: string; project: string; client: string; role: string; period: string; mm: number };
-
-const profiles: Record<string, PersonProfile> = {
-  'm-1': { name: '김도윤', role: 'PM/아키텍트', career: '14년', availableFrom: '2026-10-01', currentClient: '소방청', skills: ['공공 PM', 'MSA', 'Spring Boot', '아키텍처', '제안 리딩'] },
-  'm-2': { name: '이서연', role: 'Frontend', career: '8년', availableFrom: '2026-08-16', currentClient: '조달청', skills: ['React', 'TypeScript', '대시보드', '포털 UX', '접근성'] },
-  'm-3': { name: '박지훈', role: 'Backend', career: '9년', availableFrom: '2026-07-01', currentClient: '대기', skills: ['Spring Boot', 'API', 'PostgreSQL', '공공 데이터', '배치'] },
-  'm-4': { name: '최민서', role: 'DevOps', career: '7년', availableFrom: '2026-08-01', currentClient: 'NIA', skills: ['Kubernetes', 'CI/CD', '클라우드 운영', '모니터링', '장애 대응'] },
-  demo: { name: '김도윤', role: 'PM/아키텍트', career: '14년', availableFrom: '2026-10-01', currentClient: '소방청', skills: ['공공 PM', 'MSA', 'Spring Boot', '아키텍처', '제안 리딩'] }
-};
-
-const histories: Record<string, History[]> = {
-  'm-1': [
-    { id: 'h-1', project: '재난 안전 관리 시스템', client: '소방청', role: 'PM/아키텍트', period: '2026.01 - 2026.09', mm: 9 },
-    { id: 'h-2', project: '전자조달 플랫폼 고도화', client: '조달청', role: 'PM', period: '2025.01 - 2025.12', mm: 12 },
-    { id: 'h-3', project: '공공 데이터 표준화', client: '행정안전부', role: 'PL', period: '2024.02 - 2024.12', mm: 10 }
-  ],
-  'm-2': [
-    { id: 'h-1', project: '전자조달 포털 개선', client: '조달청', role: 'Frontend', period: '2026.02 - 2026.08', mm: 4 },
-    { id: 'h-2', project: '민원 대시보드 구축', client: '서울시', role: 'Frontend Lead', period: '2025.03 - 2025.12', mm: 9 }
-  ],
-  'm-3': [
-    { id: 'h-1', project: '공공데이터 API 연계', client: '행정안전부', role: 'Backend', period: '2025.06 - 2026.02', mm: 8 },
-    { id: 'h-2', project: '기관 연계 배치 고도화', client: '한국도로공사', role: 'Backend', period: '2024.01 - 2024.09', mm: 7 }
-  ],
-  'm-4': [
-    { id: 'h-1', project: 'AI 교과서 클라우드 운영', client: 'NIA', role: 'DevOps', period: '2026.01 - 2026.07', mm: 7 },
-    { id: 'h-2', project: '공공 클라우드 전환', client: '정보통신산업진흥원', role: 'DevOps', period: '2025.01 - 2025.10', mm: 10 }
-  ],
-  demo: []
-};
-
-const columns: DataTableColumn<History>[] = [
-  { key: 'project', header: '사업명' },
-  { key: 'client', header: '고객사/투입처' },
-  { key: 'role', header: '역할' },
-  { key: 'period', header: '기간' },
-  { key: 'mm', header: 'M/M', align: 'right' }
+const columns: DataTableColumn<ResumeProject>[] = [
+  { key: 'projectName', header: '사업명' },
+  { key: 'clientName', header: '고객사/발주처', render: (row) => row.clientName || '-' },
+  { key: 'role', header: '역할', render: (row) => row.role || '-' },
+  {
+    key: 'period',
+    header: '기간',
+    render: (row) => [row.startedAt || '-', row.endedAt || '-'].join(' ~ ')
+  },
+  { key: 'manMonths', header: 'M/M', align: 'right', render: (row) => row.manMonths.toFixed(1) }
 ];
 
 export function ResumeDetailPage() {
-  const { resumeId = 'demo' } = useParams();
-  const profile = profiles[resumeId] ?? profiles.demo;
-  const rows = histories[resumeId] ?? histories['m-1'];
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { resumeId = '' } = useParams();
+  const [errorMessage, setErrorMessage] = useState('');
+  const resumeQuery = useQuery({
+    queryKey: ['resume', resumeId],
+    queryFn: () => getResume(resumeId),
+    enabled: Boolean(resumeId)
+  });
+  const profile = resumeQuery.data;
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteResume(resumeId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['resumes'] });
+      navigate('/manpower');
+    },
+    onError: (error) => {
+      setErrorMessage(getApiErrorMessage(error, '인력 정보를 삭제하지 못했습니다.'));
+    }
+  });
+
+  const handleDelete = () => {
+    if (!profile || !window.confirm(`${profile.name} 인력 정보를 삭제할까요?`)) {
+      return;
+    }
+
+    setErrorMessage('');
+    deleteMutation.mutate();
+  };
 
   return (
     <section>
-      <PageTitle title={`${profile.name} 인력 상세`} description="투입 이력, 보유 역량, 현재 투입처와 다음 가용 시점을 확인합니다." />
+      <PageTitle
+        title={profile ? `${profile.name} 인력 상세` : '인력 상세'}
+        description="사업 이력, 보유 역량, 현재 투입처와 다음 가용 시점을 확인합니다."
+        actions={
+          profile ? (
+            <>
+              <Button variant="secondary" icon={<Pencil className="h-4 w-4" />} onClick={() => navigate(`/resumes/${profile.id}/edit`)}>
+                수정
+              </Button>
+              <Button
+                variant="secondary"
+                className="!border-error !text-error hover:!bg-error/5"
+                icon={<Trash2 className="h-4 w-4" />}
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+              >
+                삭제
+              </Button>
+            </>
+          ) : null
+        }
+      />
+
+      {errorMessage ? <p className="mb-4 font-body text-[14px] text-error">{errorMessage}</p> : null}
+
       <div className="mb-6 grid gap-4 md:grid-cols-5">
-        <MetricCard label="이름" value={profile.name} />
-        <MetricCard label="역할" value={profile.role} />
-        <MetricCard label="경력" value={profile.career} />
-        <MetricCard label="현재 투입처" value={profile.currentClient} />
-        <MetricCard label="가용일" value={profile.availableFrom} />
+        <MetricCard label="이름" value={profile?.name ?? '-'} />
+        <MetricCard label="역할" value={profile?.role || '-'} />
+        <MetricCard label="경력" value={profile ? `${profile.careerYears}년` : '-'} />
+        <MetricCard label="현재 투입처" value={profile?.currentClient ?? '-'} />
+        <MetricCard label="가용일" value={profile?.availableFrom || '-'} />
       </div>
+
       <Card className="mb-6 p-6">
-        <h2 className="mb-4 font-headline text-headline-md text-on-surface">보유 역량</h2>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="font-headline text-headline-md text-on-surface">보유 역량</h2>
+          {profile ? <Badge tone={profile.availabilityStatus === 'available' ? 'success' : profile.availabilityStatus === 'unavailable' ? 'danger' : 'info'}>{statusLabels[profile.availabilityStatus]}</Badge> : null}
+        </div>
         <div className="flex flex-wrap gap-2">
-          {profile.skills.map((skill) => (
-            <Badge key={skill} tone="info">
-              {skill}
-            </Badge>
-          ))}
+          {profile?.skills.length ? (
+            profile.skills.map((skill) => (
+              <Badge key={skill} tone="info">
+                {skill}
+              </Badge>
+            ))
+          ) : (
+            <span className="font-body text-[15px] text-on-surface-variant">등록된 기술이 없습니다.</span>
+          )}
         </div>
       </Card>
-      <DataTable columns={columns} data={rows} getRowKey={(row) => row.id} />
+
+      <DataTable
+        columns={columns}
+        data={profile?.projects ?? []}
+        getRowKey={(row) => row.id}
+        isLoading={resumeQuery.isLoading}
+        emptyMessage={resumeQuery.isError ? '인력 정보를 불러오지 못했습니다.' : '등록된 수행 이력이 없습니다.'}
+      />
     </section>
   );
 }

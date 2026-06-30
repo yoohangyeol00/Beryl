@@ -8,7 +8,6 @@ import { EmptyState } from '../../../components/common/EmptyState';
 import { LoadingState } from '../../../components/common/LoadingState';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { ActionMenu } from '../../../components/ui/ActionMenu';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
@@ -208,16 +207,21 @@ export function JobDetailPage() {
         actions={
           <>
             <Button variant="secondary" icon={<Download className="h-4 w-4" />}>{labels.downloadRfp}</Button>
-            <Button icon={isAgency ? <Star className="h-4 w-4" /> : <Send className="h-4 w-4" />} onClick={() => !isAgency && navigate('/proposals/new')}>
+            <Button icon={isAgency ? <Star className="h-4 w-4" /> : <Send className="h-4 w-4" />} onClick={() => !isAgency && navigate(`/proposals/new?jobId=${job.id}`)}>
               {isAgency ? labels.openScore : labels.createProposal}
             </Button>
-            <ActionMenu
-              label="공고 관리"
-              items={[
-                { label: '수정', icon: <Pencil className="h-4 w-4" />, onClick: () => navigate(`/jobs/${job.id}/edit`) },
-                { label: isDeleting ? '삭제 중...' : '삭제', icon: <Trash2 className="h-4 w-4" />, tone: 'danger', onClick: handleDelete }
-              ]}
-            />
+            <Button variant="secondary" icon={<Pencil className="h-4 w-4" />} onClick={() => navigate(`/jobs/${job.id}/edit`)}>
+              수정
+            </Button>
+            <Button
+              variant="secondary"
+              className="!border-error !text-error hover:!bg-error/5"
+              icon={<Trash2 className="h-4 w-4" />}
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? '삭제 중...' : '삭제'}
+            </Button>
           </>
         }
       />
@@ -255,7 +259,7 @@ export function JobDetailPage() {
           </div>
         </Card>
 
-        {isAgency ? <AgencyReviewPanel /> : <SupplierProposalPanel onCreateProposal={() => navigate('/proposals/new')} />}
+        {isAgency ? <AgencyReviewPanel /> : <SupplierProposalPanel onCreateProposal={() => navigate(`/proposals/new?jobId=${job.id}`)} />}
       </div>
 
       <Card className="overflow-hidden">
@@ -493,6 +497,8 @@ function formatDate(value: string) {
 function formatSourceType(value: string | undefined) {
   const labelMap: Record<string, string> = {
     nara: '나라장터 API',
+    nipa: 'NIPA',
+    nia: 'NIA',
     private_bid: '민간 입찰',
     manual: '수동 등록',
     email: '이메일',

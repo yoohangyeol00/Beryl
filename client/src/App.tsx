@@ -24,6 +24,7 @@ import { OfferAnalysisPage } from './features/offers/pages/OfferAnalysisPage';
 import { WonProjectsPage } from './features/projects/pages/WonProjectsPage';
 import { ProjectDetailPage } from './features/projects/pages/ProjectDetailPage';
 import { ResumeDetailPage } from './features/resumes/pages/ResumeDetailPage';
+import { ResumeFormPage } from './features/resumes/pages/ResumeFormPage';
 import { SupplierDetailPage } from './features/suppliers/pages/SupplierDetailPage';
 import { SupplierFormPage } from './features/suppliers/pages/SupplierFormPage';
 import { SuppliersPage } from './features/suppliers/pages/SuppliersPage';
@@ -57,7 +58,10 @@ const router = createBrowserRouter([
           { path: 'jobs/new', element: <JobCreatePage /> },
           { path: 'jobs/:jobId/edit', element: <JobCreatePage /> },
           { path: 'jobs/:jobId', element: <JobDetailPage /> },
+          { path: 'resumes/new', element: <ResumeFormPage /> },
+          { path: 'resumes/:resumeId/edit', element: <ResumeFormPage /> },
           { path: 'resumes/:resumeId', element: <ResumeDetailPage /> },
+          { path: 'offers/:offerId', element: <ProposalCreatePage /> },
           { path: 'offers/:offerId/analysis', element: <OfferAnalysisPage /> },
           { path: 'dashboard', element: <Navigate to="/dashboard/admin" replace /> },
           { path: 'dashboard/admin', element: <AdminDashboardPage /> },

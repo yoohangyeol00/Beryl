@@ -1,53 +1,81 @@
-﻿import { ClipboardCheck, FilePlus2, Send, Users } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ClipboardCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { getOffers } from '../../../api/offersApi';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { PageToolbar } from '../../../components/common/PageToolbar';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
+import type { Offer, OfferStatus } from '../../../types/offer';
 
 type RoleMode = 'agency' | 'supplier';
 
-type Proposal = {
-  id: string;
-  project: string;
-  client: string;
-  proposedPeople: string;
-  expectedStart: string;
-  monthlyRate: string;
-  fitScore: number;
-  status: '후보선정' | '제안완료' | '인터뷰' | '보완필요';
+const statusLabels: Record<OfferStatus, string> = {
+  draft: '후보선정',
+  submitted: '제안완료',
+  awarded: '선정',
+  rejected: '보완필요'
 };
 
-const rows: Proposal[] = [
-  { id: 'pr-1', project: '차세대 통합 재난 안전 관리 시스템 구축', client: '소방청', proposedPeople: '김도윤, 이서연, 박지훈', expectedStart: '2026-08-01', monthlyRate: '월 3,800만원', fitScore: 91, status: '제안완료' },
-  { id: 'pr-2', project: '공공데이터 API 연계 플랫폼', client: '행정안전부', proposedPeople: '박지훈, 최민서', expectedStart: '2026-07-22', monthlyRate: '월 2,200만원', fitScore: 84, status: '후보선정' },
-  { id: 'pr-3', project: 'AI 디지털 교과서 클라우드 운영', client: 'NIA', proposedPeople: '정하늘', expectedStart: '2026-07-10', monthlyRate: '월 1,600만원', fitScore: 78, status: '보완필요' },
-  { id: 'pr-4', project: '전자조달 사용자 포털 개선', client: '조달청', proposedPeople: '이서연', expectedStart: '2026-08-15', monthlyRate: '월 1,400만원', fitScore: 82, status: '인터뷰' }
-];
+const submissionChannelLabels = {
+  nara: '나라장터',
+  email: '이메일',
+  portal: '발주처 포털',
+  visit: '방문 제출',
+  other: '기타'
+} as const;
 
-const draftProject = '차세대 통합 재난 안전 관리 시스템 구축';
-
-const draftCandidates = [
-  { name: '김도윤', role: 'PM/아키텍트', score: 92 },
-  { name: '이서연', role: 'Frontend', score: 86 },
-  { name: '박지훈', role: 'Backend', score: 81 }
-];
-
-const columns: DataTableColumn<Proposal>[] = [
-  { key: 'project', header: '대상 사업', sortable: true, render: (row) => <strong>{row.project}</strong> },
-  { key: 'client', header: '발주처', sortable: true },
-  { key: 'proposedPeople', header: '제안 인력', sortable: true },
-  { key: 'expectedStart', header: '예상 투입일', sortable: true },
-  { key: 'monthlyRate', header: '제안 단가', align: 'right' },
-  { key: 'fitScore', header: '적합도', align: 'right', sortable: true, sortValue: (row) => row.fitScore, render: (row) => `${row.fitScore}점` },
+const columns: DataTableColumn<Offer>[] = [
+  { key: 'jobTitle', header: '대상 사업', sortable: true, render: (row) => <strong>{row.proposalTitle || row.jobTitle}</strong> },
+  { key: 'buyerName', header: '발주처', sortable: true },
+  { key: 'supplierName', header: '공급기업', sortable: true },
+  {
+    key: 'proposedPeople',
+    header: '제안 인력',
+    sortable: true,
+    render: (row) => (row.proposedPeople.length ? row.proposedPeople.join(', ') : '-')
+  },
+  { key: 'expectedStartDate', header: '예상 투입일', sortable: true, render: (row) => row.expectedStartDate || '-' },
+  {
+    key: 'proposalAmount',
+    header: '제안 금액',
+    align: 'right',
+    sortable: true,
+    sortValue: (row) => row.proposalAmount,
+    render: (row) => (row.proposalAmount ? `${row.proposalAmount.toLocaleString('ko-KR')}원` : '-')
+  },
+  {
+    key: 'totalMatchScore',
+    header: '적합도',
+    align: 'right',
+    sortable: true,
+    sortValue: (row) => row.totalMatchScore,
+    render: (row) => (row.totalMatchScore ? `${Math.round(row.totalMatchScore)}점` : '-')
+  },
   {
     key: 'status',
     header: '진행상태',
     sortable: true,
-    render: (row) => <Badge tone={row.status === '보완필요' ? 'danger' : row.status === '제안완료' ? 'success' : 'info'}>{row.status}</Badge>
+    render: (row) => <Badge tone={row.status === 'rejected' ? 'danger' : row.status === 'submitted' || row.status === 'awarded' ? 'success' : 'info'}>{statusLabels[row.status]}</Badge>
+  },
+  {
+    key: 'latestSubmission',
+    header: '제출 기록',
+    render: (row) =>
+      row.latestSubmission ? (
+        <div className="text-sm leading-6">
+          <strong>{submissionChannelLabels[row.latestSubmission.channel]}</strong>
+          <span className="ml-2 text-on-surface-variant">{formatDate(row.latestSubmission.submittedAt)}</span>
+          <div className="text-on-surface-variant">
+            {row.latestSubmission.submittedByName || '-'} / {row.latestSubmission.receiptNo || '접수번호 없음'}
+          </div>
+        </div>
+      ) : (
+        '-'
+      )
   }
 ];
 
@@ -56,10 +84,24 @@ function getInitialRole(): RoleMode {
   return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
 }
 
+function isOfferStatus(value: string): value is OfferStatus {
+  return value === 'draft' || value === 'submitted' || value === 'awarded' || value === 'rejected';
+}
+
 export function BidParticipationPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [role, setRole] = useState<RoleMode>(getInitialRole);
   const isAgency = role === 'agency';
+  const query = searchParams.get('q') ?? '';
+  const status = searchParams.get('status') ?? 'all';
+  const offerStatus = isOfferStatus(status) ? status : undefined;
+  const offersQuery = useQuery({
+    queryKey: ['offers', { perspective: isAgency ? 'buyer' : 'supplier', q: query, status: offerStatus }],
+    queryFn: () => getOffers({ perspective: isAgency ? 'buyer' : 'supplier', q: query || undefined, status: offerStatus, pageSize: 100 })
+  });
+  const rows = offersQuery.data?.items ?? [];
+  const summary = offersQuery.data?.summary;
 
   useEffect(() => {
     const handleRoleChange = (event: Event) => {
@@ -67,75 +109,112 @@ export function BidParticipationPage() {
       setRole(nextRole === 'supplier' ? 'supplier' : 'agency');
     };
 
+    const handleStorage = () => setRole(getInitialRole());
+
     window.addEventListener('beryl-role-change', handleRoleChange);
-    window.addEventListener('storage', () => setRole(getInitialRole()));
+    window.addEventListener('storage', handleStorage);
 
     return () => {
       window.removeEventListener('beryl-role-change', handleRoleChange);
+      window.removeEventListener('storage', handleStorage);
     };
   }, []);
+
+  const handleQueryChange = (value: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (value.trim()) next.set('q', value);
+    else next.delete('q');
+    setSearchParams(next);
+  };
+
+  const handleStatusChange = (value: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (value === 'all') next.delete('status');
+    else next.set('status', value);
+    setSearchParams(next);
+  };
 
   return (
     <section>
       <PageTitle
         title={isAgency ? '접수 제안 평가' : '제출 제안 관리'}
         description={isAgency ? '우리 기관 공고에 공급기업이 제출한 제안서, 후보 인력, 단가, 평가 상태를 관리합니다.' : '입찰공고를 보고 작성·제출한 제안서의 상태, 보완 요청, 선정 이후 계약 전환을 관리합니다.'}
-        actions={<Button icon={isAgency ? <ClipboardCheck className="h-4 w-4" /> : <Send className="h-4 w-4" />} onClick={() => !isAgency && navigate('/proposals/new')}>{isAgency ? '평가표 열기' : '제안서 생성'}</Button>}
+        actions={isAgency ? <Button icon={<ClipboardCheck className="h-4 w-4" />}>평가표 열기</Button> : null}
       />
 
       {isAgency ? (
         <div className="mb-6 grid gap-4 md:grid-cols-4">
           <Card className="p-5">
             <p className="font-label text-label-sm uppercase text-on-surface-variant">접수 제안</p>
-            <p className="mt-2 font-headline text-headline-md text-primary">16건</p>
+            <p className="mt-2 font-headline text-headline-md text-primary">{summary?.total ?? 0}건</p>
           </Card>
           <Card className="p-5">
             <p className="font-label text-label-sm uppercase text-on-surface-variant">평가 대기</p>
-            <p className="mt-2 font-headline text-headline-md text-error">8건</p>
+            <p className="mt-2 font-headline text-headline-md text-error">{summary?.submitted ?? 0}건</p>
           </Card>
           <Card className="p-5">
             <p className="font-label text-label-sm uppercase text-on-surface-variant">우선협상</p>
-            <p className="mt-2 font-headline text-headline-md text-primary">3건</p>
+            <p className="mt-2 font-headline text-headline-md text-primary">{summary?.awarded ?? 0}건</p>
           </Card>
           <Card className="p-5">
             <p className="font-label text-label-sm uppercase text-on-surface-variant">보완 요청</p>
-            <p className="mt-2 font-headline text-headline-md text-error">2건</p>
+            <p className="mt-2 font-headline text-headline-md text-error">{summary?.rejected ?? 0}건</p>
           </Card>
         </div>
       ) : (
-        <div className="mb-6 grid gap-4 xl:grid-cols-[1fr_360px]">
-          <Card className="p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <Users className="h-6 w-6 text-primary" />
-              <h2 className="font-headline text-[24px] font-bold">제안 후보군</h2>
-              <Badge tone="info">초안 준비</Badge>
-            </div>
-            <p className="mb-4 text-sm text-on-surface-variant">대상 사업: <strong className="text-on-surface">{draftProject}</strong></p>
-            <div className="grid gap-3 md:grid-cols-3">
-              {draftCandidates.map((candidate) => (
-                <div key={candidate.name} className="rounded-lg border border-outline-variant bg-surface-container-low p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <strong>{candidate.name}</strong>
-                    <span className="text-primary">{candidate.score}점</span>
-                  </div>
-                  <p className="mt-1 text-sm text-on-surface-variant">{candidate.role}</p>
-                </div>
-              ))}
-            </div>
+        <div className="mb-6 grid gap-4 md:grid-cols-4">
+          <Card className="p-5">
+            <p className="font-label text-label-sm uppercase text-on-surface-variant">전체 제안</p>
+            <p className="mt-2 font-headline text-headline-md text-primary">{summary?.total ?? 0}건</p>
           </Card>
-
-          <Card className="p-6">
-            <FilePlus2 className="mb-4 h-7 w-7 text-primary" />
-            <h2 className="font-headline text-[24px] font-bold">제안서 초안 생성</h2>
-            <p className="mt-2 text-sm leading-6 text-on-surface-variant">선택된 제안 후보군의 역할, 단가, 투입 가능일을 기반으로 제안서 초안을 생성합니다.</p>
-            <Button className="mt-5 w-full" icon={<Send className="h-4 w-4" />}>초안 생성</Button>
+          <Card className="p-5">
+            <p className="font-label text-label-sm uppercase text-on-surface-variant">작성중</p>
+            <p className="mt-2 font-headline text-headline-md text-primary">{summary?.draft ?? 0}건</p>
+          </Card>
+          <Card className="p-5">
+            <p className="font-label text-label-sm uppercase text-on-surface-variant">제출완료</p>
+            <p className="mt-2 font-headline text-headline-md text-primary">{summary?.submitted ?? 0}건</p>
+          </Card>
+          <Card className="p-5">
+            <p className="font-label text-label-sm uppercase text-on-surface-variant">선정/보완</p>
+            <p className="mt-2 font-headline text-headline-md text-error">{(summary?.awarded ?? 0) + (summary?.rejected ?? 0)}건</p>
           </Card>
         </div>
       )}
 
-      <PageToolbar searchPlaceholder={isAgency ? '사업명, 공급기업, 후보 인력 검색' : '사업명, 발주기관, 인력명 검색'} />
-      <DataTable columns={columns} data={rows} getRowKey={(row) => row.id} />
+      <PageToolbar
+        searchPlaceholder={isAgency ? '사업명, 공급기업, 후보 인력 검색' : '사업명, 발주기관, 인력명 검색'}
+        searchValue={query}
+        onSearchChange={handleQueryChange}
+        resultCount={offersQuery.data?.total ?? rows.length}
+        selects={[
+          {
+            label: '상태',
+            value: status,
+            onChange: handleStatusChange,
+            options: [
+              { label: '상태 전체', value: 'all' },
+              { label: '후보선정', value: 'draft' },
+              { label: '제안완료', value: 'submitted' },
+              { label: '선정', value: 'awarded' },
+              { label: '보완필요', value: 'rejected' }
+            ]
+          }
+        ]}
+      />
+      <DataTable
+        columns={columns}
+        data={rows}
+        getRowKey={(row) => row.id}
+        onRowClick={(row) => navigate(`/offers/${row.id}`)}
+        emptyMessage={offersQuery.isError ? '제안 목록을 불러오지 못했습니다.' : '조건에 맞는 제안서가 없습니다.'}
+        isLoading={offersQuery.isLoading}
+      />
     </section>
   );
 }
 
+function formatDate(value: string) {
+  if (!value) return '-';
+  return value.slice(0, 10);
+}

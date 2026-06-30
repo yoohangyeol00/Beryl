@@ -1,4 +1,4 @@
-import { Download, Printer, RefreshCw } from 'lucide-react';
+import { Download, FilePlus2, Printer } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
@@ -7,7 +7,6 @@ import { LoadingState } from '../../../components/common/LoadingState';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { PageToolbar } from '../../../components/common/PageToolbar';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
@@ -15,23 +14,19 @@ import type { Job } from '../../../types/job';
 import { useJobs } from '../hooks/useJobs';
 
 type RoleMode = 'agency' | 'supplier';
-
-const today = new Date('2026-06-29T00:00:00');
+type ProcurementFilter = 'all' | 'public' | 'private';
 
 function getInitialRole(): RoleMode {
   if (typeof window === 'undefined') return 'agency';
   return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
 }
 
-function getDeadlineStatus(deadline: string) {
-  if (!deadline) return 'open';
+function isJobStatus(value: string): value is Job['status'] {
+  return value === 'draft' || value === 'open' || value === 'closingSoon' || value === 'closed' || value === 'awarded';
+}
 
-  const date = new Date(deadline.replace(' ', 'T'));
-  const daysLeft = Math.ceil((date.getTime() - today.getTime()) / 86400000);
-
-  if (daysLeft < 0) return 'expired';
-  if (daysLeft <= 7) return 'urgent';
-  return 'open';
+function isDeadlineStatus(value: string): value is 'urgent' | 'open' | 'expired' {
+  return value === 'urgent' || value === 'open' || value === 'expired';
 }
 
 function TitleCell({ row, label = '공고번호' }: { row: Job; label?: string }) {
@@ -53,10 +48,28 @@ export function JobListPage() {
   const [scoreFilter, setScoreFilter] = useState(searchParams.get('score') ?? 'all');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') ?? 'all');
   const [deadlineFilter, setDeadlineFilter] = useState(searchParams.get('deadline') ?? 'all');
+  const [procurementFilter, setProcurementFilter] = useState<ProcurementFilter>(
+    searchParams.get('procurementType') === 'private' ? 'private' : searchParams.get('procurementType') === 'public' ? 'public' : 'all'
+  );
   const query = searchParams.get('q') ?? '';
   const pageSize = 10;
   const isAgency = role === 'agency';
-  const { data, isLoading, isError, error, refetch, isFetching } = useJobs();
+  const apiParams = useMemo(
+    () => ({
+      perspective: 'accessible' as const,
+      q: query.trim() || undefined,
+      status: isJobStatus(statusFilter) ? statusFilter : undefined,
+      procurementType: procurementFilter === 'all' ? undefined : procurementFilter,
+      deadlineStatus: isDeadlineStatus(deadlineFilter) ? deadlineFilter : undefined,
+      minRfpScore: scoreFilter === 'all' ? undefined : Number(scoreFilter),
+      page: currentPage,
+      pageSize,
+      sort: 'deadline' as const,
+      order: 'asc' as const
+    }),
+    [currentPage, deadlineFilter, pageSize, procurementFilter, query, scoreFilter, statusFilter]
+  );
+  const { data, isLoading, isError, error } = useJobs(apiParams);
   const jobs = data?.items ?? [];
   const summary = data?.summary;
 
@@ -77,23 +90,8 @@ export function JobListPage() {
     };
   }, []);
 
-  const filteredJobs = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase();
-
-    return jobs.filter((item) => {
-      const matchesQuery =
-        !normalizedQuery ||
-        [item.title, item.agency, item.category, item.noticeNumber].some((value) => value.toLocaleLowerCase().includes(normalizedQuery));
-      const matchesScore = scoreFilter === 'all' || item.rfpScore >= Number(scoreFilter);
-      const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
-      const matchesDeadline = deadlineFilter === 'all' || getDeadlineStatus(item.deadline) === deadlineFilter;
-
-      return matchesQuery && matchesScore && matchesStatus && matchesDeadline;
-    });
-  }, [deadlineFilter, jobs, query, scoreFilter, statusFilter]);
-
-  const pagedJobs = filteredJobs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / pageSize));
+  const totalCount = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const agencyColumns: DataTableColumn<Job>[] = [
     {
@@ -105,6 +103,7 @@ export function JobListPage() {
       render: (row) => <TitleCell row={row} />
     },
     { key: 'agency', header: '발주기관', sortable: true, headerClassName: 'min-w-[150px]' },
+    { key: 'procurementType', header: '구분', headerClassName: 'min-w-[110px]', render: (row) => formatProcurementType(row.procurementType) },
     { key: 'category', header: '요구 역량', sortable: true, headerClassName: 'min-w-[150px]' },
     { key: 'budget', header: '예산', align: 'right', headerClassName: 'min-w-[150px]', render: (row) => formatCurrency(row.budget) },
     { key: 'deadline', header: '마감/기준일', sortable: true, headerClassName: 'min-w-[160px]', render: (row) => formatDate(row.deadline) },
@@ -133,6 +132,7 @@ export function JobListPage() {
       render: (row) => <TitleCell row={row} />
     },
     { key: 'agency', header: '고객사/발주처', sortable: true, headerClassName: 'min-w-[150px]' },
+    { key: 'procurementType', header: '구분', headerClassName: 'min-w-[110px]', render: (row) => formatProcurementType(row.procurementType) },
     { key: 'category', header: '필요 역량', sortable: true, headerClassName: 'min-w-[150px]' },
     { key: 'budget', header: '예산', align: 'right', headerClassName: 'min-w-[150px]', render: (row) => formatCurrency(row.budget) },
     { key: 'deadline', header: '마감', sortable: true, headerClassName: 'min-w-[160px]', render: (row) => formatDate(row.deadline) },
@@ -184,8 +184,8 @@ export function JobListPage() {
             : '수집한 입찰 공고를 확인하고 RFP 분석과 인력 추천 대상으로 관리합니다.'
         }
         actions={
-          <Button icon={<RefreshCw className="h-4 w-4" />} onClick={() => (isAgency ? navigate('/jobs/new') : refetch())}>
-            {isAgency ? '신규 공고 등록' : '공고 새로고침'}
+          <Button icon={<FilePlus2 className="h-4 w-4" />} onClick={() => navigate('/jobs/new')}>
+            {isAgency ? '신규 공고 등록' : '수동 공고 입력'}
           </Button>
         }
       />
@@ -214,10 +214,10 @@ export function JobListPage() {
             searchPlaceholder={isAgency ? '공고명, 발주기관, 기술 검색' : '공고명, 고객사, 기술 검색'}
             searchValue={query}
             onSearchChange={handleQueryChange}
-            resultCount={filteredJobs.length}
+            resultCount={totalCount}
             actions={
               <>
-                <Button variant="ghost" icon={<RefreshCw className="h-5 w-5" />} aria-label="새로고침" onClick={() => refetch()} disabled={isFetching} />
+                <Button variant="ghost" icon={<FilePlus2 className="h-5 w-5" />} aria-label="수동 공고 입력" onClick={() => navigate('/jobs/new')} />
                 <Button variant="ghost" icon={<Download className="h-5 w-5" />} aria-label="다운로드" />
                 <Button variant="ghost" icon={<Printer className="h-5 w-5" />} aria-label="인쇄" />
               </>
@@ -256,6 +256,19 @@ export function JobListPage() {
                       { label: '80점 이상', value: '80' },
                       { label: '90점 이상', value: '90' }
                     ]
+              },
+              {
+                label: '공고 구분',
+                value: procurementFilter,
+                onChange: (value) =>
+                  updateSearchFilter('procurementType', value, (next) =>
+                    setProcurementFilter(next === 'public' || next === 'private' ? next : 'all')
+                  ),
+                options: [
+                  { label: '공공/민간 전체', value: 'all' },
+                  { label: '공공', value: 'public' },
+                  { label: '민간', value: 'private' }
+                ]
               }
             ]}
           />
@@ -273,17 +286,17 @@ export function JobListPage() {
           <>
             <DataTable
               columns={isAgency ? agencyColumns : supplierColumns}
-              data={pagedJobs}
+              data={jobs}
               getRowKey={(row) => row.id}
               onRowClick={(row) => navigate(`/jobs/${row.id}`)}
               emptyMessage={isAgency ? '조건에 맞는 발주 공고가 없습니다.' : '조건에 맞는 입찰 공고가 없습니다.'}
               density="compact"
-              tableClassName="min-w-[1080px] w-full"
+              tableClassName="min-w-[960px] w-full"
             />
             <div className="flex flex-col gap-3 border-t border-outline-variant px-7 py-5 text-on-surface-variant sm:flex-row sm:items-center sm:justify-between">
               <span>
-                총 {filteredJobs.length.toLocaleString('ko-KR')}건 중{' '}
-                {filteredJobs.length ? `${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, filteredJobs.length)}` : '0'} 표시 중
+                총 {totalCount.toLocaleString('ko-KR')}건 중{' '}
+                {totalCount ? `${(currentPage - 1) * pageSize + 1}-${Math.min(currentPage * pageSize, totalCount)}` : '0'} 표시 중
               </span>
               <div className="flex gap-2">
                 {Array.from({ length: totalPages }, (_, index) => {
@@ -341,4 +354,10 @@ function formatDate(value: string) {
   if (!value) return '-';
 
   return value.slice(0, 10);
+}
+
+function formatProcurementType(value: Job['procurementType']) {
+  if (value === 'private') return '민간';
+  if (value === 'public') return '공공';
+  return '-';
 }

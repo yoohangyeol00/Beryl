@@ -8,7 +8,7 @@ export const jobsRouter = createCompanyScopedRouter();
 
 type JobStatus = 'draft' | 'open' | 'closingSoon' | 'closed' | 'awarded';
 type ProcurementType = 'public' | 'private';
-type SourceType = 'nara' | 'private_bid' | 'manual' | 'email' | 'other';
+type SourceType = 'nara' | 'nipa' | 'nia' | 'private_bid' | 'manual' | 'email' | 'other';
 
 interface JobRow {
   id: string;
@@ -61,7 +61,14 @@ function getNullableString(value: unknown): string | null {
 function getSourceType(value: unknown): SourceType {
   const sourceType = getString(value);
 
-  if (sourceType === 'nara' || sourceType === 'private_bid' || sourceType === 'manual' || sourceType === 'email') {
+  if (
+    sourceType === 'nara' ||
+    sourceType === 'nipa' ||
+    sourceType === 'nia' ||
+    sourceType === 'private_bid' ||
+    sourceType === 'manual' ||
+    sourceType === 'email'
+  ) {
     return sourceType;
   }
 
@@ -80,6 +87,18 @@ function getJobStatus(value: unknown): JobStatus {
   }
 
   return 'draft';
+}
+
+function isValidSourceType(value: string): value is SourceType {
+  return (
+    value === 'nara' ||
+    value === 'nipa' ||
+    value === 'nia' ||
+    value === 'private_bid' ||
+    value === 'manual' ||
+    value === 'email' ||
+    value === 'other'
+  );
 }
 
 function getBudget(value: unknown): number | null {
@@ -204,6 +223,10 @@ function buildJobsFilter(req: Request, currentCompanyId: string) {
       : [
           `(
             j.buyer_company_id = $1
+            or (
+              j.procurement_type = 'public'
+              and j.source_type in ('nara', 'nipa', 'nia')
+            )
             or exists (
               select 1
               from company_relationships cr
@@ -220,6 +243,8 @@ function buildJobsFilter(req: Request, currentCompanyId: string) {
   const status = getString(query.status);
   const procurementType = getString(query.procurementType);
   const sourceType = getString(query.sourceType);
+  const deadlineStatus = getString(query.deadlineStatus);
+  const minRfpScore = Number(getString(query.minRfpScore) || query.minRfpScore);
 
   if (q) {
     values.push(`%${q}%`);
@@ -236,9 +261,26 @@ function buildJobsFilter(req: Request, currentCompanyId: string) {
     conditions.push(`j.procurement_type = $${values.length}`);
   }
 
-  if (sourceType === 'nara' || sourceType === 'private_bid' || sourceType === 'manual' || sourceType === 'email' || sourceType === 'other') {
+  if (isValidSourceType(sourceType)) {
     values.push(sourceType);
     conditions.push(`j.source_type = $${values.length}`);
+  }
+
+  if (deadlineStatus === 'urgent') {
+    conditions.push(`j.deadline is not null and j.deadline >= current_date and j.deadline <= current_date + interval '7 days'`);
+  }
+
+  if (deadlineStatus === 'open') {
+    conditions.push(`j.deadline is not null and j.deadline > current_date + interval '7 days'`);
+  }
+
+  if (deadlineStatus === 'expired') {
+    conditions.push(`j.deadline is not null and j.deadline < current_date`);
+  }
+
+  if (Number.isFinite(minRfpScore) && minRfpScore > 0) {
+    values.push(minRfpScore);
+    conditions.push(`coalesce(j.rfp_score, 0) >= $${values.length}`);
   }
 
   return {
@@ -317,6 +359,10 @@ async function findAccessibleJob(jobId: string, currentCompanyId: string): Promi
       where j.id = $1
         and (
           j.buyer_company_id = $2
+          or (
+            j.procurement_type = 'public'
+            and j.source_type in ('nara', 'nipa', 'nia')
+          )
           or exists (
             select 1
             from company_relationships cr
@@ -383,6 +429,10 @@ async function getJobDetailById(jobId: string, currentCompanyId: string): Promis
       where j.id = $1
         and (
           j.buyer_company_id = $2
+          or (
+            j.procurement_type = 'public'
+            and j.source_type in ('nara', 'nipa', 'nia')
+          )
           or exists (
             select 1
             from company_relationships cr
@@ -478,6 +528,186 @@ jobsRouter.get('/', async (req: Request, res: Response, next) => {
     });
   } catch (error) {
     next(error);
+  }
+});
+
+jobsRouter.post('/import', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const body = asRecord(req.body);
+  const rawItems = Array.isArray(body.items) ? body.items : [body];
+  const items = rawItems.map(asRecord);
+
+  if (!items.length) {
+    sendError(res, 400, 'VALIDATION_ERROR', 'Import할 공고 데이터가 필요합니다.');
+    return;
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('begin');
+
+    const importedJobs = [];
+
+    for (const item of items) {
+      const title = getString(item.title);
+      const buyerName = getString(item.buyerName) || getString(item.agency);
+      const noticeNumber = getNullableString(item.noticeNumber);
+
+      if (!title || !buyerName) {
+        await client.query('rollback');
+        sendError(res, 400, 'VALIDATION_ERROR', '공고명과 발주기관명은 필수입니다.');
+        return;
+      }
+
+      const existingBuyer = await client.query<{ id: string; name: string }>(
+        'select id, name from companies where lower(name) = lower($1) limit 1',
+        [buyerName]
+      );
+      const buyerCompany =
+        existingBuyer.rows[0] ??
+        (
+          await client.query<{ id: string; name: string }>(
+            `
+              insert into companies (name, company_type, status, supports_buyer, supports_supplier)
+              values ($1, 'public_agency', 'active', true, false)
+              returning id, name
+            `,
+            [buyerName]
+          )
+        ).rows[0];
+
+      if (buyerCompany.id !== currentCompanyId) {
+        const existingRelationship = await client.query(
+          `
+            select id
+            from company_relationships
+            where source_company_id = $1
+              and target_company_id = $2
+              and source_perspective = 'supplier'
+              and target_perspective = 'buyer'
+            limit 1
+          `,
+          [currentCompanyId, buyerCompany.id]
+        );
+
+        if (!existingRelationship.rowCount) {
+          await client.query(
+            `
+              insert into company_relationships (
+                source_company_id,
+                target_company_id,
+                source_perspective,
+                target_perspective,
+                relationship_type,
+                status,
+                first_activity_date,
+                last_activity_date
+              )
+              values ($1, $2, 'supplier', 'buyer', 'bid_participation', 'active', current_date, current_date)
+            `,
+            [currentCompanyId, buyerCompany.id]
+          );
+        } else {
+          await client.query(
+            `
+              update company_relationships
+              set last_activity_date = current_date,
+                  updated_at = now()
+              where source_company_id = $1
+                and target_company_id = $2
+                and source_perspective = 'supplier'
+                and target_perspective = 'buyer'
+            `,
+            [currentCompanyId, buyerCompany.id]
+          );
+        }
+      }
+
+      const result = await client.query<JobRow>(
+        `
+          insert into jobs (
+            buyer_company_id,
+            internal_owner_member_id,
+            notice_number,
+            title,
+            category,
+            procurement_type,
+            source_type,
+            source_url,
+            budget,
+            published_at,
+            deadline,
+            status,
+            rfp_score,
+            recommended_people_count,
+            description
+          )
+          values ($1, null, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+          on conflict (notice_number)
+          do update set
+            buyer_company_id = excluded.buyer_company_id,
+            title = excluded.title,
+            category = excluded.category,
+            procurement_type = excluded.procurement_type,
+            source_type = excluded.source_type,
+            source_url = excluded.source_url,
+            budget = excluded.budget,
+            published_at = excluded.published_at,
+            deadline = excluded.deadline,
+            status = excluded.status,
+            rfp_score = excluded.rfp_score,
+            recommended_people_count = excluded.recommended_people_count,
+            description = excluded.description,
+            updated_at = now()
+          returning
+            id,
+            notice_number,
+            title,
+            buyer_company_id,
+            $15::varchar as buyer_company_name,
+            category,
+            procurement_type,
+            source_type,
+            source_url,
+            budget,
+            published_at,
+            deadline,
+            status,
+            rfp_score,
+            recommended_people_count,
+            description
+        `,
+        [
+          buyerCompany.id,
+          noticeNumber,
+          title,
+          getNullableString(item.category),
+          getProcurementType(item.procurementType),
+          getSourceType(item.sourceType),
+          getNullableString(item.sourceUrl),
+          getBudget(item.budget),
+          getDate(item.publishedAt),
+          getDate(item.deadline),
+          getJobStatus(item.status) === 'draft' ? 'open' : getJobStatus(item.status),
+          typeof item.rfpScore === 'number' ? item.rfpScore : null,
+          typeof item.recommendedPeople === 'number' ? item.recommendedPeople : 0,
+          getNullableString(item.description),
+          buyerCompany.name
+        ]
+      );
+
+      importedJobs.push(toJobListItem(result.rows[0]));
+    }
+
+    await client.query('commit');
+    sendSuccess(res, { items: importedJobs, total: importedJobs.length }, 201);
+  } catch (error) {
+    await client.query('rollback');
+    next(error);
+  } finally {
+    client.release();
   }
 });
 

@@ -6,6 +6,16 @@ import type { JobDetail, JobList, JobStatus } from '../types/job';
 
 export interface GetJobsParams {
   perspective?: 'buyer' | 'accessible';
+  q?: string;
+  status?: JobStatus;
+  procurementType?: 'public' | 'private';
+  sourceType?: 'nara' | 'nipa' | 'nia' | 'private_bid' | 'manual' | 'email' | 'other';
+  deadlineStatus?: 'urgent' | 'open' | 'expired';
+  minRfpScore?: number;
+  page?: number;
+  pageSize?: number;
+  sort?: 'createdAt' | 'publishedAt' | 'deadline' | 'title';
+  order?: 'asc' | 'desc';
 }
 
 export interface CreateJobRequest {
@@ -15,7 +25,7 @@ export interface CreateJobRequest {
   category?: string;
   budget?: number;
   procurementType?: 'public' | 'private';
-  sourceType?: 'nara' | 'private_bid' | 'manual' | 'email' | 'other';
+  sourceType?: 'nara' | 'nipa' | 'nia' | 'private_bid' | 'manual' | 'email' | 'other';
   sourceUrl?: string;
   publishedAt?: string;
   deadline?: string;

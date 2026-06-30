@@ -77,23 +77,25 @@ export function PageToolbar({
   };
 
   return (
-    <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-3">
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        <div className="grid flex-1 gap-3 md:grid-cols-[minmax(220px,360px)_repeat(2,minmax(150px,220px))]">
-          <Input
-            placeholder={searchPlaceholder}
-            value={draftSearchValue}
-            onChange={handleSearchChange}
-            onFocus={handleSearchFocus}
-            onBlur={handleSearchBlur}
-            onCompositionStart={handleCompositionStart}
-            onCompositionEnd={handleCompositionEnd}
-          />
+    <div className="rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-3">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <div className="w-full sm:w-[280px] lg:w-[320px]">
+            <Input
+              placeholder={searchPlaceholder}
+              value={draftSearchValue}
+              onChange={handleSearchChange}
+              onFocus={handleSearchFocus}
+              onBlur={handleSearchBlur}
+              onCompositionStart={handleCompositionStart}
+              onCompositionEnd={handleCompositionEnd}
+            />
+          </div>
           {selects?.map((select) => (
-            <label key={select.label} className="block">
+            <label key={select.label} className="block w-full sm:w-[190px] lg:w-[210px]">
               <span className="sr-only">{select.label}</span>
               <select
-                className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body text-[16px] text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+                className="h-11 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-3 font-body text-[15px] text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
                 value={select.value}
                 onChange={(event) => select.onChange(event.target.value)}
               >
@@ -109,10 +111,10 @@ export function PageToolbar({
             </>
           )}
         </div>
-        <div className="flex shrink-0 items-center justify-end gap-2 whitespace-nowrap">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 whitespace-nowrap xl:pt-0.5">
           {typeof resultCount === 'number' ? <span className="mr-2 text-sm text-on-surface-variant">{resultCount.toLocaleString('ko-KR')}건 표시</span> : null}
           {actions ? <div className="flex items-center gap-1 text-on-surface">{actions}</div> : null}
-          <Button variant="secondary" icon={<Filter className="h-4 w-4" />}>
+          <Button variant="secondary" className="h-11 px-4" icon={<Filter className="h-4 w-4" />}>
             필터 적용
           </Button>
         </div>
