@@ -39,7 +39,7 @@ export function SignupPage() {
         }
       });
       setSession(session);
-      navigate('/dashboard/admin', { replace: true });
+      navigate('/buyer/dashboard', { replace: true });
     } catch (error) {
       setErrorMessage(getSignupErrorMessage(error));
     } finally {

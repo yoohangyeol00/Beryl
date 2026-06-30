@@ -15,6 +15,7 @@ import { PageTitle } from '../../../components/common/PageTitle';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
+import { getSupplierPoolPath } from '../../modes/roleMode';
 import { certificationOptions, supplierFormLabels, supplierStatusLabel } from '../labels';
 
 export function SupplierFormPage() {
@@ -90,7 +91,7 @@ export function SupplierFormPage() {
   }, [supplierId]);
 
   const handleCancel = () => {
-    navigate('/suppliers');
+    navigate(getSupplierPoolPath());
   };
 
   const handleAddTechnology = () => {
@@ -143,7 +144,7 @@ export function SupplierFormPage() {
         await uploadSupplierCertificationFile(savedSupplier.id, file);
       }
 
-      navigate('/suppliers', { replace: true });
+      navigate(getSupplierPoolPath(), { replace: true });
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, supplierFormLabels.errorFallback));
     } finally {

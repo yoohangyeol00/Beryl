@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ClipboardCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { getOffers } from '../../../api/offersApi';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { PageToolbar } from '../../../components/common/PageToolbar';
@@ -10,8 +10,7 @@ import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
 import type { Offer, OfferStatus } from '../../../types/offer';
-
-type RoleMode = 'agency' | 'supplier';
+import { getRoleMode, type RoleMode } from '../../modes/roleMode';
 
 const statusLabels: Record<OfferStatus, string> = {
   draft: '후보선정',
@@ -79,19 +78,15 @@ const columns: DataTableColumn<Offer>[] = [
   }
 ];
 
-function getInitialRole(): RoleMode {
-  if (typeof window === 'undefined') return 'agency';
-  return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
-}
-
 function isOfferStatus(value: string): value is OfferStatus {
   return value === 'draft' || value === 'submitted' || value === 'awarded' || value === 'rejected';
 }
 
 export function BidParticipationPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [role, setRole] = useState<RoleMode>(getInitialRole);
+  const [role, setRole] = useState<RoleMode>(() => getRoleMode(location.pathname));
   const isAgency = role === 'agency';
   const query = searchParams.get('q') ?? '';
   const status = searchParams.get('status') ?? 'all';
@@ -109,7 +104,7 @@ export function BidParticipationPage() {
       setRole(nextRole === 'supplier' ? 'supplier' : 'agency');
     };
 
-    const handleStorage = () => setRole(getInitialRole());
+    const handleStorage = () => setRole(getRoleMode(location.pathname));
 
     window.addEventListener('beryl-role-change', handleRoleChange);
     window.addEventListener('storage', handleStorage);
@@ -119,6 +114,10 @@ export function BidParticipationPage() {
       window.removeEventListener('storage', handleStorage);
     };
   }, []);
+
+  useEffect(() => {
+    setRole(getRoleMode(location.pathname));
+  }, [location.pathname]);
 
   const handleQueryChange = (value: string) => {
     const next = new URLSearchParams(searchParams);

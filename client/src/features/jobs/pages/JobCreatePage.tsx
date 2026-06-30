@@ -9,6 +9,7 @@ import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
 import { useAuth } from '../../auth/AuthContext';
+import { getJobDetailPath } from '../../modes/roleMode';
 import { useJobDetail } from '../hooks/useJobDetail';
 
 type SourceType = NonNullable<CreateJobRequest['sourceType']>;
@@ -89,7 +90,7 @@ export function JobCreatePage() {
 
     try {
       const savedJob = isEditMode && jobId ? await updateJob(jobId, payload) : await createJob(payload);
-      navigate(`/jobs/${savedJob.id}`, { replace: true });
+      navigate(getJobDetailPath('agency', savedJob.id), { replace: true });
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, isEditMode ? '공고 수정 중 오류가 발생했습니다.' : '공고 등록 중 오류가 발생했습니다.'));
     } finally {

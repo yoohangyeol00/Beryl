@@ -149,7 +149,7 @@ export function ProposalCreatePage() {
       if (offerId) {
         await queryClient.invalidateQueries({ queryKey: ['offer', offerId] });
       }
-      navigate('/bid-participation');
+      navigate('/supplier/bid-participation');
     },
     onError: (error) => {
       setErrorMessage(getApiErrorMessage(error, '제안서를 저장하지 못했습니다.'));

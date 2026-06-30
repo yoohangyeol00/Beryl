@@ -10,16 +10,11 @@ import { StatusBadge } from '../../../components/common/StatusBadge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
+import { getJobDetailPath, type RoleMode } from '../../modes/roleMode';
 import type { Job } from '../../../types/job';
 import { useJobs } from '../hooks/useJobs';
 
-type RoleMode = 'agency' | 'supplier';
 type ProcurementFilter = 'all' | 'public' | 'private';
-
-function getInitialRole(): RoleMode {
-  if (typeof window === 'undefined') return 'agency';
-  return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
-}
 
 function isJobStatus(value: string): value is Job['status'] {
   return value === 'draft' || value === 'open' || value === 'closingSoon' || value === 'closed' || value === 'awarded';
@@ -40,11 +35,15 @@ function TitleCell({ row, label = '공고번호' }: { row: Job; label?: string }
   );
 }
 
-export function JobListPage() {
+type JobListPageProps = {
+  mode?: RoleMode;
+};
+
+export function JobListPage({ mode }: JobListPageProps = {}) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
-  const [role, setRole] = useState<RoleMode>(getInitialRole);
+  const [role, setRole] = useState<RoleMode>(mode ?? 'agency');
   const [scoreFilter, setScoreFilter] = useState(searchParams.get('score') ?? 'all');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') ?? 'all');
   const [deadlineFilter, setDeadlineFilter] = useState(searchParams.get('deadline') ?? 'all');
@@ -74,12 +73,17 @@ export function JobListPage() {
   const summary = data?.summary;
 
   useEffect(() => {
+    if (mode) {
+      setRole(mode);
+      return;
+    }
+
     const handleRoleChange = (event: Event) => {
       const nextRole = (event as CustomEvent<RoleMode>).detail;
       setRole(nextRole === 'supplier' ? 'supplier' : 'agency');
       setCurrentPage(1);
     };
-    const handleStorage = () => setRole(getInitialRole());
+    const handleStorage = () => setRole(window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency');
 
     window.addEventListener('beryl-role-change', handleRoleChange);
     window.addEventListener('storage', handleStorage);
@@ -88,7 +92,7 @@ export function JobListPage() {
       window.removeEventListener('beryl-role-change', handleRoleChange);
       window.removeEventListener('storage', handleStorage);
     };
-  }, []);
+  }, [mode]);
 
   const totalCount = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -184,7 +188,7 @@ export function JobListPage() {
             : '수집한 입찰 공고를 확인하고 RFP 분석과 인력 추천 대상으로 관리합니다.'
         }
         actions={
-          <Button icon={<FilePlus2 className="h-4 w-4" />} onClick={() => navigate('/jobs/new')}>
+          <Button icon={<FilePlus2 className="h-4 w-4" />} onClick={() => navigate('/buyer/jobs/new')}>
             {isAgency ? '신규 공고 등록' : '수동 공고 입력'}
           </Button>
         }
@@ -217,7 +221,7 @@ export function JobListPage() {
             resultCount={totalCount}
             actions={
               <>
-                <Button variant="ghost" icon={<FilePlus2 className="h-5 w-5" />} aria-label="수동 공고 입력" onClick={() => navigate('/jobs/new')} />
+                <Button variant="ghost" icon={<FilePlus2 className="h-5 w-5" />} aria-label="수동 공고 입력" onClick={() => navigate('/buyer/jobs/new')} />
                 <Button variant="ghost" icon={<Download className="h-5 w-5" />} aria-label="다운로드" />
                 <Button variant="ghost" icon={<Printer className="h-5 w-5" />} aria-label="인쇄" />
               </>
@@ -288,7 +292,7 @@ export function JobListPage() {
               columns={isAgency ? agencyColumns : supplierColumns}
               data={jobs}
               getRowKey={(row) => row.id}
-              onRowClick={(row) => navigate(`/jobs/${row.id}`)}
+              onRowClick={(row) => navigate(getJobDetailPath(role, row.id))}
               emptyMessage={isAgency ? '조건에 맞는 발주 공고가 없습니다.' : '조건에 맞는 입찰 공고가 없습니다.'}
               density="compact"
               tableClassName="min-w-[960px] w-full"

@@ -1,5 +1,5 @@
 ﻿import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Navigate, RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Navigate, RouterProvider, createBrowserRouter, useParams } from 'react-router-dom';
 import { AuthLayout } from './layouts/AuthLayout';
 import { MainLayout } from './layouts/MainLayout';
 import { AuthProvider } from './features/auth/AuthContext';
@@ -31,6 +31,13 @@ import { SuppliersPage } from './features/suppliers/pages/SuppliersPage';
 
 const queryClient = new QueryClient();
 
+function RedirectWithParam({ to, param }: { to: (value: string) => string; param: string }) {
+  const params = useParams();
+  const value = params[param];
+
+  return <Navigate to={value ? to(value) : '/buyer/dashboard'} replace />;
+}
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -52,36 +59,53 @@ const router = createBrowserRouter([
       {
         element: <MainLayout />,
         children: [
-          { index: true, element: <Navigate to="/dashboard/admin" replace /> },
+          { index: true, element: <Navigate to="/buyer/dashboard" replace /> },
           { path: 'mypage', element: <MyPage /> },
-          { path: 'jobs', element: <JobListPage /> },
-          { path: 'jobs/new', element: <JobCreatePage /> },
-          { path: 'jobs/:jobId/edit', element: <JobCreatePage /> },
-          { path: 'jobs/:jobId', element: <JobDetailPage /> },
+          { path: 'buyer/dashboard', element: <AgencyDashboardPage /> },
+          { path: 'buyer/jobs', element: <JobListPage mode="agency" /> },
+          { path: 'buyer/jobs/new', element: <JobCreatePage /> },
+          { path: 'buyer/jobs/:jobId/edit', element: <JobCreatePage /> },
+          { path: 'buyer/jobs/:jobId', element: <JobDetailPage mode="agency" /> },
+          { path: 'buyer/suppliers', element: <SuppliersPage mode="agency" /> },
+          { path: 'buyer/suppliers/new', element: <SupplierFormPage /> },
+          { path: 'buyer/suppliers/:supplierId/edit', element: <SupplierFormPage /> },
+          { path: 'buyer/company-members', element: <AgencyStaffPage /> },
+          { path: 'supplier/dashboard', element: <SupplierDashboardPage /> },
+          { path: 'supplier/jobs', element: <JobListPage mode="supplier" /> },
+          { path: 'supplier/jobs/:jobId', element: <JobDetailPage mode="supplier" /> },
+          { path: 'supplier/bid-participation', element: <BidParticipationPage /> },
+          { path: 'supplier/clients', element: <SuppliersPage mode="supplier" /> },
+          { path: 'supplier/manpower', element: <ManpowerPage /> },
+          { path: 'supplier/projects', element: <WonProjectsPage /> },
+          { path: 'supplier/projects/:projectId', element: <ProjectDetailPage /> },
+          { path: 'jobs', element: <Navigate to="/buyer/jobs" replace /> },
+          { path: 'jobs/new', element: <Navigate to="/buyer/jobs/new" replace /> },
+          { path: 'jobs/:jobId/edit', element: <RedirectWithParam param="jobId" to={(jobId) => `/buyer/jobs/${jobId}/edit`} /> },
+          { path: 'jobs/:jobId', element: <RedirectWithParam param="jobId" to={(jobId) => `/buyer/jobs/${jobId}`} /> },
           { path: 'resumes/new', element: <ResumeFormPage /> },
           { path: 'resumes/:resumeId/edit', element: <ResumeFormPage /> },
           { path: 'resumes/:resumeId', element: <ResumeDetailPage /> },
           { path: 'offers/:offerId', element: <ProposalCreatePage /> },
           { path: 'offers/:offerId/analysis', element: <OfferAnalysisPage /> },
-          { path: 'dashboard', element: <Navigate to="/dashboard/admin" replace /> },
+          { path: 'dashboard', element: <Navigate to="/buyer/dashboard" replace /> },
           { path: 'dashboard/admin', element: <AdminDashboardPage /> },
-          { path: 'dashboard/agency', element: <AgencyDashboardPage /> },
-          { path: 'dashboard/supplier', element: <SupplierDashboardPage /> },
+          { path: 'dashboard/agency', element: <Navigate to="/buyer/dashboard" replace /> },
+          { path: 'dashboard/supplier', element: <Navigate to="/supplier/dashboard" replace /> },
           { path: 'agencies', element: <AgenciesPage /> },
           { path: 'agencies/new', element: <AgencyFormPage /> },
           { path: 'agencies/:agencyId/edit', element: <AgencyFormPage /> },
           { path: 'agency-organizations', element: <AgencyOrganizationPage /> },
-          { path: 'agency-staff', element: <AgencyStaffPage /> },
-          { path: 'bid-participation', element: <BidParticipationPage /> },
+          { path: 'agency-staff', element: <Navigate to="/buyer/company-members" replace /> },
+          { path: 'bid-participation', element: <Navigate to="/supplier/bid-participation" replace /> },
           { path: 'proposals/new', element: <ProposalCreatePage /> },
-          { path: 'clients', element: <SuppliersPage /> },
-          { path: 'suppliers', element: <SuppliersPage /> },
-          { path: 'suppliers/new', element: <SupplierFormPage /> },
-          { path: 'suppliers/:supplierId/edit', element: <SupplierFormPage /> },
+          { path: 'clients', element: <Navigate to="/supplier/clients" replace /> },
+          { path: 'suppliers', element: <Navigate to="/buyer/suppliers" replace /> },
+          { path: 'suppliers/new', element: <Navigate to="/buyer/suppliers/new" replace /> },
+          { path: 'suppliers/:supplierId/edit', element: <RedirectWithParam param="supplierId" to={(supplierId) => `/buyer/suppliers/${supplierId}/edit`} /> },
           { path: 'suppliers/:supplierId', element: <SupplierDetailPage /> },
-          { path: 'projects/won', element: <WonProjectsPage /> },
-          { path: 'projects/won/:projectId', element: <ProjectDetailPage /> },
-          { path: 'manpower', element: <ManpowerPage /> }
+          { path: 'projects/won', element: <Navigate to="/supplier/projects" replace /> },
+          { path: 'projects/won/:projectId', element: <RedirectWithParam param="projectId" to={(projectId) => `/supplier/projects/${projectId}`} /> },
+          { path: 'manpower', element: <Navigate to="/supplier/manpower" replace /> }
         ]
       }
     ]

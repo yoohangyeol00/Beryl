@@ -65,7 +65,7 @@ export function ResumeFormPage() {
       if (resumeId) {
         await queryClient.invalidateQueries({ queryKey: ['resume', resumeId] });
       }
-      navigate('/manpower');
+      navigate('/supplier/manpower');
     },
     onError: (error) => {
       setErrorMessage(getApiErrorMessage(error, '인력 정보를 저장하지 못했습니다.'));
@@ -97,7 +97,7 @@ export function ResumeFormPage() {
         title={isEdit ? '인력 정보 수정' : '인력 입력'}
         description="제안 추천과 투입현황 관리에 사용할 인력 기본 정보를 등록합니다."
         actions={
-          <Button variant="secondary" icon={<ArrowLeft className="h-4 w-4" />} onClick={() => navigate('/manpower')}>
+          <Button variant="secondary" icon={<ArrowLeft className="h-4 w-4" />} onClick={() => navigate('/supplier/manpower')}>
             목록
           </Button>
         }
@@ -150,7 +150,7 @@ export function ResumeFormPage() {
           {errorMessage ? <p className="font-body text-[14px] text-error">{errorMessage}</p> : null}
 
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="secondary" onClick={() => navigate('/manpower')}>
+            <Button type="button" variant="secondary" onClick={() => navigate('/supplier/manpower')}>
               취소
             </Button>
             <Button type="submit" icon={<Save className="h-4 w-4" />} disabled={saveMutation.isPending || resumeQuery.isLoading}>

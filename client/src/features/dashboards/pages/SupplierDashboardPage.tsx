@@ -120,10 +120,10 @@ export function SupplierDashboardPage() {
     <section>
       <PageTitle title={ko.title} description={ko.description} />
       <div className="mb-6 grid gap-4 md:grid-cols-4">
-        <MetricCard label={ko.activeProjects} value={`4${ko.cases}`} onClick={() => navigate('/projects/won')} />
-        <MetricCard label={ko.activePeople} value={`15${ko.peopleUnit}`} onClick={() => navigate('/manpower')} />
-        <MetricCard label={ko.inspectionWaiting} value={`2${ko.cases}`} onClick={() => navigate('/projects/won')} />
-        <MetricCard label={ko.riskProjects} value={`1${ko.cases}`} tone="danger" onClick={() => navigate('/projects/won?health=risk')} />
+        <MetricCard label={ko.activeProjects} value={`4${ko.cases}`} onClick={() => navigate('/supplier/projects')} />
+        <MetricCard label={ko.activePeople} value={`15${ko.peopleUnit}`} onClick={() => navigate('/supplier/manpower')} />
+        <MetricCard label={ko.inspectionWaiting} value={`2${ko.cases}`} onClick={() => navigate('/supplier/projects')} />
+        <MetricCard label={ko.riskProjects} value={`1${ko.cases}`} tone="danger" onClick={() => navigate('/supplier/projects?health=risk')} />
       </div>
 
       <div className="mb-6 grid gap-4 xl:grid-cols-2">
@@ -141,7 +141,7 @@ export function SupplierDashboardPage() {
         <div className="border-b border-outline-variant p-6">
           <h2 className="font-headline text-[26px] font-bold">{ko.projectStatus}</h2>
         </div>
-        <DataTable columns={projectColumns} data={projects} getRowKey={(row) => row.id} onRowClick={(row) => navigate(`/projects/won/${row.id}`)} tableClassName="min-w-[1320px] w-full" />
+        <DataTable columns={projectColumns} data={projects} getRowKey={(row) => row.id} onRowClick={(row) => navigate(`/supplier/projects/${row.id}`)} tableClassName="min-w-[1320px] w-full" />
       </Card>
 
       <Card className="overflow-hidden">

@@ -1,16 +1,15 @@
 ﻿import { Bell, BriefcaseBusiness, Building2, ChevronDown, CircleHelp, Menu, Search, ShieldCheck, UserRound, X } from 'lucide-react';
-import { FormEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { FormEvent, useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.png';
 import { useAuth } from '../../features/auth/AuthContext';
+import { getBidParticipationPath, getDashboardPath, getJobsPath, getRoleMode, setStoredRoleMode, type RoleMode } from '../../features/modes/roleMode';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
 
 type HeaderProps = {
   onMenuClick?: () => void;
 };
-
-type RoleMode = 'agency' | 'supplier';
 
 const roles: { label: string; value: RoleMode }[] = [
   { label: '발주기관', value: 'agency' },
@@ -24,16 +23,12 @@ const notifications = [
   { id: 'n-4', title: 'RFP 분석 확인 필요', detail: '첨부파일 1건의 분석 결과를 수동으로 확인해야 합니다.', tone: 'info' as const }
 ];
 
-function getInitialRole(): RoleMode {
-  if (typeof window === 'undefined') return 'agency';
-  return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
-}
-
 export function Header({ onMenuClick }: HeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { session: authSession } = useAuth();
   const [search, setSearch] = useState('');
-  const [role, setRole] = useState<RoleMode>(getInitialRole);
+  const [role, setRole] = useState<RoleMode>(() => getRoleMode(location.pathname));
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isRoleMenuOpen, setIsRoleMenuOpen] = useState(false);
 
@@ -45,25 +40,30 @@ export function Header({ onMenuClick }: HeaderProps) {
   const title = position ? `${userName} ${position}` : userName;
   const subtitle = [companyName, department || roles.find((item) => item.value === role)?.label].filter(Boolean).join(' · ');
   const currentRole = roles.find((item) => item.value === role) ?? roles[0];
+  const dashboardPath = getDashboardPath(role);
+  const jobsPath = getJobsPath(role);
+
+  useEffect(() => {
+    setRole(getRoleMode(location.pathname));
+  }, [location.pathname]);
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const query = search.trim();
-    navigate(query ? `/jobs?q=${encodeURIComponent(query)}` : '/jobs');
+    navigate(query ? `${jobsPath}?q=${encodeURIComponent(query)}` : jobsPath);
   };
 
   const handleRoleChange = (nextRole: RoleMode) => {
     setRole(nextRole);
-    window.localStorage.setItem('beryl-role-mode', nextRole);
-    window.dispatchEvent(new CustomEvent('beryl-role-change', { detail: nextRole }));
-    navigate(nextRole === 'agency' ? '/dashboard/agency' : '/dashboard/supplier');
+    setStoredRoleMode(nextRole);
+    navigate(getDashboardPath(nextRole));
   };
 
   return (
     <>
       <header className="fixed left-0 right-0 top-0 z-50 flex h-20 items-center bg-surface-container-lowest">
         <div className="hidden h-full w-80 shrink-0 items-center border-r border-outline-variant px-6 lg:flex">
-          <Link to={role === 'agency' ? '/dashboard/agency' : '/dashboard/supplier'} className="block">
+          <Link to={dashboardPath} className="block">
             <img src={logo} alt="BERYL" className="h-14 w-44 object-contain object-left" />
           </Link>
         </div>
@@ -78,7 +78,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             <Menu className="h-6 w-6" />
           </button>
 
-          <Link to={role === 'agency' ? '/dashboard/agency' : '/dashboard/supplier'} className="shrink-0 lg:hidden">
+          <Link to={dashboardPath} className="shrink-0 lg:hidden">
             <img src={logo} alt="BERYL" className="h-11 w-28 object-contain object-left" />
           </Link>
 
@@ -183,7 +183,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             </div>
             <div className="space-y-3 overflow-y-auto p-5">
               {notifications.map((item) => (
-                <button key={item.id} type="button" className="w-full rounded-lg border border-outline-variant p-4 text-left transition hover:border-primary hover:bg-primary/5" onClick={() => navigate(item.tone === 'danger' ? '/jobs?deadline=urgent' : '/bid-participation')}>
+                <button key={item.id} type="button" className="w-full rounded-lg border border-outline-variant p-4 text-left transition hover:border-primary hover:bg-primary/5" onClick={() => navigate(item.tone === 'danger' ? `${jobsPath}?deadline=urgent` : getBidParticipationPath())}>
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <strong>{item.title}</strong>
                     <Badge tone={item.tone}>{item.tone === 'danger' ? '긴급' : '확인'}</Badge>
@@ -193,7 +193,7 @@ export function Header({ onMenuClick }: HeaderProps) {
               ))}
             </div>
             <div className="border-t border-outline-variant p-5">
-              <button type="button" className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-label font-semibold text-on-primary" onClick={() => navigate(role === 'agency' ? '/dashboard/agency' : '/dashboard/supplier')}>
+              <button type="button" className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 font-label font-semibold text-on-primary" onClick={() => navigate(dashboardPath)}>
                 <BriefcaseBusiness className="h-5 w-5" />
                 현재 모드 대시보드에서 보기
               </button>

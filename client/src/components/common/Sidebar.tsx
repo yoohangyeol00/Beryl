@@ -1,8 +1,7 @@
 import { Building2, ClipboardList, FileSearch, LayoutDashboard, Plus, RefreshCw, Users, X, type LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-
-type RoleMode = 'agency' | 'supplier';
+import { getBidParticipationPath, getDashboardPath, getJobsPath, getManpowerPath, getProjectsPath, getRoleMode, getSupplierClientsPath, getSupplierPoolPath, type RoleMode } from '../../features/modes/roleMode';
 
 type NavItem = {
   label: string;
@@ -30,25 +29,24 @@ const ko = {
 
 const navItemsByRole: Record<RoleMode, NavItem[]> = {
   agency: [
-    { label: ko.agencyDashboard, href: '/dashboard/agency', icon: LayoutDashboard, activeMatch: 'exact' },
-    { label: ko.agencyJobs, href: '/jobs', icon: ClipboardList, activeMatch: 'section' },
-    { label: ko.agencyExecution, href: '/projects/won', icon: RefreshCw, activeMatch: 'section' },
-    { label: ko.agencySuppliers, href: '/suppliers', icon: Building2, activeMatch: 'section' },
-    { label: ko.agencyUsers, href: '/agency-staff', icon: Users, activeMatch: 'exact' }
+    { label: ko.agencyDashboard, href: getDashboardPath('agency'), icon: LayoutDashboard, activeMatch: 'exact' },
+    { label: ko.agencyJobs, href: getJobsPath('agency'), icon: ClipboardList, activeMatch: 'section' },
+    { label: ko.agencySuppliers, href: getSupplierPoolPath(), icon: Building2, activeMatch: 'section' },
+    { label: ko.agencyUsers, href: '/buyer/company-members', icon: Users, activeMatch: 'exact' }
   ],
   supplier: [
-    { label: ko.supplierDashboard, href: '/dashboard/supplier', icon: LayoutDashboard, activeMatch: 'exact' },
-    { label: ko.supplierOpportunities, href: '/jobs', icon: ClipboardList, activeMatch: 'section' },
-    { label: ko.supplierProposals, href: '/bid-participation', icon: FileSearch, activeMatch: 'exact' },
-    { label: ko.supplierPeople, href: '/manpower', icon: Users, activeMatch: 'exact' },
-    { label: ko.supplierProjects, href: '/projects/won', icon: RefreshCw, activeMatch: 'section' },
-    { label: ko.supplierClients, href: '/clients', icon: Building2, activeMatch: 'exact' }
+    { label: ko.supplierDashboard, href: getDashboardPath('supplier'), icon: LayoutDashboard, activeMatch: 'exact' },
+    { label: ko.supplierOpportunities, href: getJobsPath('supplier'), icon: ClipboardList, activeMatch: 'section' },
+    { label: ko.supplierProposals, href: getBidParticipationPath(), icon: FileSearch, activeMatch: 'exact' },
+    { label: ko.supplierPeople, href: getManpowerPath(), icon: Users, activeMatch: 'exact' },
+    { label: ko.supplierProjects, href: getProjectsPath(), icon: RefreshCw, activeMatch: 'section' },
+    { label: ko.supplierClients, href: getSupplierClientsPath(), icon: Building2, activeMatch: 'exact' }
   ]
 };
 
 const roleMeta = {
-  agency: { ctaLabel: ko.newJob, ctaHref: '/jobs/new' },
-  supplier: { ctaLabel: ko.supplierOpportunities, ctaHref: '/jobs' }
+  agency: { ctaLabel: ko.newJob, ctaHref: '/buyer/jobs/new' },
+  supplier: { ctaLabel: ko.supplierOpportunities, ctaHref: getJobsPath('supplier') }
 };
 
 type SidebarProps = {
@@ -56,20 +54,14 @@ type SidebarProps = {
   onClose?: () => void;
 };
 
-function getInitialRole(): RoleMode {
-  if (typeof window === 'undefined') return 'agency';
-  return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
-}
-
 function isNavItemActive(pathname: string, item: NavItem) {
   if (item.activeMatch === 'exact') return pathname === item.href;
-  if (item.href === '/jobs') return pathname === '/jobs' || pathname.startsWith('/jobs/');
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
 }
 
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const location = useLocation();
-  const [role, setRole] = useState<RoleMode>(getInitialRole);
+  const [role, setRole] = useState<RoleMode>(() => getRoleMode(location.pathname));
   const navItems = navItemsByRole[role];
   const meta = roleMeta[role];
 
@@ -78,7 +70,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       const nextRole = (event as CustomEvent<RoleMode>).detail;
       setRole(nextRole === 'supplier' ? 'supplier' : 'agency');
     };
-    const handleStorage = () => setRole(getInitialRole());
+    const handleStorage = () => setRole(getRoleMode(location.pathname));
 
     window.addEventListener('beryl-role-change', handleRoleChange);
     window.addEventListener('storage', handleStorage);
@@ -88,6 +80,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       window.removeEventListener('storage', handleStorage);
     };
   }, []);
+
+  useEffect(() => {
+    setRole(getRoleMode(location.pathname));
+  }, [location.pathname]);
 
   const nav = (
     <>

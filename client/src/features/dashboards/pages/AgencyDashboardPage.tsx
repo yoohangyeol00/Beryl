@@ -9,6 +9,7 @@ import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
 import type { Job, JobStatus } from '../../../types/job';
 import { useJobs } from '../../jobs/hooks/useJobs';
+import { getJobDetailPath } from '../../modes/roleMode';
 
 type AgencyProjectRow = {
   id: string;
@@ -83,10 +84,10 @@ export function AgencyDashboardPage() {
     <section>
       <PageTitle title={t.title} description={t.description} />
       <div className="mb-6 grid gap-4 md:grid-cols-4">
-        <MetricCard label={t.activeBid} value={`${activeBidCount}${t.count}`} description={t.activeBidDesc} onClick={() => navigate('/jobs')} />
-        <MetricCard label={t.reviewWaiting} value={`${summary?.closingSoon ?? 0}${t.count}`} description={t.reviewWaitingDesc} tone="danger" onClick={() => navigate('/jobs?status=closingSoon')} />
-        <MetricCard label={t.contractReady} value={`${summary?.awarded ?? 0}${t.count}`} description={t.contractReadyDesc} onClick={() => navigate('/projects/won')} />
-        <MetricCard label={t.runningProjects} value={`0${t.count}`} description={t.runningProjectsDesc} onClick={() => navigate('/projects/won')} />
+        <MetricCard label={t.activeBid} value={`${activeBidCount}${t.count}`} description={t.activeBidDesc} onClick={() => navigate('/buyer/jobs')} />
+        <MetricCard label={t.reviewWaiting} value={`${summary?.closingSoon ?? 0}${t.count}`} description={t.reviewWaitingDesc} tone="danger" onClick={() => navigate('/buyer/jobs?status=closingSoon')} />
+        <MetricCard label={t.contractReady} value={`${summary?.awarded ?? 0}${t.count}`} description={t.contractReadyDesc} onClick={() => navigate('/supplier/projects')} />
+        <MetricCard label={t.runningProjects} value={`0${t.count}`} description={t.runningProjectsDesc} onClick={() => navigate('/supplier/projects')} />
       </div>
 
       <div className="mb-6 grid gap-4 xl:grid-cols-3">
@@ -115,7 +116,7 @@ export function AgencyDashboardPage() {
             columns={columns}
             data={rows}
             getRowKey={(row) => row.id}
-            onRowClick={(row) => navigate(`/jobs/${row.id}`)}
+            onRowClick={(row) => navigate(getJobDetailPath('agency', row.id))}
             emptyMessage="등록된 발주 공고가 없습니다."
             density="compact"
             tableClassName="min-w-[1080px] w-full"

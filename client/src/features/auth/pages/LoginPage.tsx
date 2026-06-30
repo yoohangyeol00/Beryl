@@ -63,5 +63,5 @@ function getRedirectPath(state: unknown) {
     }
   }
 
-  return '/dashboard/admin';
+  return '/buyer/dashboard';
 }

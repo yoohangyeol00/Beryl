@@ -12,10 +12,10 @@ import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
+import { getJobEditPath, getJobsPath, type RoleMode } from '../../modes/roleMode';
 import type { JobDetail } from '../../../types/job';
 import { useJobDetail } from '../hooks/useJobDetail';
 
-type RoleMode = 'agency' | 'supplier';
 type DetailTab = 'overview' | 'summary' | 'skills' | 'criteria' | 'schedule' | 'files';
 type ProposalStatus = 'received' | 'reviewing' | 'revision' | 'preferred';
 
@@ -107,28 +107,32 @@ const tabs: { id: DetailTab; label: string; icon: typeof Info }[] = [
   { id: 'files', label: labels.files, icon: Paperclip }
 ];
 
-function getInitialRole(): RoleMode {
-  if (typeof window === 'undefined') return 'agency';
-  return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
-}
+type JobDetailPageProps = {
+  mode?: RoleMode;
+};
 
-export function JobDetailPage() {
+export function JobDetailPage({ mode }: JobDetailPageProps = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { jobId = '' } = useParams();
   const { data: job, isLoading, isError, error } = useJobDetail(jobId);
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
-  const [role, setRole] = useState<RoleMode>(getInitialRole);
+  const [role, setRole] = useState<RoleMode>(mode ?? 'agency');
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const isAgency = role === 'agency';
 
   useEffect(() => {
+    if (mode) {
+      setRole(mode);
+      return;
+    }
+
     const handleRoleChange = (event: Event) => {
       const nextRole = (event as CustomEvent<RoleMode>).detail;
       setRole(nextRole === 'supplier' ? 'supplier' : 'agency');
     };
-    const handleStorage = () => setRole(getInitialRole());
+    const handleStorage = () => setRole(window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency');
 
     window.addEventListener('beryl-role-change', handleRoleChange);
     window.addEventListener('storage', handleStorage);
@@ -136,7 +140,7 @@ export function JobDetailPage() {
       window.removeEventListener('beryl-role-change', handleRoleChange);
       window.removeEventListener('storage', handleStorage);
     };
-  }, []);
+  }, [mode]);
 
   const proposalColumns: DataTableColumn<ReceivedProposal>[] = [
     { key: 'supplier', header: labels.supplier, sortable: true, render: (row) => <strong>{row.supplier}</strong> },
@@ -175,7 +179,7 @@ export function JobDetailPage() {
     try {
       await deleteJob(jobId);
       await queryClient.invalidateQueries({ queryKey: ['jobs'] });
-      navigate('/jobs', { replace: true });
+      navigate(getJobsPath(role), { replace: true });
     } catch (deleteError) {
       setDeleteErrorMessage(getApiErrorMessage(deleteError, '공고 삭제 중 오류가 발생했습니다.'));
     } finally {
@@ -210,7 +214,7 @@ export function JobDetailPage() {
             <Button icon={isAgency ? <Star className="h-4 w-4" /> : <Send className="h-4 w-4" />} onClick={() => !isAgency && navigate(`/proposals/new?jobId=${job.id}`)}>
               {isAgency ? labels.openScore : labels.createProposal}
             </Button>
-            <Button variant="secondary" icon={<Pencil className="h-4 w-4" />} onClick={() => navigate(`/jobs/${job.id}/edit`)}>
+            <Button variant="secondary" icon={<Pencil className="h-4 w-4" />} onClick={() => navigate(getJobEditPath(job.id))}>
               수정
             </Button>
             <Button

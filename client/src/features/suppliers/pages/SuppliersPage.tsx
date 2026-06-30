@@ -15,20 +15,20 @@ import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
 import { Modal } from '../../../components/ui/Modal';
+import { getSupplierFormPath, type RoleMode } from '../../modes/roleMode';
 import { useSupplierRelationships } from '../hooks/useSupplierRelationships';
 import { supplierLabels, supplierStatusLabel } from '../labels';
-import type { RoleMode, SupplierAttachment, SupplierCompany } from '../types';
+import type { SupplierAttachment, SupplierCompany } from '../types';
 import { mapSupplierRelationshipToCompany } from '../utils/supplierMappers';
 
-function getInitialRole(): RoleMode {
-  if (typeof window === 'undefined') return 'agency';
-  return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
-}
+type SuppliersPageProps = {
+  mode?: RoleMode;
+};
 
-export function SuppliersPage() {
+export function SuppliersPage({ mode }: SuppliersPageProps = {}) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [role, setRole] = useState<RoleMode>(getInitialRole);
+  const [role, setRole] = useState<RoleMode>(mode ?? 'agency');
   const [searchValue, setSearchValue] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState<SupplierCompany | null>(null);
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('');
@@ -41,11 +41,16 @@ export function SuppliersPage() {
   const suppliers = (data?.items ?? []).map(mapSupplierRelationshipToCompany);
 
   useEffect(() => {
+    if (mode) {
+      setRole(mode);
+      return;
+    }
+
     const handleRoleChange = (event: Event) => {
       const nextRole = (event as CustomEvent<RoleMode>).detail;
       setRole(nextRole === 'supplier' ? 'supplier' : 'agency');
     };
-    const handleStorage = () => setRole(getInitialRole());
+    const handleStorage = () => setRole(window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency');
 
     window.addEventListener('beryl-role-change', handleRoleChange);
     window.addEventListener('storage', handleStorage);
@@ -54,7 +59,7 @@ export function SuppliersPage() {
       window.removeEventListener('beryl-role-change', handleRoleChange);
       window.removeEventListener('storage', handleStorage);
     };
-  }, []);
+  }, [mode]);
 
   async function handleDeleteSupplier(supplier: SupplierCompany) {
     if (!window.confirm(`${supplier.name} 공급기업 관계를 삭제하시겠습니까?`)) return;
@@ -122,7 +127,7 @@ export function SuppliersPage() {
         title={isAgency ? supplierLabels.agencyTitle : supplierLabels.supplierTitle}
         description={isAgency ? supplierLabels.agencyDesc : supplierLabels.supplierDesc}
         actions={
-          <Button icon={<PlusCircle className="h-4 w-4" />} onClick={() => navigate('/suppliers/new')}>
+          <Button icon={<PlusCircle className="h-4 w-4" />} onClick={() => navigate(getSupplierFormPath())}>
             {isAgency ? supplierLabels.addAgency : supplierLabels.addSupplier}
           </Button>
         }
@@ -212,7 +217,7 @@ export function SuppliersPage() {
                 {
                   label: '수정',
                   icon: <Pencil className="h-4 w-4" />,
-                  onClick: () => navigate(`/suppliers/${selectedSupplier.id}/edit`)
+                  onClick: () => navigate(getSupplierFormPath(selectedSupplier.id))
                 },
                 {
                   label: isDeleting ? '삭제 중...' : '삭제',

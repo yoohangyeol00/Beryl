@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { MetricCard } from '../../../components/common/MetricCard';
 import { PageToolbar } from '../../../components/common/PageToolbar';
 import { Badge } from '../../../components/ui/Badge';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
+import { getRoleMode, type RoleMode } from '../../modes/roleMode';
 
-type RoleMode = 'agency' | 'supplier';
 type ProjectHealth = 'normal' | 'watch' | 'risk';
 type ProjectStage = 'contract' | 'kickoff' | 'running' | 'inspection';
 
@@ -84,15 +84,11 @@ const rows: ContractProject[] = [
   { id: 'p-3', name: '\uC18C\uBC29 \uB370\uC774\uD130 \uD1B5\uD569 \uBD84\uC11D \uD50C\uB7AB\uD3FC', agency: '\uC18C\uBC29\uCCAD', supplier: '\uB125\uC2A4\uD2B8\uC18C\uD504\uD2B8', stage: 'inspection', assignedPeople: '\uBC15\uC9C0\uD6C8 \uC678 3\uBA85', amount: 2180000000, endDate: '2026-11-30', deliverables: '\uC0B0\uCD9C\uBB3C \uBCF4\uC644\uC694\uCCAD', mmProgress: 81, health: 'risk', nextAction: '\uC0B0\uCD9C\uBB3C \uC7AC\uAC80\uC218' }
 ];
 
-function getInitialRole(): RoleMode {
-  if (typeof window === 'undefined') return 'agency';
-  return window.localStorage.getItem('beryl-role-mode') === 'supplier' ? 'supplier' : 'agency';
-}
-
 export function WonProjectsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [role, setRole] = useState<RoleMode>(getInitialRole);
+  const [role, setRole] = useState<RoleMode>(() => getRoleMode(location.pathname));
   const [health, setHealth] = useState(searchParams.get('health') ?? 'all');
   const query = searchParams.get('q') ?? '';
   const isAgency = role === 'agency';
@@ -102,7 +98,7 @@ export function WonProjectsPage() {
       const nextRole = (event as CustomEvent<RoleMode>).detail;
       setRole(nextRole === 'supplier' ? 'supplier' : 'agency');
     };
-    const handleStorage = () => setRole(getInitialRole());
+    const handleStorage = () => setRole(getRoleMode(location.pathname));
 
     window.addEventListener('beryl-role-change', handleRoleChange);
     window.addEventListener('storage', handleStorage);
@@ -112,6 +108,10 @@ export function WonProjectsPage() {
       window.removeEventListener('storage', handleStorage);
     };
   }, []);
+
+  useEffect(() => {
+    setRole(getRoleMode(location.pathname));
+  }, [location.pathname]);
 
   const filteredRows = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -174,7 +174,7 @@ export function WonProjectsPage() {
           { label: ko.period, value: 'all', onChange: () => undefined, options: [{ label: ko.allPeriod, value: 'all' }] }
         ]}
       />
-      <DataTable columns={columns} data={filteredRows} getRowKey={(row) => row.id} onRowClick={(row) => navigate(`/projects/won/${row.id}`)} emptyMessage={ko.noData} tableClassName="min-w-[1320px] w-full" />
+      <DataTable columns={columns} data={filteredRows} getRowKey={(row) => row.id} onRowClick={(row) => navigate(`/supplier/projects/${row.id}`)} emptyMessage={ko.noData} tableClassName="min-w-[1320px] w-full" />
     </section>
   );
 }

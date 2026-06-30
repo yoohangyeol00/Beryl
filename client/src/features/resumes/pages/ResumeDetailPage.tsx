@@ -46,7 +46,7 @@ export function ResumeDetailPage() {
     mutationFn: () => deleteResume(resumeId),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['resumes'] });
-      navigate('/manpower');
+      navigate('/supplier/manpower');
     },
     onError: (error) => {
       setErrorMessage(getApiErrorMessage(error, '인력 정보를 삭제하지 못했습니다.'));
