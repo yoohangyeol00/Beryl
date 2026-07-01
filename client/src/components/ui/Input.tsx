@@ -2,7 +2,7 @@
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   icon?: ReactNode;
-  label?: string;
+  label?: ReactNode;
 };
 
 export function Input({ className = '', icon, label, id, ...props }: InputProps) {

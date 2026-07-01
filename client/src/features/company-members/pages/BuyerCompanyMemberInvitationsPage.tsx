@@ -68,18 +68,18 @@ export function BuyerCompanyMemberInvitationsPage() {
         open={selectedInvitation !== null}
         title={selectedInvitation ? `${selectedInvitation.name} 초대 정보` : '초대 정보'}
         onClose={() => setSelectedInvitation(null)}
-        footer={
-          <Button variant="secondary" type="button" onClick={() => setSelectedInvitation(null)}>
-            닫기
-          </Button>
-        }
+        footer={<div className="h-10" aria-hidden="true" />}
       >
         {selectedInvitation ? (
           <dl className="space-y-3 rounded-lg border border-outline-variant p-4">
             <DetailLine label="이름" value={selectedInvitation.name} />
             <DetailLine label="이메일" value={selectedInvitation.email} />
             <DetailLine label="소속 부서" value={selectedInvitation.department || '-'} />
+            <DetailLine label="직책" value={selectedInvitation.position || '-'} />
             <DetailLine label="상태" value={<InvitationStatus status={selectedInvitation.status} />} />
+            <DetailLine label="초대일" value={formatDate(selectedInvitation.sentAt ?? selectedInvitation.invitedAt)} />
+            <DetailLine label="취소일" value={formatDate(selectedInvitation.canceledAt)} />
+            <DetailLine label="수락일" value={formatDate(selectedInvitation.acceptedAt)} />
           </dl>
         ) : null}
       </Modal>
@@ -109,4 +109,14 @@ function DetailLine({ label, value }: { label: string; value: string | ReactNode
       <dd className="text-right font-semibold text-on-surface">{value}</dd>
     </div>
   );
+}
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return '-';
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date(value));
 }

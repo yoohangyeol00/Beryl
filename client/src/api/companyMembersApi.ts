@@ -69,12 +69,14 @@ export interface CompanyMemberInvitationHistoryItem {
   companyMemberId: string;
   name: string;
   department: string | null;
+  position: string | null;
   email: string;
   status: 'pending' | 'accepted' | 'expired' | 'revoked' | string;
   invitedAt: string;
   sentAt: string | null;
   expiresAt: string;
   acceptedAt: string | null;
+  canceledAt: string | null;
 }
 
 export interface CompanyMemberInvitationHistoryResponse {

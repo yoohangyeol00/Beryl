@@ -354,12 +354,14 @@ Response data:
       "companyMemberId": "uuid",
       "name": "홍길동",
       "department": "사업개발팀",
+      "position": "팀장",
       "email": "user@example.com",
       "status": "pending",
       "invitedAt": "2026-07-01T00:00:00.000Z",
       "sentAt": "2026-07-01T00:00:00.000Z",
       "expiresAt": "2026-07-04T00:00:00.000Z",
-      "acceptedAt": null
+      "acceptedAt": null,
+      "canceledAt": null
     }
   ],
   "total": 1

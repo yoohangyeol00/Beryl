@@ -49,12 +49,14 @@ interface CompanyMemberInvitationHistoryRow {
   company_member_id: string;
   name: string;
   department: string | null;
+  position: string | null;
   email: string;
   status: string;
   invited_at: string;
   sent_at: string | null;
   expires_at: string;
   accepted_at: string | null;
+  canceled_at: string | null;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -136,12 +138,14 @@ function toCompanyMemberInvitationHistoryResponse(row: CompanyMemberInvitationHi
     companyMemberId: row.company_member_id,
     name: row.name,
     department: row.department,
+    position: row.position,
     email: row.email,
     status: row.status,
     invitedAt: row.invited_at,
     sentAt: row.sent_at,
     expiresAt: row.expires_at,
-    acceptedAt: row.accepted_at
+    acceptedAt: row.accepted_at,
+    canceledAt: row.canceled_at
   };
 }
 
@@ -157,12 +161,14 @@ companyMembersRouter.get('/invitations', async (req: Request, res: Response, nex
           ui.company_member_id,
           cm.name,
           cm.department,
+          cm.position,
           ui.email,
           ui.status,
           ui.created_at as invited_at,
           ui.sent_at,
           ui.expires_at,
-          ui.accepted_at
+          ui.accepted_at,
+          case when ui.status = 'revoked' then ui.updated_at else null end as canceled_at
         from user_invitations ui
         join company_members cm on cm.id = ui.company_member_id
         where ui.company_id = $1
@@ -193,8 +199,13 @@ companyMembersRouter.get('/', async (req: Request, res: Response, next) => {
     "cm.member_type <> 'contact'",
     `
       not (
-        cm.status = 'inactive'
-        and cm.user_id is null
+        cm.user_id is null
+        and not exists (
+          select 1
+          from user_invitations active_invitation
+          where active_invitation.company_member_id = cm.id
+            and active_invitation.status in ('pending', 'accepted')
+        )
         and exists (
           select 1
           from user_invitations hidden_invitation

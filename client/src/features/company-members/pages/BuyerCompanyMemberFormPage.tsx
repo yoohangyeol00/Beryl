@@ -1,4 +1,4 @@
-import { ArrowLeft, BriefcaseBusiness, Building2, Mail, PlusCircle, Phone, Save, UserRound } from 'lucide-react';
+import { ArrowLeft, BriefcaseBusiness, Building2, Mail, PlusCircle, Phone, UserRound } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
@@ -7,6 +7,15 @@ import { PageTitle } from '../../../components/common/PageTitle';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Input } from '../../../components/ui/Input';
+
+function RequiredLabel({ children }: { children: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span>{children}</span>
+      <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
+    </span>
+  );
+}
 
 export function BuyerCompanyMemberFormPage() {
   const navigate = useNavigate();
@@ -50,8 +59,8 @@ export function BuyerCompanyMemberFormPage() {
             <Button variant="secondary" type="button" icon={<ArrowLeft className="h-4 w-4" />} onClick={() => navigate(-1)}>
               뒤로
             </Button>
-            <Button type="submit" form="company-member-form" icon={<Save className="h-4 w-4" />} disabled={isSubmitting}>
-              {isSubmitting ? '등록 중...' : '사용자 등록'}
+            <Button type="submit" form="company-member-form" icon={<Mail className="h-4 w-4" />} disabled={isSubmitting}>
+              {isSubmitting ? '등록 중...' : '초대하기'}
             </Button>
           </>
         }
@@ -63,16 +72,16 @@ export function BuyerCompanyMemberFormPage() {
         </div>
       ) : null}
 
-      <form id="company-member-form" className="mt-5 grid gap-8 xl:grid-cols-[1fr_360px]" onSubmit={handleSubmit}>
+      <form id="company-member-form" className="mt-5" onSubmit={handleSubmit}>
         <Card className="p-8">
           <div className="mb-7 flex items-center gap-3 border-b border-outline-variant pb-6">
             <PlusCircle className="h-6 w-6 text-primary" />
-            <h2 className="font-headline text-[26px] font-bold">기본 정보</h2>
+            <h2 className="font-headline text-[26px] font-bold">사용자 정보</h2>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2">
             <Input
-              label="이름"
+              label={<RequiredLabel>이름</RequiredLabel>}
               icon={<UserRound className="h-5 w-5" />}
               placeholder="홍길동"
               value={name}
@@ -81,7 +90,7 @@ export function BuyerCompanyMemberFormPage() {
               required
             />
             <Input
-              label="이메일"
+              label={<RequiredLabel>이메일</RequiredLabel>}
               icon={<Mail className="h-5 w-5" />}
               placeholder="user@company.com"
               value={email}
@@ -105,38 +114,16 @@ export function BuyerCompanyMemberFormPage() {
               onChange={(event) => setPosition(event.target.value)}
               autoComplete="organization-title"
             />
-            <div className="md:col-span-2">
-              <Input
-                label="연락처"
-                icon={<Phone className="h-5 w-5" />}
-                placeholder="010-1234-5678"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value)}
-                autoComplete="tel"
-              />
-            </div>
+            <Input
+              label="연락처"
+              icon={<Phone className="h-5 w-5" />}
+              placeholder="010-1234-5678"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              autoComplete="tel"
+            />
           </div>
         </Card>
-
-        <aside className="space-y-6">
-          <Card className="p-7">
-            <h3 className="mb-4 font-headline text-[22px] font-bold">등록 기준</h3>
-            <ul className="space-y-4 text-on-surface-variant">
-              <li className="flex items-center gap-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-                초대 대상은 `companyUser`로 등록됩니다.
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-                부서와 직책은 선택 입력입니다.
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-                등록 후 목록 화면으로 돌아갑니다.
-              </li>
-            </ul>
-          </Card>
-        </aside>
       </form>
     </section>
   );
