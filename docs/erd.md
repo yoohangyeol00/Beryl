@@ -336,9 +336,17 @@ erDiagram
 
 #### `company_members`
 
-기업 소속 담당자/직원 정보다.
+기업 내부 구성원 정보다.
 
-`users`는 로그인 계정이고, `company_members`는 기업 구성원 프로필이다. 모든 기업 구성원이 로그인 계정을 가져야 하는 것은 아니므로 `user_id`는 nullable로 둘 수 있다.
+`users`는 로그인 계정이고, `company_members`는 기업 내부 구성원 프로필이다. 초대받은 사용자는 초대 수락 전 `user_id`가 null이고 `status = invited`일 수 있다. 초대 수락 후 `users.id`가 `company_members.user_id`에 연결된다.
+
+공급기업/발주기관 등록에서 입력하는 외부 담당자는 `company_members`에 저장하지 않고 `company_contacts`에 저장한다.
+
+#### `company_contacts`
+
+기업의 외부 연락 담당자 정보다.
+
+공급기업 풀, 거래처 관리, 발주기관/공급기업 관계에서 표시되는 대표 담당자/연락처는 이 테이블을 사용한다. 로그인 계정과 직접 연결하지 않는다.
 
 ### 5.2 Company Relationships
 
@@ -638,7 +646,7 @@ won_projects
 
 인덱싱 단계 이후 DB 구현을 시작한다면 다음 순서를 권장한다.
 
-1. `companies`, `users`, `company_members`
+1. `companies`, `users`, `company_members`, `company_contacts`
 2. `company_relationships`
 3. `jobs`, `job_requirements`, `rfp_files`, `rfp_analyses`
 4. `resumes`, `resume_skills`, `resume_projects`
@@ -653,6 +661,7 @@ won_projects
 
 - `company_members`와 `resumes`는 완전히 분리한다.
 - 같은 사람이 기업 구성원이면서 투입 가능한 인력일 수 있으므로 `resumes.company_member_id` 선택 연결 필드를 둔다.
+- 외부 기업 담당자는 `company_contacts`에 저장하고, 내부 사용자/초대 구성원은 `company_members`에 저장한다.
 - 계약은 MVP부터 `contracts` 테이블로 명시 분리한다.
 - `won_projects`에는 계약 상세 정보를 중복 저장하지 않고 `contract_id`로 연결한다.
 - RFP 원문 파일은 저장한다.

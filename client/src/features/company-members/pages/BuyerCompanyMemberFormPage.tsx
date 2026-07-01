@@ -63,7 +63,7 @@ export function BuyerCompanyMemberFormPage() {
         </div>
       ) : null}
 
-      <form id="company-member-form" className="grid gap-8 xl:grid-cols-[1fr_360px]" onSubmit={handleSubmit}>
+      <form id="company-member-form" className="mt-5 grid gap-8 xl:grid-cols-[1fr_360px]" onSubmit={handleSubmit}>
         <Card className="p-8">
           <div className="mb-7 flex items-center gap-3 border-b border-outline-variant pb-6">
             <PlusCircle className="h-6 w-6 text-primary" />

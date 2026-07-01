@@ -73,6 +73,21 @@ export interface UpdatePasswordRequest {
   newPassword: string;
 }
 
+export interface InvitationAcceptInfo {
+  email: string;
+  name: string;
+  companyName: string;
+  department: string | null;
+  position: string | null;
+  expiresAt: string;
+}
+
+export interface AcceptInvitationRequest {
+  token: string;
+  password: string;
+  passwordConfirm: string;
+}
+
 export async function login(payload: LoginRequest) {
   const response = await axiosInstance.post<ApiResponse<AuthSession>>('/auth/login', payload);
   return unwrapApiResponse(response.data);
@@ -105,5 +120,17 @@ export async function updateProfile(payload: UpdateProfileRequest) {
 
 export async function updatePassword(payload: UpdatePasswordRequest) {
   const response = await axiosInstance.patch<ApiResponse<{ ok: boolean }>>('/auth/me/password', payload);
+  return unwrapApiResponse(response.data);
+}
+
+export async function getInvitationAcceptInfo(token: string) {
+  const response = await axiosInstance.get<ApiResponse<InvitationAcceptInfo>>('/auth/invitations/accept', {
+    params: { token }
+  });
+  return unwrapApiResponse(response.data);
+}
+
+export async function acceptInvitation(payload: AcceptInvitationRequest) {
+  const response = await axiosInstance.post<ApiResponse<AuthSession>>('/auth/invitations/accept', payload);
   return unwrapApiResponse(response.data);
 }

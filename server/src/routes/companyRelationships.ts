@@ -43,12 +43,12 @@ interface CompanyRelationshipRow {
   target_address: string | null;
   target_contact_phone: string | null;
   target_contact_email: string | null;
-  contact_member_id: string | null;
-  contact_member_name: string | null;
-  contact_member_department: string | null;
-  contact_member_position: string | null;
-  contact_member_email: string | null;
-  contact_member_phone: string | null;
+  contact_id: string | null;
+  contact_name: string | null;
+  contact_department: string | null;
+  contact_position: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
   capabilities: string[] | null;
   certifications: string[] | null;
   certification_files: Array<{
@@ -145,20 +145,95 @@ function toRelationshipResponse(row: CompanyRelationshipRow) {
       contactPhone: row.target_contact_phone,
       contactEmail: row.target_contact_email
     },
-    contact: row.contact_member_id
+    contact: row.contact_id
       ? {
-          id: row.contact_member_id,
-          name: row.contact_member_name,
-          department: row.contact_member_department,
-          position: row.contact_member_position,
-          email: row.contact_member_email,
-          phone: row.contact_member_phone
+          id: row.contact_id,
+          name: row.contact_name,
+          department: row.contact_department,
+          position: row.contact_position,
+          email: row.contact_email,
+          phone: row.contact_phone
         }
       : null,
     capabilities: row.capabilities ?? [],
     certifications: row.certifications ?? [],
     certificationFiles: row.certification_files ?? []
   };
+}
+
+async function upsertCompanyContact(
+  client: { query: typeof pool.query },
+  {
+    companyId,
+    name,
+    department,
+    position,
+    email,
+    phone
+  }: {
+    companyId: string;
+    name: string;
+    department: string | null;
+    position: string | null;
+    email: string | null;
+    phone: string | null;
+  }
+) {
+  if (!name) {
+    return null;
+  }
+
+  const existingContact = await client.query<{ id: string }>(
+    `
+      select id
+      from company_contacts
+      where company_id = $1
+        and lower(name) = lower($2)
+      limit 1
+    `,
+    [companyId, name]
+  );
+
+  if (existingContact.rows[0]) {
+    const updatedContact = await client.query<{ id: string }>(
+      `
+        update company_contacts
+        set department = $1,
+            position = $2,
+            email = $3,
+            phone = $4,
+            is_primary = true,
+            status = 'active',
+            updated_at = now()
+        where id = $5
+        returning id
+      `,
+      [department, position, email, phone, existingContact.rows[0].id]
+    );
+
+    return updatedContact.rows[0].id;
+  }
+
+  const createdContact = await client.query<{ id: string }>(
+    `
+      insert into company_contacts (
+        company_id,
+        name,
+        department,
+        position,
+        email,
+        phone,
+        contact_type,
+        is_primary,
+        status
+      )
+      values ($1, $2, $3, $4, $5, $6, 'business', true, 'active')
+      returning id
+    `,
+    [companyId, name, department, position, email, phone]
+  );
+
+  return createdContact.rows[0].id;
 }
 
 async function findRelationship(relationshipId: string, currentCompanyId: string) {
@@ -184,12 +259,12 @@ async function findRelationship(relationshipId: string, currentCompanyId: string
         c.address as target_address,
         c.contact_phone as target_contact_phone,
         c.contact_email as target_contact_email,
-        cm.id as contact_member_id,
-        cm.name as contact_member_name,
-        cm.department as contact_member_department,
-        cm.position as contact_member_position,
-        cm.email as contact_member_email,
-        cm.phone as contact_member_phone,
+        ct.id as contact_id,
+        ct.name as contact_name,
+        ct.department as contact_department,
+        ct.position as contact_position,
+        ct.email as contact_email,
+        ct.phone as contact_phone,
         coalesce(array_agg(distinct cc.name) filter (where cc.name is not null), '{}') as capabilities,
         coalesce(array_agg(distinct cert.name) filter (where cert.name is not null), '{}') as certifications,
         coalesce(
@@ -207,15 +282,14 @@ async function findRelationship(relationshipId: string, currentCompanyId: string
         ) as certification_files
       from company_relationships cr
       join companies c on c.id = cr.target_company_id
-      left join company_members cm
-        on cm.company_id = cr.target_company_id
-       and cm.member_type = 'contact'
-       and cm.status = 'active'
+      left join company_contacts ct
+        on ct.id = cr.contact_id
+       and ct.status = 'active'
       left join company_capabilities cc on cc.company_id = c.id
       left join company_certifications cert on cert.company_id = c.id
       where cr.id = $1
         and cr.source_company_id = $2
-      group by cr.id, c.id, cm.id, cm.name, cm.department, cm.position, cm.email, cm.phone
+      group by cr.id, c.id, ct.id, ct.name, ct.department, ct.position, ct.email, ct.phone
       limit 1
     `,
     [relationshipId, currentCompanyId]
@@ -329,52 +403,14 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
       targetCompanyId = createdCompany.rows[0].id;
     }
 
-    if (contactName) {
-      const existingContact = await client.query<{ id: string }>(
-        `
-          select id
-          from company_members
-          where company_id = $1
-            and member_type = 'contact'
-            and lower(name) = lower($2)
-          limit 1
-        `,
-        [targetCompanyId, contactName]
-      );
-
-      if (existingContact.rows[0]) {
-        await client.query(
-          `
-            update company_members
-            set department = $1,
-                position = $2,
-                email = $3,
-                phone = $4,
-                status = 'active',
-                updated_at = now()
-            where id = $5
-          `,
-          [contactDepartment, contactPosition, contactEmail, contactPhone, existingContact.rows[0].id]
-        );
-      } else {
-        await client.query(
-          `
-            insert into company_members (
-              company_id,
-              name,
-              department,
-              position,
-              email,
-              phone,
-              member_type,
-              status
-            )
-            values ($1, $2, $3, $4, $5, $6, 'contact', 'active')
-          `,
-          [targetCompanyId, contactName, contactDepartment, contactPosition, contactEmail, contactPhone]
-        );
-      }
-    }
+    const contactId = await upsertCompanyContact(client, {
+      companyId: targetCompanyId,
+      name: contactName,
+      department: contactDepartment,
+      position: contactPosition,
+      email: contactEmail,
+      phone: contactPhone
+    });
 
     await client.query('delete from company_capabilities where company_id = $1', [targetCompanyId]);
     for (const capability of capabilities) {
@@ -431,10 +467,11 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
               tags = $4,
               memo = $5,
               internal_owner_member_id = $6,
+              contact_id = $7,
               updated_at = now()
-          where id = $7
+          where id = $8
         `,
-        [relationshipType, internalGrade, managementStatus, tags, memo, internalOwnerMemberId, relationshipId]
+        [relationshipType, internalGrade, managementStatus, tags, memo, internalOwnerMemberId, contactId, relationshipId]
       );
     } else {
       const createdRelationship = await client.query<{ id: string }>(
@@ -452,12 +489,13 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
             management_status,
             tags,
             memo,
-            internal_owner_member_id
+            internal_owner_member_id,
+            contact_id
           )
-          values ($1, $2, 'buyer', 'supplier', $3, 'active', current_date, current_date, $4, $5, $6, $7, $8)
+          values ($1, $2, 'buyer', 'supplier', $3, 'active', current_date, current_date, $4, $5, $6, $7, $8, $9)
           returning id
         `,
-        [currentCompanyId, targetCompanyId, relationshipType, internalGrade, managementStatus, tags, memo, internalOwnerMemberId]
+        [currentCompanyId, targetCompanyId, relationshipType, internalGrade, managementStatus, tags, memo, internalOwnerMemberId, contactId]
       );
       relationshipId = createdRelationship.rows[0].id;
     }
@@ -590,52 +628,14 @@ companyRelationshipsRouter.patch('/:relationshipId', async (req: Request, res: R
       [companyName, businessRegistrationNo, companyType, representativeName, websiteUrl, address, contactPhone, contactEmail, targetCompanyId]
     );
 
-    if (contactName) {
-      const existingContact = await client.query<{ id: string }>(
-        `
-          select id
-          from company_members
-          where company_id = $1
-            and member_type = 'contact'
-            and lower(name) = lower($2)
-          limit 1
-        `,
-        [targetCompanyId, contactName]
-      );
-
-      if (existingContact.rows[0]) {
-        await client.query(
-          `
-            update company_members
-            set department = $1,
-                position = $2,
-                email = $3,
-                phone = $4,
-                status = 'active',
-                updated_at = now()
-            where id = $5
-          `,
-          [contactDepartment, contactPosition, contactEmail, contactPhone, existingContact.rows[0].id]
-        );
-      } else {
-        await client.query(
-          `
-            insert into company_members (
-              company_id,
-              name,
-              department,
-              position,
-              email,
-              phone,
-              member_type,
-              status
-            )
-            values ($1, $2, $3, $4, $5, $6, 'contact', 'active')
-          `,
-          [targetCompanyId, contactName, contactDepartment, contactPosition, contactEmail, contactPhone]
-        );
-      }
-    }
+    const contactId = await upsertCompanyContact(client, {
+      companyId: targetCompanyId,
+      name: contactName,
+      department: contactDepartment,
+      position: contactPosition,
+      email: contactEmail,
+      phone: contactPhone
+    });
 
     await client.query('delete from company_capabilities where company_id = $1', [targetCompanyId]);
     for (const capability of capabilities) {
@@ -674,11 +674,12 @@ companyRelationshipsRouter.patch('/:relationshipId', async (req: Request, res: R
             tags = $4,
             memo = $5,
             internal_owner_member_id = $6,
+            contact_id = $7,
             updated_at = now()
-        where id = $7
-          and source_company_id = $8
+        where id = $8
+          and source_company_id = $9
       `,
-      [relationshipType, internalGrade, managementStatus, tags, memo, internalOwnerMemberId, relationshipId, currentCompanyId]
+      [relationshipType, internalGrade, managementStatus, tags, memo, internalOwnerMemberId, contactId, relationshipId, currentCompanyId]
     );
 
     await client.query('commit');
@@ -912,15 +913,15 @@ companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) =>
         or cr.memo ilike $${values.length}
         or exists (
           select 1
-          from company_members search_cm
-          where search_cm.company_id = c.id
-            and search_cm.status = 'active'
+          from company_contacts search_contact
+          where search_contact.company_id = c.id
+            and search_contact.status = 'active'
             and (
-              search_cm.name ilike $${values.length}
-              or search_cm.department ilike $${values.length}
-              or search_cm.position ilike $${values.length}
-              or search_cm.email ilike $${values.length}
-              or search_cm.phone ilike $${values.length}
+              search_contact.name ilike $${values.length}
+              or search_contact.department ilike $${values.length}
+              or search_contact.position ilike $${values.length}
+              or search_contact.email ilike $${values.length}
+              or search_contact.phone ilike $${values.length}
             )
         )
         or exists (
@@ -962,12 +963,12 @@ companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) =>
           c.address as target_address,
           c.contact_phone as target_contact_phone,
           c.contact_email as target_contact_email,
-          cm.id as contact_member_id,
-          cm.name as contact_member_name,
-          cm.department as contact_member_department,
-          cm.position as contact_member_position,
-          cm.email as contact_member_email,
-          cm.phone as contact_member_phone,
+          ct.id as contact_id,
+          ct.name as contact_name,
+          ct.department as contact_department,
+          ct.position as contact_position,
+          ct.email as contact_email,
+          ct.phone as contact_phone,
           coalesce(array_agg(distinct cc.name) filter (where cc.name is not null), '{}') as capabilities,
           coalesce(array_agg(distinct cert.name) filter (where cert.name is not null), '{}') as certifications,
           coalesce(
@@ -987,17 +988,16 @@ companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) =>
         join companies c on c.id = cr.target_company_id
         left join lateral (
           select *
-          from company_members cm
-          where cm.company_id = cr.target_company_id
-            and cm.member_type = 'contact'
-            and cm.status = 'active'
-          order by cm.created_at desc
+          from company_contacts ct
+          where ct.id = cr.contact_id
+            and ct.status = 'active'
+          order by ct.is_primary desc, ct.updated_at desc
           limit 1
-        ) cm on true
+        ) ct on true
         left join company_capabilities cc on cc.company_id = c.id
         left join company_certifications cert on cert.company_id = c.id
         where ${conditions.join('\n          and ')}
-        group by cr.id, c.id, cm.id, cm.name, cm.department, cm.position, cm.email, cm.phone
+        group by cr.id, c.id, ct.id, ct.name, ct.department, ct.position, ct.email, ct.phone
         order by cr.updated_at desc
       `,
       values

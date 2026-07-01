@@ -6,11 +6,13 @@ import { AuthProvider } from './features/auth/AuthContext';
 import { ProtectedRoute, PublicOnlyRoute } from './features/auth/routes/AuthRouteGuards';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { SignupPage } from './features/auth/pages/SignupPage';
+import { InvitationAcceptPage } from './features/auth/pages/InvitationAcceptPage';
 import { AgenciesPage } from './features/agencies/pages/AgenciesPage';
 import { AgencyFormPage } from './features/agencies/pages/AgencyFormPage';
 import { AgencyOrganizationPage } from './features/agencies/pages/AgencyOrganizationPage';
 import { BuyerCompanyMembersPage } from './features/company-members/pages/BuyerCompanyMembersPage';
 import { BuyerCompanyMemberFormPage } from './features/company-members/pages/BuyerCompanyMemberFormPage';
+import { BuyerCompanyMemberInvitationsPage } from './features/company-members/pages/BuyerCompanyMemberInvitationsPage';
 import { MyPage } from './features/account/pages/MyPage';
 import { AdminDashboardPage } from './features/dashboards/pages/AdminDashboardPage';
 import { BuyerDashboardPage } from './features/dashboards/pages/BuyerDashboardPage';
@@ -51,7 +53,8 @@ const router = createBrowserRouter([
         element: <AuthLayout />,
         children: [
           { path: 'login', element: <LoginPage /> },
-          { path: 'signup', element: <SignupPage /> }
+          { path: 'signup', element: <SignupPage /> },
+          { path: 'invitations/accept', element: <InvitationAcceptPage /> }
         ]
       }
     ]
@@ -74,6 +77,7 @@ const router = createBrowserRouter([
           { path: 'buyer/suppliers/new', element: <BuyerSupplierFormPage /> },
           { path: 'buyer/suppliers/:supplierId/edit', element: <BuyerSupplierFormPage /> },
           { path: 'buyer/company-members', element: <BuyerCompanyMembersPage /> },
+          { path: 'buyer/company-members/invitations', element: <BuyerCompanyMemberInvitationsPage /> },
           { path: 'buyer/company-members/new', element: <BuyerCompanyMemberFormPage /> },
           { path: 'supplier/dashboard', element: <SupplierDashboardPage /> },
           { path: 'supplier/jobs', element: <SupplierJobListPage /> },

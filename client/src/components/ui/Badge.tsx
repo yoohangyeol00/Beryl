@@ -5,7 +5,7 @@ type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
 };
 
 const tones = {
-  success: 'bg-primary-fixed text-on-primary-fixed-variant',
+  success: 'bg-primary text-on-primary',
   danger: 'bg-error-container text-on-error-container',
   neutral: 'bg-surface-container-high text-on-surface-variant',
   info: 'bg-secondary-container text-on-secondary-container'

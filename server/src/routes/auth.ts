@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { Router, type Request, type Response } from 'express';
 import { hashPassword, verifyPassword } from '../auth/password.js';
 import {
@@ -102,6 +103,10 @@ function normalizeEmail(email: string): string {
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function hashInvitationToken(token: string) {
+  return createHash('sha256').update(token).digest('hex');
 }
 
 function toAuthResponse(row: UserRow): AuthResponse {
@@ -308,6 +313,209 @@ authRouter.post('/signup', async (req, res, next) => {
     sendSuccess(res, toAuthResponse(responseUser), 201);
   } catch (error) {
     await client.query('rollback');
+    next(error);
+  } finally {
+    client.release();
+  }
+});
+
+authRouter.get('/invitations/accept', async (req: Request, res: Response, next) => {
+  const token = getString(req.query.token);
+
+  if (!token) {
+    sendError(res, 400, 'INVITATION_TOKEN_REQUIRED', '초대 토큰이 필요합니다.');
+    return;
+  }
+
+  try {
+    const result = await pool.query<{
+      id: string;
+      email: string;
+      expires_at: string;
+      company_name: string;
+      member_name: string;
+      member_department: string | null;
+      member_position: string | null;
+    }>(
+      `
+        select
+          ui.id,
+          ui.email,
+          ui.expires_at,
+          c.name as company_name,
+          cm.name as member_name,
+          cm.department as member_department,
+          cm.position as member_position
+        from user_invitations ui
+        join companies c on c.id = ui.company_id
+        join company_members cm on cm.id = ui.company_member_id
+        where ui.token_hash = $1
+          and ui.status = 'pending'
+        limit 1
+      `,
+      [hashInvitationToken(token)]
+    );
+    const invitation = result.rows[0];
+
+    if (!invitation) {
+      sendError(res, 404, 'INVITATION_NOT_FOUND', '유효한 초대 링크를 찾을 수 없습니다.');
+      return;
+    }
+
+    if (new Date(invitation.expires_at).getTime() <= Date.now()) {
+      await pool.query("update user_invitations set status = 'expired', updated_at = now() where id = $1", [
+        invitation.id
+      ]);
+      sendError(res, 410, 'INVITATION_EXPIRED', '만료된 초대 링크입니다. 다시 초대를 요청해주세요.');
+      return;
+    }
+
+    sendSuccess(res, {
+      email: invitation.email,
+      name: invitation.member_name,
+      companyName: invitation.company_name,
+      department: invitation.member_department,
+      position: invitation.member_position,
+      expiresAt: invitation.expires_at
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+authRouter.post('/invitations/accept', async (req: Request, res: Response, next) => {
+  const body = asRecord(req.body);
+  const token = getString(body.token);
+  const password = getString(body.password);
+  const passwordConfirm = getString(body.passwordConfirm);
+
+  if (!token || !password || !passwordConfirm) {
+    sendError(res, 400, 'VALIDATION_ERROR', '초대 토큰과 비밀번호를 입력해주세요.');
+    return;
+  }
+
+  if (password.length < 8) {
+    sendError(res, 400, 'WEAK_PASSWORD', '비밀번호는 8자 이상이어야 합니다.');
+    return;
+  }
+
+  if (password !== passwordConfirm) {
+    sendError(res, 400, 'PASSWORD_MISMATCH', '비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+    return;
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('begin');
+
+    const invitationResult = await client.query<{
+      id: string;
+      company_id: string;
+      company_member_id: string;
+      email: string;
+      role: AuthRole;
+      expires_at: string;
+      member_name: string;
+      member_user_id: string | null;
+    }>(
+      `
+        select
+          ui.id,
+          ui.company_id,
+          ui.company_member_id,
+          ui.email,
+          ui.role,
+          ui.expires_at,
+          cm.name as member_name,
+          cm.user_id as member_user_id
+        from user_invitations ui
+        join company_members cm on cm.id = ui.company_member_id
+        where ui.token_hash = $1
+          and ui.status = 'pending'
+        limit 1
+        for update
+      `,
+      [hashInvitationToken(token)]
+    );
+    const invitation = invitationResult.rows[0];
+
+    if (!invitation) {
+      await client.query('rollback');
+      sendError(res, 404, 'INVITATION_NOT_FOUND', '유효한 초대 링크를 찾을 수 없습니다.');
+      return;
+    }
+
+    if (new Date(invitation.expires_at).getTime() <= Date.now()) {
+      await client.query("update user_invitations set status = 'expired', updated_at = now() where id = $1", [
+        invitation.id
+      ]);
+      await client.query('commit');
+      sendError(res, 410, 'INVITATION_EXPIRED', '만료된 초대 링크입니다. 다시 초대를 요청해주세요.');
+      return;
+    }
+
+    if (invitation.member_user_id) {
+      await client.query('rollback');
+      sendError(res, 409, 'INVITATION_ALREADY_ACCEPTED', '이미 수락된 초대입니다.');
+      return;
+    }
+
+    const existingUser = await client.query('select id from users where email = $1 limit 1', [invitation.email]);
+
+    if (existingUser.rowCount) {
+      await client.query('rollback');
+      sendError(res, 409, 'EMAIL_ALREADY_EXISTS', '이미 가입된 이메일입니다.');
+      return;
+    }
+
+    const passwordHash = await hashPassword(password);
+    const userResult = await client.query<{ id: string }>(
+      `
+        insert into users (company_id, email, name, password_hash, role, status)
+        values ($1, $2, $3, $4, $5, 'active')
+        returning id
+      `,
+      [invitation.company_id, invitation.email, invitation.member_name, passwordHash, invitation.role]
+    );
+    const createdUser = userResult.rows[0];
+
+    await client.query(
+      `
+        update company_members
+        set user_id = $1,
+            status = 'active',
+            updated_at = now()
+        where id = $2
+      `,
+      [createdUser.id, invitation.company_member_id]
+    );
+
+    await client.query(
+      `
+        update user_invitations
+        set status = 'accepted',
+            accepted_at = now(),
+            accepted_user_id = $1,
+            updated_at = now()
+        where id = $2
+      `,
+      [createdUser.id, invitation.id]
+    );
+
+    await client.query('commit');
+    await createSessionForUser(res, createdUser.id);
+
+    const responseUser = await findUserForAuthResponse(createdUser.id);
+
+    if (!responseUser) {
+      sendError(res, 500, 'AUTH_RESPONSE_NOT_FOUND', '가입된 사용자 정보를 불러오지 못했습니다.');
+      return;
+    }
+
+    sendSuccess(res, toAuthResponse(responseUser), 201);
+  } catch (error) {
+    await client.query('rollback').catch(() => undefined);
     next(error);
   } finally {
     client.release();

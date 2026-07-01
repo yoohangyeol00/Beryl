@@ -447,6 +447,7 @@ PostgreSQL 도입 시 우선 테이블 후보:
 - `users`
 - `companies`
 - `company_members`
+- `company_contacts`
 - `company_relationships`
 - `jobs`
 - `job_requirements`

@@ -75,9 +75,11 @@ MVP에서 제외:
 
 ### company_members
 
-기업 구성원 프로필이다. `users`와 완전히 같은 개념이 아니다.
+기업 내부 구성원 프로필이다. `users`와 완전히 같은 개념이 아니다.
 
-모든 `company_members`가 로그인 계정을 가져야 하는 것은 아니며, 로그인 계정과 연결할 필요가 있는 경우 `company_members.user_id` 또는 `users.company_member_id` 중 하나의 연결 필드를 사용한다. 최종 방향은 migration 작성 전 `docs/erd.md`와 함께 확정한다.
+모든 `company_members`가 로그인 계정을 가져야 하는 것은 아니다. 초대받은 사용자는 초대 수락 전 `user_id = null`, `status = invited` 상태로 둘 수 있고, 수락 후 `company_members.user_id`에 `users.id`를 연결한다.
+
+공급기업/발주기관 등록에서 입력하는 외부 담당자 연락처는 `company_members`가 아니라 `company_contacts`에 저장한다.
 
 ## 5. 회원가입 플로우
 
@@ -90,7 +92,7 @@ MVP에서 제외:
 3. 서버는 이메일 중복과 기업 식별값 중복을 검증한다.
 4. 서버는 `companies`를 생성한다.
 5. 서버는 `users`를 `companyUser` role로 생성하고 생성된 `company_id`에 연결한다.
-6. 필요하면 `company_members`에 기본 담당자 프로필을 생성하거나, 이후 마이페이지/관리 화면에서 별도 등록한다.
+6. 필요하면 `company_members`에 기본 내부 구성원 프로필을 생성하거나, 이후 마이페이지/관리 화면에서 별도 등록한다.
 7. 회원가입 성공 후 로그인 상태로 전환하거나 `/login`으로 이동한다. MVP에서는 둘 중 하나로 통일한다.
 
 회원가입 API는 `systemAdmin` 생성을 지원하지 않는다. 관리자 계정 생성은 일반 API가 아니라 프로그램 초기 설정, seed, 운영 스크립트 같은 별도 경로에서만 수행한다.
@@ -143,6 +145,8 @@ Auth API는 공통 응답 envelope을 사용한다.
 | `POST` | `/api/auth/login` | 로그인 |
 | `POST` | `/api/auth/logout` | 로그아웃 |
 | `GET` | `/api/auth/me` | 현재 사용자와 소속 기업 조회 |
+| `GET` | `/api/auth/invitations/accept` | 초대 수락 전 토큰 검증 |
+| `POST` | `/api/auth/invitations/accept` | 초대 수락, 비밀번호 설정, 계정 활성화 |
 
 ### `POST /api/auth/signup`
 
@@ -233,6 +237,14 @@ Response data 후보:
   }
 }
 ```
+
+### 초대 수락 흐름
+
+관리자가 사용자를 초대하면 `company_members`에 구성원 프로필을 만들고 `user_invitations`에 초대 토큰 해시를 저장한다.
+
+초대 링크는 `/invitations/accept?token=...` 프론트 라우트로 연결한다. 클라이언트는 `GET /api/auth/invitations/accept?token=...`로 토큰을 검증한 뒤 비밀번호 입력 폼을 보여준다.
+
+사용자가 비밀번호를 설정하면 `POST /api/auth/invitations/accept`가 `users` 계정을 생성하고, `company_members.user_id`를 연결하며, `user_invitations.status`를 `accepted`로 변경한다. 성공 시 일반 로그인과 동일하게 서버 세션 cookie를 발급한다.
 
 ## 8. 세션과 Token 기준
 

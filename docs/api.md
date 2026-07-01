@@ -133,6 +133,8 @@ status=active
 | `PATCH` | `/api/auth/me` | 내 계정/구성원 프로필 수정 |
 | `PATCH` | `/api/auth/me/password` | 내 비밀번호 변경 |
 | `DELETE` | `/api/auth/me` | 내 계정 탈퇴 처리 |
+| `GET` | `/api/auth/invitations/accept` | 초대 수락 전 토큰 검증 |
+| `POST` | `/api/auth/invitations/accept` | 초대 수락, 비밀번호 설정, 계정 활성화 |
 
 ### `POST /api/auth/signup`
 
@@ -235,6 +237,190 @@ Response data:
     "email": "user@example.com",
     "phone": null
   }
+}
+```
+
+### `GET /api/auth/invitations/accept`
+
+초대 메일 링크로 접근한 사용자가 비밀번호를 설정하기 전에 초대 토큰을 검증한다.
+
+Query:
+
+```text
+token=raw-invitation-token
+```
+
+Response data:
+
+```json
+{
+  "email": "user@example.com",
+  "name": "홍길동",
+  "companyName": "A기업",
+  "department": "사업개발팀",
+  "position": "팀장",
+  "expiresAt": "2026-07-04T00:00:00.000Z"
+}
+```
+
+### `POST /api/auth/invitations/accept`
+
+초대를 수락하고 로그인 가능한 `users` 계정을 생성한다. 성공 시 서버 세션 cookie를 발급하고 `company_members.user_id`, `company_members.status`, `user_invitations.status`를 함께 갱신한다.
+
+Request:
+
+```json
+{
+  "token": "raw-invitation-token",
+  "password": "password123",
+  "passwordConfirm": "password123"
+}
+```
+
+Response data는 `POST /api/auth/login`과 같은 auth session 구조를 사용한다.
+
+## 3.1 Company Members
+
+현재 기업의 내부 구성원과 계정 상태를 관리한다. 초대 수락이 완료된 사용자는 화면에서 `활성` 상태로 표시한다. 공급기업/발주기관 담당자 연락처는 `company_contacts`를 사용하고, 이 API에는 포함하지 않는다.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/company-members` | 현재 기업 내부 구성원과 최신 초대 상태 목록 조회 |
+| `GET` | `/api/company-members/invitations` | 현재 기업 사용자 초대 이력 전체 조회 |
+| `PATCH` | `/api/company-members/:memberId` | 내부 구성원 연락처/소속/직책 수정 |
+| `PATCH` | `/api/company-members/:memberId/cancel-invitation` | 초대 대기 구성원 초대 취소 |
+| `PATCH` | `/api/company-members/:memberId/deactivate` | 활성 구성원 비활성화 |
+| `PATCH` | `/api/company-members/:memberId/activate` | 비활성 구성원 재활성화 |
+| `POST` | `/api/company-members/invitations` | 내부 사용자 초대 |
+
+### `GET /api/company-members`
+
+초대 취소된 사용자 초안은 이력 보존을 위해 DB에는 남기지만, 기본 목록 응답에서는 제외한다. 비활성화된 실제 계정은 `userId`가 연결되어 있으므로 목록에 표시된다.
+
+Query:
+
+```text
+q=검색어
+status=invited | active | inactive
+```
+
+Response data:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "name": "홍길동",
+      "department": "사업개발팀",
+      "position": "팀장",
+      "email": "user@example.com",
+      "phone": "010-1234-5678",
+      "memberType": "employee",
+      "status": "invited",
+      "userId": null,
+      "assignedJobs": 0,
+      "invitation": {
+        "id": "uuid",
+        "status": "pending",
+        "role": "companyUser",
+        "invitedAt": "2026-07-01T00:00:00.000Z",
+        "sentAt": "2026-07-01T00:00:00.000Z",
+        "expiresAt": "2026-07-04T00:00:00.000Z",
+        "acceptedAt": null,
+        "invitedBy": {
+          "id": "uuid",
+          "name": "관리자",
+          "email": "admin@example.com"
+        }
+      }
+    }
+  ],
+  "total": 1
+}
+```
+
+### `GET /api/company-members/invitations`
+
+현재 기업의 사용자 초대 이력을 조회한다. 사용자 목록에서 숨기는 초대 취소 건도 이 응답에는 포함한다.
+
+Response data:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "companyMemberId": "uuid",
+      "name": "홍길동",
+      "department": "사업개발팀",
+      "email": "user@example.com",
+      "status": "pending",
+      "invitedAt": "2026-07-01T00:00:00.000Z",
+      "sentAt": "2026-07-01T00:00:00.000Z",
+      "expiresAt": "2026-07-04T00:00:00.000Z",
+      "acceptedAt": null
+    }
+  ],
+  "total": 1
+}
+```
+
+### `PATCH /api/company-members/:memberId`
+
+현재 기업에 속한 내부 구성원의 연락처, 소속 부서, 직책을 수정한다. 이름과 이메일은 이 API에서 수정하지 않는다. 외부 담당자 연락처는 이 API가 아니라 `company_contacts` 계열 데이터를 사용한다.
+
+Request:
+
+```json
+{
+  "phone": "010-1234-5678",
+  "department": "사업개발팀",
+  "position": "팀장"
+}
+```
+
+Response data:
+
+```json
+{
+  "id": "uuid"
+}
+```
+
+### `PATCH /api/company-members/:memberId/cancel-invitation`
+
+현재 기업의 초대 대기 구성원만 대상으로 한다. `company_members.status`를 `inactive`으로 변경하고, 연결된 pending 초대는 `user_invitations.status = revoked`로 변경한다.
+
+Response data:
+
+```json
+{
+  "id": "uuid"
+}
+```
+
+### `PATCH /api/company-members/:memberId/deactivate`
+
+현재 기업의 활성 구성원을 비활성화한다. 물리 삭제하지 않고 `company_members.status = inactive`으로 변경해 이력과 연결 관계를 보존한다.
+
+Response data:
+
+```json
+{
+  "id": "uuid"
+}
+```
+
+### `PATCH /api/company-members/:memberId/activate`
+
+현재 기업의 비활성 구성원을 다시 활성화한다. 초대 취소처럼 아직 `users` 계정이 연결되지 않은 구성원은 대상이 아니며, `company_members.user_id`가 연결된 비활성 구성원만 `active`로 변경한다.
+
+Response data:
+
+```json
+{
+  "id": "uuid"
 }
 ```
 

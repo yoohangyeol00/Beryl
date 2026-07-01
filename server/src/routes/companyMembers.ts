@@ -21,6 +21,42 @@ interface InvitationRow {
   sent_at: string | null;
 }
 
+interface CompanyMemberRow {
+  id: string;
+  name: string;
+  department: string | null;
+  position: string | null;
+  email: string | null;
+  phone: string | null;
+  member_type: string;
+  status: string;
+  user_id: string | null;
+  assigned_jobs: string | number;
+  invitation_id: string | null;
+  invitation_status: string | null;
+  invitation_role: InvitationRole | null;
+  invited_at: string | null;
+  sent_at: string | null;
+  expires_at: string | null;
+  accepted_at: string | null;
+  invited_by_user_id: string | null;
+  invited_by_name: string | null;
+  invited_by_email: string | null;
+}
+
+interface CompanyMemberInvitationHistoryRow {
+  id: string;
+  company_member_id: string;
+  name: string;
+  department: string | null;
+  email: string;
+  status: string;
+  invited_at: string;
+  sent_at: string | null;
+  expires_at: string;
+  accepted_at: string | null;
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return {};
@@ -60,6 +96,390 @@ function toInvitationResponse(row: InvitationRow) {
     sentAt: row.sent_at
   };
 }
+
+function toCompanyMemberResponse(row: CompanyMemberRow) {
+  return {
+    id: row.id,
+    name: row.name,
+    department: row.department,
+    position: row.position,
+    email: row.email,
+    phone: row.phone,
+    memberType: row.member_type,
+    status: row.status,
+    userId: row.user_id,
+    assignedJobs: Number(row.assigned_jobs ?? 0),
+    invitation: row.invitation_id
+      ? {
+          id: row.invitation_id,
+          status: row.invitation_status,
+          role: row.invitation_role,
+          invitedAt: row.invited_at,
+          sentAt: row.sent_at,
+          expiresAt: row.expires_at,
+          acceptedAt: row.accepted_at,
+          invitedBy: row.invited_by_user_id
+            ? {
+                id: row.invited_by_user_id,
+                name: row.invited_by_name,
+                email: row.invited_by_email
+              }
+            : null
+        }
+      : null
+  };
+}
+
+function toCompanyMemberInvitationHistoryResponse(row: CompanyMemberInvitationHistoryRow) {
+  return {
+    id: row.id,
+    companyMemberId: row.company_member_id,
+    name: row.name,
+    department: row.department,
+    email: row.email,
+    status: row.status,
+    invitedAt: row.invited_at,
+    sentAt: row.sent_at,
+    expiresAt: row.expires_at,
+    acceptedAt: row.accepted_at
+  };
+}
+
+companyMembersRouter.get('/invitations', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+
+  try {
+    const result = await pool.query<CompanyMemberInvitationHistoryRow>(
+      `
+        select
+          ui.id,
+          ui.company_member_id,
+          cm.name,
+          cm.department,
+          ui.email,
+          ui.status,
+          ui.created_at as invited_at,
+          ui.sent_at,
+          ui.expires_at,
+          ui.accepted_at
+        from user_invitations ui
+        join company_members cm on cm.id = ui.company_member_id
+        where ui.company_id = $1
+          and cm.member_type <> 'contact'
+        order by ui.created_at desc
+      `,
+      [currentCompanyId]
+    );
+
+    sendSuccess(res, {
+      items: result.rows.map(toCompanyMemberInvitationHistoryResponse),
+      total: result.rowCount ?? result.rows.length
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+companyMembersRouter.get('/', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const query = asRecord(req.query);
+  const q = getString(query.q);
+  const status = getString(query.status);
+  const values: unknown[] = [currentCompanyId];
+  const conditions = [
+    "cm.company_id = $1",
+    "cm.member_type <> 'contact'",
+    `
+      not (
+        cm.status = 'inactive'
+        and cm.user_id is null
+        and exists (
+          select 1
+          from user_invitations hidden_invitation
+          where hidden_invitation.company_member_id = cm.id
+            and hidden_invitation.status = 'revoked'
+        )
+      )
+    `
+  ];
+
+  if (status) {
+    values.push(status);
+    conditions.push(`cm.status = $${values.length}`);
+  }
+
+  if (q) {
+    values.push(`%${q}%`);
+    conditions.push(`
+      (
+        cm.name ilike $${values.length}
+        or cm.department ilike $${values.length}
+        or cm.position ilike $${values.length}
+        or cm.email ilike $${values.length}
+        or cm.phone ilike $${values.length}
+      )
+    `);
+  }
+
+  try {
+    const result = await pool.query<CompanyMemberRow>(
+      `
+        select
+          cm.id,
+          cm.name,
+          cm.department,
+          cm.position,
+          cm.email,
+          cm.phone,
+          cm.member_type,
+          cm.status,
+          cm.user_id,
+          coalesce(job_counts.assigned_jobs, 0) as assigned_jobs,
+          latest_invitation.id as invitation_id,
+          latest_invitation.status as invitation_status,
+          latest_invitation.role as invitation_role,
+          latest_invitation.created_at as invited_at,
+          latest_invitation.sent_at,
+          latest_invitation.expires_at,
+          latest_invitation.accepted_at,
+          inviter.id as invited_by_user_id,
+          inviter.name as invited_by_name,
+          inviter.email as invited_by_email
+        from company_members cm
+        left join lateral (
+          select count(*) as assigned_jobs
+          from jobs j
+          where j.internal_owner_member_id = cm.id
+        ) job_counts on true
+        left join lateral (
+          select
+            ui.id,
+            ui.status,
+            ui.role,
+            ui.created_at,
+            ui.sent_at,
+            ui.expires_at,
+            ui.accepted_at,
+            ui.created_by_user_id
+          from user_invitations ui
+          where ui.company_member_id = cm.id
+          order by
+            case ui.status
+              when 'accepted' then 0
+              when 'pending' then 1
+              else 2
+            end,
+            ui.accepted_at desc nulls last,
+            ui.created_at desc
+          limit 1
+        ) latest_invitation on true
+        left join users inviter on inviter.id = latest_invitation.created_by_user_id
+        where ${conditions.join('\n          and ')}
+        order by
+          case cm.status
+            when 'invited' then 0
+            when 'active' then 1
+            else 2
+          end,
+          cm.updated_at desc
+      `,
+      values
+    );
+
+    sendSuccess(res, {
+      items: result.rows.map(toCompanyMemberResponse),
+      total: result.rowCount ?? result.rows.length
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+companyMembersRouter.patch('/:memberId', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const memberId = getString(req.params.memberId);
+  const body = asRecord(req.body);
+  const department = getString(body.department) || null;
+  const position = getString(body.position) || null;
+  const phone = getString(body.phone) || null;
+
+  if (!memberId) {
+    sendError(res, 400, 'VALIDATION_ERROR', '사용자 ID가 필요합니다.');
+    return;
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('begin');
+
+    const result = await client.query<{ id: string; user_id: string | null }>(
+      `
+        update company_members
+        set department = $1,
+            position = $2,
+            phone = $3,
+            updated_at = now()
+        where id = $4
+          and company_id = $5
+          and member_type <> 'contact'
+        returning id, user_id
+      `,
+      [department, position, phone, memberId, currentCompanyId]
+    );
+    const member = result.rows[0];
+
+    if (!member) {
+      await client.query('rollback');
+      sendError(res, 404, 'COMPANY_MEMBER_NOT_FOUND', '사용자 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    await client.query('commit');
+    sendSuccess(res, { id: member.id });
+  } catch (error) {
+    await client.query('rollback').catch(() => undefined);
+    next(error);
+  } finally {
+    client.release();
+  }
+});
+
+companyMembersRouter.patch('/:memberId/cancel-invitation', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const memberId = getString(req.params.memberId);
+
+  if (!memberId) {
+    sendError(res, 400, 'VALIDATION_ERROR', '사용자 ID가 필요합니다.');
+    return;
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('begin');
+
+    const memberResult = await client.query<{ id: string }>(
+      `
+        update company_members
+        set status = 'inactive',
+            updated_at = now()
+        where id = $1
+          and company_id = $2
+          and member_type <> 'contact'
+          and status = 'invited'
+        returning id
+      `,
+      [memberId, currentCompanyId]
+    );
+    const member = memberResult.rows[0];
+
+    if (!member) {
+      await client.query('rollback');
+      sendError(res, 404, 'COMPANY_MEMBER_INVITATION_NOT_FOUND', '취소할 초대 대기 사용자를 찾을 수 없습니다.');
+      return;
+    }
+
+    await client.query(
+      `
+        update user_invitations
+        set status = 'revoked',
+            updated_at = now()
+        where company_id = $1
+          and company_member_id = $2
+          and status = 'pending'
+      `,
+      [currentCompanyId, memberId]
+    );
+
+    await client.query('commit');
+    sendSuccess(res, { id: member.id });
+  } catch (error) {
+    await client.query('rollback').catch(() => undefined);
+    next(error);
+  } finally {
+    client.release();
+  }
+});
+
+companyMembersRouter.patch('/:memberId/deactivate', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const memberId = getString(req.params.memberId);
+
+  if (!memberId) {
+    sendError(res, 400, 'VALIDATION_ERROR', '사용자 ID가 필요합니다.');
+    return;
+  }
+
+  try {
+    const result = await pool.query<{ id: string }>(
+      `
+        update company_members
+        set status = 'inactive',
+            updated_at = now()
+        where id = $1
+          and company_id = $2
+          and member_type <> 'contact'
+          and status = 'active'
+        returning id
+      `,
+      [memberId, currentCompanyId]
+    );
+    const member = result.rows[0];
+
+    if (!member) {
+      sendError(res, 404, 'COMPANY_MEMBER_NOT_FOUND', '비활성화할 활성 사용자를 찾을 수 없습니다.');
+      return;
+    }
+
+    sendSuccess(res, { id: member.id });
+  } catch (error) {
+    next(error);
+  }
+});
+
+companyMembersRouter.patch('/:memberId/activate', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const memberId = getString(req.params.memberId);
+
+  if (!memberId) {
+    sendError(res, 400, 'VALIDATION_ERROR', '사용자 ID가 필요합니다.');
+    return;
+  }
+
+  try {
+    const result = await pool.query<{ id: string }>(
+      `
+        update company_members
+        set status = 'active',
+            updated_at = now()
+        where id = $1
+          and company_id = $2
+          and member_type <> 'contact'
+          and status = 'inactive'
+          and user_id is not null
+        returning id
+      `,
+      [memberId, currentCompanyId]
+    );
+    const member = result.rows[0];
+
+    if (!member) {
+      sendError(res, 404, 'COMPANY_MEMBER_NOT_FOUND', '활성화할 비활성 계정을 찾을 수 없습니다.');
+      return;
+    }
+
+    sendSuccess(res, { id: member.id });
+  } catch (error) {
+    next(error);
+  }
+});
 
 companyMembersRouter.post('/invitations', async (req: Request, res: Response, next) => {
   const authReq = req as AuthenticatedRequest;
@@ -135,7 +555,7 @@ companyMembersRouter.post('/invitations', async (req: Request, res: Response, ne
                 position = $3,
                 phone = $4,
                 member_type = 'employee',
-                status = 'active',
+                status = 'invited',
                 updated_at = now()
             where id = $5
             returning id
@@ -154,7 +574,7 @@ companyMembersRouter.post('/invitations', async (req: Request, res: Response, ne
               member_type,
               status
             )
-            values ($1, $2, $3, $4, $5, $6, 'employee', 'active')
+            values ($1, $2, $3, $4, $5, $6, 'employee', 'invited')
             returning id
           `,
           [currentCompanyId, name, department, position, email, phone]

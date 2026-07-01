@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 export type ActionMenuItem = {
   label: string;
   icon?: ReactNode;
-  tone?: 'default' | 'danger';
+  tone?: 'default' | 'danger' | 'info' | 'success';
   onClick: () => void;
 };
 
@@ -68,7 +68,13 @@ export function ActionMenu({ label = '더보기', items, align = 'right' }: Acti
               role="menuitem"
               className={[
                 'flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold transition-colors hover:bg-surface-container-low',
-                item.tone === 'danger' ? 'text-error' : 'text-on-surface'
+                item.tone === 'danger'
+                  ? 'text-error'
+                  : item.tone === 'info'
+                    ? 'text-blue-600'
+                    : item.tone === 'success'
+                      ? 'text-primary'
+                      : 'text-on-surface'
               ].join(' ')}
               onClick={() => {
                 setOpen(false);
