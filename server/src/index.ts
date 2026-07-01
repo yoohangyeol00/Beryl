@@ -12,6 +12,7 @@ import { companiesRouter } from './routes/companies.js';
 import { jobsRouter } from './routes/jobs.js';
 import { offersRouter } from './routes/offers.js';
 import { resumesRouter } from './routes/resumes.js';
+import { wonProjectsRouter } from './routes/wonProjects.js';
 import { sendError } from './utils/apiResponse.js';
 
 const app = express();
@@ -41,6 +42,7 @@ app.use('/api/company-relationships', companyRelationshipsRouter);
 app.use('/api/jobs', jobsRouter);
 app.use('/api/offers', offersRouter);
 app.use('/api/resumes', resumesRouter);
+app.use('/api/projects/won', wonProjectsRouter);
 
 app.get('/api/health', async (_req, res, next) => {
   try {

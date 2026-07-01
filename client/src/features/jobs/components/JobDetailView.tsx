@@ -1,9 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Calendar, CheckCircle2, Download, FileText, Info, Paperclip, Pencil, Send, Sparkles, Star, Target, Trash2, XCircle } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
 import { deleteJob, updateJobOwnProcurement } from '../../../api/jobsApi';
+import { getResumes } from '../../../api/resumesApi';
 import { EmptyState } from '../../../components/common/EmptyState';
 import { LoadingState } from '../../../components/common/LoadingState';
 import { PageTitle } from '../../../components/common/PageTitle';
@@ -14,6 +15,7 @@ import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
 import { getJobEditPath, getJobsPath, type RoleMode } from '../../modes/roleMode';
 import type { JobDetail } from '../../../types/job';
+import type { Resume } from '../../../types/resume';
 import { useJobDetail } from '../hooks/useJobDetail';
 
 type DetailTab = 'overview' | 'summary' | 'skills' | 'criteria' | 'schedule' | 'files';
@@ -31,6 +33,7 @@ type ReceivedProposal = {
 
 type RecommendedPerson = {
   id: string;
+  resumeId: string;
   name: string;
   role: string;
   currentProject: string;
@@ -92,12 +95,6 @@ const receivedProposals: ReceivedProposal[] = [
   { id: 'proposal-4', supplier: '에이아이랩스', people: '강서준 외 4명', proposedAmount: '8,590,000,000원', techScore: 89, priceScore: 86, status: 'preferred' }
 ];
 
-const recommendedPeople: RecommendedPerson[] = [
-  { id: 'match-8f3a21', name: '김도윤', role: 'PM/아키텍트', currentProject: '전자조달 플랫폼 고도화', availableFrom: '2026-08-01', fitScore: 92, reason: 'MSA 전환과 공공 PM 경험 보유' },
-  { id: 'match-42c9e7', name: '이서연', role: 'Frontend', currentProject: '전자조달 포털 개선', availableFrom: '2026-08-16', fitScore: 86, reason: '대시보드/포털 UX 구축 경험' },
-  { id: 'match-a71d04', name: '박지훈', role: 'Backend', currentProject: '대기', availableFrom: '2026-07-01', fitScore: 81, reason: 'Spring Boot API 구축 경험' }
-];
-
 const tabs: { id: DetailTab; label: string; icon: typeof Info }[] = [
   { id: 'overview', label: labels.overview, icon: Info },
   { id: 'summary', label: labels.summary, icon: Sparkles },
@@ -130,6 +127,12 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
       ]);
     }
   });
+  const { data: resumeList } = useQuery({
+    queryKey: ['resumes', 'matching-candidates'],
+    queryFn: () => getResumes({ pageSize: 100 }),
+    enabled: !isAgency
+  });
+  const recommendedPeople = job ? getRecommendedPeople(job, resumeList?.items ?? []) : [];
 
   useEffect(() => {
     if (mode) {
@@ -282,7 +285,7 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
           </div>
         </Card>
 
-        {isAgency ? <AgencyReviewPanel /> : <SupplierProposalPanel job={job} onCreateProposal={() => navigate(`/proposals/new?jobId=${job.id}`)} />}
+        {isAgency ? <AgencyReviewPanel /> : <SupplierProposalPanel job={job} />}
       </div>
 
       <Card className="overflow-hidden">
@@ -293,11 +296,90 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
         {isAgency ? (
           <DataTable columns={proposalColumns} data={receivedProposals} getRowKey={(row) => row.id} tableClassName="min-w-[1040px] w-full" />
         ) : (
-          <DataTable columns={recommendedColumns} data={recommendedPeople} getRowKey={(row) => row.id} onRowClick={(row) => navigate(`/offers/${row.id}/analysis`)} tableClassName="min-w-[1040px] w-full" />
+          <DataTable columns={recommendedColumns} data={recommendedPeople} getRowKey={(row) => row.id} onRowClick={(row) => navigate(`/offers/${row.id}/analysis?resumeId=${row.resumeId}`)} tableClassName="min-w-[1040px] w-full" />
         )}
       </Card>
     </section>
   );
+}
+
+const baseRequiredSkills = ['React', 'TypeScript', 'Spring Boot', 'PostgreSQL', 'MSA', 'API'];
+const publicKeywords = ['공공', '조달', '전자조달', '공공기관', '공공 SI', '공공 데이터'];
+
+function getRecommendedPeople(job: JobDetail, resumes: Resume[]): RecommendedPerson[] {
+  const jobTerms = [job.title, job.category, job.description, ...job.requirements].join(' ');
+  const requiredSkills = [
+    ...baseRequiredSkills,
+    ...job.category.split(',').map((item) => item.trim()).filter(Boolean)
+  ];
+
+  return resumes
+    .map((resume) => toRecommendedPerson(resume, requiredSkills, jobTerms))
+    .sort((a, b) => b.fitScore - a.fitScore || a.availableFrom.localeCompare(b.availableFrom));
+}
+
+function toRecommendedPerson(resume: Resume, requiredSkills: string[], jobTerms: string): RecommendedPerson {
+  const normalizedJobTerms = jobTerms.toLowerCase();
+  const matchedSkills = resume.skills.filter((skill) => {
+    const normalizedSkill = skill.toLowerCase();
+    return requiredSkills.some((requiredSkill) => normalizedSkill.includes(requiredSkill.toLowerCase()) || requiredSkill.toLowerCase().includes(normalizedSkill))
+      || normalizedJobTerms.includes(normalizedSkill);
+  });
+  const publicExperienceCount = resume.skills.filter((skill) => publicKeywords.some((keyword) => skill.includes(keyword))).length;
+  const roleScore = getRoleScore(resume.role, normalizedJobTerms);
+  const availabilityScore = getAvailabilityScore(resume);
+  const careerScore = Math.min(resume.careerYears * 2, 24);
+  const skillScore = Math.min(matchedSkills.length * 8, 32);
+  const publicScore = Math.min(publicExperienceCount * 7, 14);
+  const loadPenalty = Math.round(resume.currentManMonths * 8);
+  const fitScore = clampScore(35 + skillScore + roleScore + publicScore + availabilityScore + careerScore - loadPenalty);
+
+  return {
+    id: `match-${resume.id}`,
+    resumeId: resume.id,
+    name: resume.name,
+    role: resume.role,
+    currentProject: formatCurrentProject(resume),
+    availableFrom: resume.availableFrom,
+    fitScore,
+    reason: buildRecommendationReason(resume, matchedSkills, publicExperienceCount)
+  };
+}
+
+function getRoleScore(role: string, jobTerms: string) {
+  const normalizedRole = role.toLowerCase();
+  if (jobTerms.includes(normalizedRole)) return 12;
+  if (['pm', 'architect', '아키텍트'].some((keyword) => normalizedRole.includes(keyword))) return 10;
+  if (['backend', 'frontend', 'data', 'devops'].some((keyword) => normalizedRole.includes(keyword))) return 8;
+  if (['qa', 'pmo', 'business analyst', 'ui/ux'].some((keyword) => normalizedRole.includes(keyword))) return 6;
+  return 4;
+}
+
+function getAvailabilityScore(resume: Resume) {
+  if (resume.availabilityStatus === 'available') return 14;
+  if (resume.availabilityStatus === 'partiallyAssigned') return 9;
+  if (resume.availabilityStatus === 'assigned') return 4;
+  return 0;
+}
+
+function formatCurrentProject(resume: Resume) {
+  if (resume.availabilityStatus === 'available') return '대기';
+  return resume.currentClient && resume.currentClient !== '-' ? `${resume.currentProject} (${resume.currentClient})` : resume.currentProject;
+}
+
+function buildRecommendationReason(resume: Resume, matchedSkills: string[], publicExperienceCount: number) {
+  const skillText = matchedSkills.slice(0, 3).join(', ');
+  const parts = [
+    skillText ? `${skillText} 역량 보유` : `${resume.role} 역할 경험 보유`,
+    publicExperienceCount ? '공공/조달 유사 경험' : '',
+    resume.availabilityStatus === 'available' ? '즉시 투입 가능' : resume.availabilityStatus === 'partiallyAssigned' ? '부분 투입 가능' : ''
+  ].filter(Boolean);
+
+  return parts.join(' · ');
+}
+
+function clampScore(value: number) {
+  return Math.max(45, Math.min(98, Math.round(value)));
 }
 
 function TabContent({ activeTab, job }: { activeTab: DetailTab; job: JobDetail }) {
@@ -403,7 +485,7 @@ function AgencyReviewPanel() {
   );
 }
 
-function SupplierProposalPanel({ job, onCreateProposal }: { job: JobDetail; onCreateProposal: () => void }) {
+function SupplierProposalPanel({ job }: { job: JobDetail }) {
   const daysLeft = getDaysLeft(job.deadline);
   const urgencyLabel = daysLeft === null ? '마감일 미정' : daysLeft <= 3 ? `마감 ${daysLeft}일 전` : daysLeft <= 7 ? `마감 임박 D-${daysLeft}` : `D-${daysLeft}`;
   const fitLabel = job.rfpScore >= 85 ? '매우 적합' : job.rfpScore >= 70 ? '검토 적합' : '추가 검토';
@@ -439,7 +521,6 @@ function SupplierProposalPanel({ job, onCreateProposal }: { job: JobDetail; onCr
           ]}
         />
       </div>
-      <Button className="mt-5 w-full" icon={<Send className="h-4 w-4" />} onClick={onCreateProposal}>{labels.createProposal}</Button>
     </Card>
   );
 }

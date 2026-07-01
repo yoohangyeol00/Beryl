@@ -23,7 +23,7 @@ export const mockJobsResponse: ApiResponse<JobList> = {
         deadline: '2026-07-05',
         status: 'open',
         rfpScore: 92,
-        recommendedPeople: 12
+        recommendedPeople: 20
       },
       {
         id: 'job-002',
