@@ -1,7 +1,6 @@
-import { axiosInstance, requestWithMockFallback } from './axios';
+import { axiosInstance } from './axios';
 import type { ApiResponse } from './apiResponse';
 import { unwrapApiResponse } from './apiResponse';
-import { mockJobDetailResponse, mockJobsResponse } from '../mocks/jobs.mock';
 import type { JobDetail, JobList, JobStatus } from '../types/job';
 
 export interface GetJobsParams {
@@ -34,23 +33,13 @@ export interface CreateJobRequest {
 }
 
 export async function getJobs(params?: GetJobsParams) {
-  return requestWithMockFallback<JobList>({
-    request: async () => {
-      const response = await axiosInstance.get<ApiResponse<JobList>>('/jobs', { params });
-      return unwrapApiResponse(response.data);
-    },
-    mock: () => unwrapApiResponse(mockJobsResponse)
-  });
+  const response = await axiosInstance.get<ApiResponse<JobList>>('/jobs', { params });
+  return unwrapApiResponse(response.data);
 }
 
 export async function getJobDetail(jobId: string) {
-  return requestWithMockFallback<JobDetail>({
-    request: async () => {
-      const response = await axiosInstance.get<ApiResponse<JobDetail>>(`/jobs/${jobId}`);
-      return unwrapApiResponse(response.data);
-    },
-    mock: () => unwrapApiResponse(mockJobDetailResponse)
-  });
+  const response = await axiosInstance.get<ApiResponse<JobDetail>>(`/jobs/${jobId}`);
+  return unwrapApiResponse(response.data);
 }
 
 export async function createJob(payload: CreateJobRequest) {
@@ -60,6 +49,13 @@ export async function createJob(payload: CreateJobRequest) {
 
 export async function updateJob(jobId: string, payload: CreateJobRequest) {
   const response = await axiosInstance.patch<ApiResponse<JobDetail>>(`/jobs/${jobId}`, payload);
+  return unwrapApiResponse(response.data);
+}
+
+export async function updateJobOwnProcurement(jobId: string, isOwnProcurement: boolean) {
+  const response = await axiosInstance.patch<ApiResponse<JobDetail>>(`/jobs/${jobId}/own-procurement`, {
+    isOwnProcurement
+  });
   return unwrapApiResponse(response.data);
 }
 

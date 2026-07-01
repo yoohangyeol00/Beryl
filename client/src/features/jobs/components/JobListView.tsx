@@ -7,6 +7,7 @@ import { LoadingState } from '../../../components/common/LoadingState';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { PageToolbar } from '../../../components/common/PageToolbar';
 import { StatusBadge } from '../../../components/common/StatusBadge';
+import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
@@ -55,7 +56,7 @@ export function JobListView({ mode }: JobListViewProps = {}) {
   const isAgency = role === 'agency';
   const apiParams = useMemo(
     () => ({
-      perspective: 'accessible' as const,
+      perspective: isAgency ? ('buyer' as const) : ('accessible' as const),
       q: query.trim() || undefined,
       status: isJobStatus(statusFilter) ? statusFilter : undefined,
       procurementType: procurementFilter === 'all' ? undefined : procurementFilter,
@@ -66,7 +67,7 @@ export function JobListView({ mode }: JobListViewProps = {}) {
       sort: 'deadline' as const,
       order: 'asc' as const
     }),
-    [currentPage, deadlineFilter, pageSize, procurementFilter, query, scoreFilter, statusFilter]
+    [currentPage, deadlineFilter, isAgency, pageSize, procurementFilter, query, scoreFilter, statusFilter]
   );
   const { data, isLoading, isError, error } = useJobs(apiParams);
   const jobs = data?.items ?? [];
@@ -108,6 +109,13 @@ export function JobListView({ mode }: JobListViewProps = {}) {
     },
     { key: 'agency', header: '발주기관', sortable: true, headerClassName: 'min-w-[150px]' },
     { key: 'procurementType', header: '구분', headerClassName: 'min-w-[110px]', render: (row) => formatProcurementType(row.procurementType) },
+    {
+      key: 'isOwnProcurement',
+      header: '발주 구분',
+      align: 'center',
+      headerClassName: 'min-w-[110px]',
+      render: (row) => <Badge tone={row.isOwnProcurement ? 'success' : 'neutral'}>{row.isOwnProcurement ? '발주' : '검토 중'}</Badge>
+    },
     { key: 'category', header: '요구 역량', sortable: true, headerClassName: 'min-w-[150px]' },
     { key: 'budget', header: '예산', align: 'right', headerClassName: 'min-w-[150px]', render: (row) => formatCurrency(row.budget) },
     { key: 'deadline', header: '마감/기준일', sortable: true, headerClassName: 'min-w-[160px]', render: (row) => formatDate(row.deadline) },
@@ -221,7 +229,12 @@ export function JobListView({ mode }: JobListViewProps = {}) {
             resultCount={totalCount}
             actions={
               <>
-                <Button variant="ghost" icon={<FilePlus2 className="h-5 w-5" />} aria-label="수동 공고 입력" onClick={() => navigate('/buyer/jobs/new')} />
+                <Button
+                  variant="ghost"
+                  icon={<FilePlus2 className="h-5 w-5" />}
+                  aria-label={isAgency ? '신규 공고 등록' : '수동 공고 입력'}
+                  onClick={() => navigate('/buyer/jobs/new')}
+                />
                 <Button variant="ghost" icon={<Download className="h-5 w-5" />} aria-label="다운로드" />
                 <Button variant="ghost" icon={<Printer className="h-5 w-5" />} aria-label="인쇄" />
               </>

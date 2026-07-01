@@ -27,6 +27,7 @@ interface JobRow {
   rfp_score: string | null;
   recommended_people_count: number;
   description: string | null;
+  is_own_procurement: boolean | null;
 }
 
 interface JobSummaryRow {
@@ -169,7 +170,8 @@ function toJobListItem(row: JobRow) {
     sourceType: row.source_type,
     sourceUrl: row.source_url ?? '',
     rfpScore: row.rfp_score ? Number(row.rfp_score) : 0,
-    recommendedPeople: row.recommended_people_count
+    recommendedPeople: row.recommended_people_count,
+    isOwnProcurement: Boolean(row.is_own_procurement)
   };
 }
 
@@ -186,6 +188,7 @@ function toJobDetail(row: JobRow) {
     status: row.status,
     rfpScore: row.rfp_score ? Number(row.rfp_score) : 0,
     recommendedPeople: row.recommended_people_count,
+    isOwnProcurement: Boolean(row.is_own_procurement),
     description: row.description ?? '',
     requirements: row.category ? [row.category] : []
   };
@@ -210,18 +213,23 @@ function buildJobsFilter(req: Request, currentCompanyId: string) {
   const conditions =
     perspective === 'buyer'
       ? [
-          `(
-            j.buyer_company_id = $1
-            or exists (
-              select 1
-              from company_members cm
-              where cm.id = j.internal_owner_member_id
-                and cm.company_id = $1
-            )
+          `exists (
+            select 1
+            from job_managements jm
+            where jm.job_id = j.id
+              and jm.company_id = $1
+              and jm.perspective = 'buyer'
           )`
         ]
       : [
           `(
+            exists (
+              select 1
+              from job_managements jm
+              where jm.job_id = j.id
+                and jm.company_id = $1
+            )
+            or
             j.buyer_company_id = $1
             or (
               j.procurement_type = 'public'
@@ -358,6 +366,13 @@ async function findAccessibleJob(jobId: string, currentCompanyId: string): Promi
       from jobs j
       where j.id = $1
         and (
+          exists (
+            select 1
+            from job_managements jm
+            where jm.job_id = j.id
+              and jm.company_id = $2
+          )
+          or
           j.buyer_company_id = $2
           or (
             j.procurement_type = 'public'
@@ -387,14 +402,12 @@ async function findManageableJob(jobId: string, currentCompanyId: string): Promi
       select j.id, j.buyer_company_id
       from jobs j
       where j.id = $1
-        and (
-          j.buyer_company_id = $2
-          or exists (
-            select 1
-            from company_members cm
-            where cm.id = j.internal_owner_member_id
-              and cm.company_id = $2
-          )
+        and exists (
+          select 1
+          from job_managements jm
+          where jm.job_id = j.id
+            and jm.company_id = $2
+            and jm.perspective = 'buyer'
         )
       limit 1
     `,
@@ -423,11 +436,29 @@ async function getJobDetailById(jobId: string, currentCompanyId: string): Promis
         j.status,
         j.rfp_score,
         j.recommended_people_count,
-        j.description
+        j.description,
+        coalesce(
+          (
+            select jm.is_own_procurement
+            from job_managements jm
+            where jm.job_id = j.id
+              and jm.company_id = $2
+              and jm.perspective = 'buyer'
+            limit 1
+          ),
+          false
+        ) as is_own_procurement
       from jobs j
       join companies c on c.id = j.buyer_company_id
       where j.id = $1
         and (
+          exists (
+            select 1
+            from job_managements jm
+            where jm.job_id = j.id
+              and jm.company_id = $2
+          )
+          or
           j.buyer_company_id = $2
           or (
             j.procurement_type = 'public'
@@ -482,7 +513,18 @@ jobsRouter.get('/', async (req: Request, res: Response, next) => {
           j.status,
           j.rfp_score,
           j.recommended_people_count,
-          j.description
+          j.description,
+          coalesce(
+            (
+              select jm.is_own_procurement
+              from job_managements jm
+              where jm.job_id = j.id
+                and jm.company_id = $1
+                and jm.perspective = 'buyer'
+              limit 1
+            ),
+            false
+          ) as is_own_procurement
         from jobs j
         join companies c on c.id = j.buyer_company_id
         where ${whereSql}
@@ -642,7 +684,8 @@ jobsRouter.post('/import', async (req: Request, res: Response, next) => {
             status,
             rfp_score,
             recommended_people_count,
-            description
+            description,
+            false as is_own_procurement
           )
           values ($1, null, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
           on conflict (notice_number)
@@ -753,17 +796,22 @@ jobsRouter.post('/', async (req: Request, res: Response, next) => {
     return;
   }
 
+  const client = await pool.connect();
+
   try {
+    await client.query('begin');
+
     if (noticeNumber) {
-      const existingJob = await pool.query('select id from jobs where notice_number = $1 limit 1', [noticeNumber]);
+      const existingJob = await client.query('select id from jobs where notice_number = $1 limit 1', [noticeNumber]);
 
       if (existingJob.rowCount) {
+        await client.query('rollback');
         sendError(res, 409, 'JOB_ALREADY_EXISTS', '이미 등록된 공고번호입니다.');
         return;
       }
     }
 
-    const result = await pool.query<JobRow>(
+    const result = await client.query<JobRow>(
       `
         insert into jobs (
           buyer_company_id,
@@ -797,7 +845,8 @@ jobsRouter.post('/', async (req: Request, res: Response, next) => {
           status,
           rfp_score,
           recommended_people_count,
-          description
+          description,
+          false as is_own_procurement
       `,
       [
         currentCompanyId,
@@ -816,9 +865,33 @@ jobsRouter.post('/', async (req: Request, res: Response, next) => {
         buyerName
       ]
     );
+
+    await client.query(
+      `
+        insert into job_managements (
+          company_id,
+          job_id,
+          perspective,
+          management_status,
+          is_own_procurement,
+          internal_owner_member_id
+        )
+        values ($1, $2, 'buyer', 'registered', false, $3)
+        on conflict (company_id, job_id, perspective) do update
+        set management_status = excluded.management_status,
+            internal_owner_member_id = excluded.internal_owner_member_id,
+            updated_at = now()
+      `,
+      [currentCompanyId, result.rows[0].id, authReq.auth?.member?.id ?? null]
+    );
+
+    await client.query('commit');
     sendSuccess(res, toJobDetail(result.rows[0]), 201);
   } catch (error) {
+    await client.query('rollback').catch(() => undefined);
     next(error);
+  } finally {
+    client.release();
   }
 });
 
@@ -902,7 +975,18 @@ jobsRouter.patch('/:jobId', async (req: Request, res: Response, next) => {
           status,
           rfp_score,
           recommended_people_count,
-          description
+          description,
+          coalesce(
+            (
+              select jm.is_own_procurement
+              from job_managements jm
+              where jm.job_id = jobs.id
+                and jm.company_id = $15
+                and jm.perspective = 'buyer'
+              limit 1
+            ),
+            false
+          ) as is_own_procurement
       `,
       [
         buyerCompany.id,
@@ -918,7 +1002,8 @@ jobsRouter.patch('/:jobId', async (req: Request, res: Response, next) => {
         status,
         description,
         jobId,
-        buyerCompany.name
+        buyerCompany.name,
+        currentCompanyId
       ]
     );
 
@@ -936,6 +1021,45 @@ jobsRouter.patch('/:jobId', async (req: Request, res: Response, next) => {
     );
 
     sendSuccess(res, toJobDetail(result.rows[0]));
+  } catch (error) {
+    next(error);
+  }
+});
+
+jobsRouter.patch('/:jobId/own-procurement', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const jobId = getString(req.params.jobId);
+  const body = asRecord(req.body);
+  const isOwnProcurement = body.isOwnProcurement === true;
+
+  try {
+    const result = await pool.query<{ id: string }>(
+      `
+        update job_managements
+        set is_own_procurement = $1,
+            updated_at = now()
+        where company_id = $2
+          and job_id = $3
+          and perspective = 'buyer'
+        returning id
+      `,
+      [isOwnProcurement, currentCompanyId, jobId]
+    );
+
+    if (!result.rows[0]) {
+      sendError(res, 404, 'JOB_MANAGEMENT_NOT_FOUND', '발주 관점으로 관리 중인 공고를 찾을 수 없습니다.');
+      return;
+    }
+
+    const job = await getJobDetailById(jobId, currentCompanyId);
+
+    if (!job) {
+      sendError(res, 404, 'JOB_NOT_FOUND', '공고 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    sendSuccess(res, toJobDetail(job));
   } catch (error) {
     next(error);
   }

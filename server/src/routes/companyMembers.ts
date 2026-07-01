@@ -648,7 +648,9 @@ companyMembersRouter.post('/invitations', async (req: Request, res: Response, ne
       );
 
       sendSuccess(res, toInvitationResponse(sentResult.rows[0]), 201);
-    } catch {
+    } catch (error) {
+      console.error('Failed to send company member invitation email:', error);
+
       await pool.query(
         `
           update user_invitations

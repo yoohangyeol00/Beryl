@@ -14,7 +14,7 @@ import { useJobDetail } from '../hooks/useJobDetail';
 
 type SourceType = NonNullable<CreateJobRequest['sourceType']>;
 
-const checklist = ['사업 기본 정보 확인', 'RFP 및 첨부파일 등록', '제안 마감/평가 일정 입력', '평가 기준과 배점 검토', '공개 범위와 담당자 지정'];
+const checklist = ['발주 사업 기본 정보 입력', 'RFP 및 첨부파일 등록', '제안 접수/평가 일정 입력', '평가 기준과 배점 검토', '계약 전환 기준 확인'];
 
 export function BuyerJobFormPage() {
   const navigate = useNavigate();
@@ -113,15 +113,15 @@ export function BuyerJobFormPage() {
   return (
     <section>
       <PageTitle
-        title={isEditMode ? '공고 수정' : '공고 등록/수집'}
-        description="발주 사업의 공고 정보, RFP, 평가 기준, 제출 일정을 등록하고 관리합니다."
+        title={isEditMode ? '공고 수정' : '신규 공고 등록'}
+        description="발주 관점에서 검토하거나 관리할 사업 공고와 제안 접수, 평가, 계약 전환에 필요한 기준 정보를 등록합니다."
         actions={
           <>
             <Button variant="secondary" type="button" disabled={isSubmitting} onClick={() => navigate(-1)}>
               취소
             </Button>
             <Button type="submit" form="job-form" icon={<Save className="h-4 w-4" />} disabled={isSubmitting}>
-              {isSubmitting ? '저장 중...' : isEditMode ? '수정 저장' : '공고 저장'}
+              {isSubmitting ? '저장 중...' : isEditMode ? '수정 저장' : '공고 등록'}
             </Button>
           </>
         }
@@ -147,7 +147,7 @@ export function BuyerJobFormPage() {
               <Input label="필요 역량" placeholder="Java, Spring Boot, MSA, React" value={category} onChange={(event) => setCategory(event.target.value)} />
               <Input label="추정 예산" placeholder="8,900,000,000 KRW" value={budget} onChange={(event) => setBudget(event.target.value)} />
               <label className="block">
-                <span className="mb-2 block font-label text-label-sm text-on-surface-variant">수집 경로</span>
+                <span className="mb-2 block font-label text-label-sm text-on-surface-variant">등록 경로</span>
                 <select
                   className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body text-[16px] text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-fixed-dim"
                   value={sourceType}

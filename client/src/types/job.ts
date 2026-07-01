@@ -15,6 +15,7 @@ export type Job = {
   sourceUrl?: string;
   rfpScore: number;
   recommendedPeople: number;
+  isOwnProcurement?: boolean;
 };
 
 export type JobList = {

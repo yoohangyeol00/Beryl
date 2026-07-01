@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { KeyRound, MailCheck, Pencil, PlusCircle, Power, PowerOff, Save, Trash2, UserRound, X } from 'lucide-react';
+import { KeyRound, MailCheck, Pencil, PlusCircle, Power, PowerOff, RotateCcw, Save, Trash2, UserRound, X } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
@@ -149,6 +149,11 @@ export function BuyerCompanyMembersPage() {
     setEditPhone(formatPhoneNumber(value));
   }
 
+  function handleResetFilters() {
+    setQuery('');
+    setStatus('');
+  }
+
   function handleCloseModal() {
     setSelectedMember(null);
     setIsEditing(false);
@@ -232,16 +237,12 @@ export function BuyerCompanyMembersPage() {
         onSearchChange={setQuery}
         resultCount={membersQuery.data?.total}
         selects={[{ label: '상태', value: status, options: statusOptions, onChange: setStatus }]}
-        actions={
-          <>
-            <Button variant="secondary" icon={<KeyRound className="h-4 w-4" />}>
-              권한 전체
-            </Button>
-            <Button variant="secondary" icon={<UserRound className="h-4 w-4" />}>
-              사용자
-            </Button>
-          </>
-        }
+        filterAction={{
+          label: '필터 초기화',
+          icon: <RotateCcw className="h-4 w-4" />,
+          onClick: handleResetFilters,
+          disabled: !query && !status
+        }}
       />
 
       <div className="mt-5">
@@ -449,7 +450,7 @@ function getMemberTypeLabel(memberType: string) {
 
 function getDisplayStatus(row: CompanyMemberListItem): { label: string; tone: StatusTone | null } {
   if (row.invitation?.status === 'revoked') return { label: '취소', tone: 'neutral' };
-  if (row.status === 'inactive') return { label: '비활성', tone: 'neutral' };
+  if (row.status === 'inactive') return { label: '비활성', tone: 'danger' };
   if (row.invitation?.status === 'pending' || row.status === 'invited') return { label: '대기', tone: 'neutral' };
   if (row.invitation?.status === 'accepted' || row.invitation?.acceptedAt || row.status === 'active' || row.userId) {
     return { label: '활성', tone: 'success' };

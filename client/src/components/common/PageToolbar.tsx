@@ -18,6 +18,12 @@ type PageToolbarProps = {
   selects?: ToolbarSelect[];
   resultCount?: number;
   actions?: ReactNode;
+  filterAction?: {
+    label: string;
+    icon?: ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+  };
 };
 
 export function PageToolbar({
@@ -27,7 +33,8 @@ export function PageToolbar({
   onSearchChange,
   selects,
   resultCount,
-  actions
+  actions,
+  filterAction
 }: PageToolbarProps) {
   const [draftSearchValue, setDraftSearchValue] = useState(searchValue);
   const [isComposing, setIsComposing] = useState(false);
@@ -114,8 +121,15 @@ export function PageToolbar({
         <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 whitespace-nowrap xl:pt-0.5">
           {typeof resultCount === 'number' ? <span className="mr-2 text-sm text-on-surface-variant">{resultCount.toLocaleString('ko-KR')}건 표시</span> : null}
           {actions ? <div className="flex items-center gap-1 text-on-surface">{actions}</div> : null}
-          <Button variant="secondary" className="h-11 px-4" icon={<Filter className="h-4 w-4" />}>
-            필터 적용
+          <Button
+            variant="secondary"
+            type="button"
+            className="h-11 px-4"
+            icon={filterAction?.icon ?? <Filter className="h-4 w-4" />}
+            onClick={filterAction?.onClick}
+            disabled={filterAction?.disabled}
+          >
+            {filterAction?.label ?? '필터 적용'}
           </Button>
         </div>
       </div>

@@ -8,6 +8,10 @@ type NavItem = {
   href: string;
   icon: LucideIcon;
   activeMatch?: 'exact' | 'section';
+  children?: {
+    label: string;
+    href: string;
+  }[];
 };
 
 const ko = {
@@ -32,7 +36,16 @@ const navItemsByRole: Record<RoleMode, NavItem[]> = {
     { label: ko.agencyDashboard, href: getDashboardPath('agency'), icon: LayoutDashboard, activeMatch: 'exact' },
     { label: ko.agencyJobs, href: getJobsPath('agency'), icon: ClipboardList, activeMatch: 'section' },
     { label: ko.agencySuppliers, href: getSupplierPoolPath(), icon: Building2, activeMatch: 'section' },
-    { label: ko.agencyUsers, href: '/buyer/company-members', icon: Users, activeMatch: 'exact' }
+    {
+      label: ko.agencyUsers,
+      href: '/buyer/company-members',
+      icon: Users,
+      activeMatch: 'section',
+      children: [
+        { label: '사용자 초대', href: '/buyer/company-members/new' },
+        { label: '초대 내역', href: '/buyer/company-members/invitations' }
+      ]
+    }
   ],
   supplier: [
     { label: ko.supplierDashboard, href: getDashboardPath('supplier'), icon: LayoutDashboard, activeMatch: 'exact' },
@@ -62,6 +75,7 @@ function isNavItemActive(pathname: string, item: NavItem) {
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const location = useLocation();
   const [role, setRole] = useState<RoleMode>(() => getRoleMode(location.pathname));
+  const [collapsedNavHref, setCollapsedNavHref] = useState<string | null>(null);
   const navItems = navItemsByRole[role];
   const meta = roleMeta[role];
 
@@ -83,6 +97,10 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   useEffect(() => {
     setRole(getRoleMode(location.pathname));
+    setCollapsedNavHref((current) => {
+      if (!current || location.pathname === current || location.pathname.startsWith(`${current}/`)) return current;
+      return null;
+    });
   }, [location.pathname]);
 
   const nav = (
@@ -97,14 +115,51 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
       <nav className="flex-grow space-y-3 overflow-y-auto px-5">
         {navItems.map((item) => {
           const isActive = isNavItemActive(location.pathname, item);
+          const hasChildren = item.children && item.children.length > 0;
+          const hasVisibleChildren = isActive && hasChildren && collapsedNavHref !== item.href;
+
           return (
-            <Link key={item.href} to={item.href} onClick={onClose} className={[
-              'flex h-14 items-center rounded-lg border-r-4 px-5 font-label text-[18px] font-semibold transition-colors',
-              isActive ? 'border-primary bg-primary/10 text-primary' : 'border-transparent text-on-surface hover:bg-surface-container'
-            ].join(' ')}>
-              <item.icon aria-hidden className="mr-4 h-6 w-6" />
-              {item.label}
-            </Link>
+            <div key={item.href}>
+              <Link
+                to={item.href}
+                onClick={() => {
+                  if (hasChildren && isActive) {
+                    setCollapsedNavHref((current) => (current === item.href ? null : item.href));
+                  } else {
+                    setCollapsedNavHref(null);
+                  }
+                  onClose?.();
+                }}
+                className={[
+                'flex h-14 items-center rounded-lg border-r-4 px-5 font-label text-[18px] font-semibold transition-colors',
+                isActive ? 'border-primary bg-primary/10 text-primary' : 'border-transparent text-on-surface hover:bg-surface-container'
+              ].join(' ')}>
+                <item.icon aria-hidden className="mr-4 h-6 w-6" />
+                {item.label}
+              </Link>
+              {hasVisibleChildren ? (
+                <div className="mt-2 space-y-1 pl-5">
+                  {item.children?.map((child) => {
+                    const isChildActive = location.pathname === child.href;
+
+                    return (
+                      <Link
+                        key={child.href}
+                        to={child.href}
+                        onClick={onClose}
+                        className={[
+                          'block rounded-md px-3 py-2 font-label text-[15px] transition-colors',
+                          isChildActive ? 'bg-primary/10 text-primary' : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+                        ].join(' ')}
+                      >
+                        <span className="mr-2 inline-block h-1 w-1 rounded-full bg-current align-middle" aria-hidden="true" />
+                        {child.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : null}
+            </div>
           );
         })}
       </nav>

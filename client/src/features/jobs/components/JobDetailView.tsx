@@ -1,9 +1,9 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { Calendar, CheckCircle2, Download, FileText, Info, Paperclip, Pencil, Send, Sparkles, Star, Target, Trash2 } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Calendar, CheckCircle2, Download, FileText, Info, Paperclip, Pencil, Send, Sparkles, Star, Target, Trash2, XCircle } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
-import { deleteJob } from '../../../api/jobsApi';
+import { deleteJob, updateJobOwnProcurement } from '../../../api/jobsApi';
 import { EmptyState } from '../../../components/common/EmptyState';
 import { LoadingState } from '../../../components/common/LoadingState';
 import { PageTitle } from '../../../components/common/PageTitle';
@@ -121,6 +121,15 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
   const isAgency = role === 'agency';
+  const ownProcurementMutation = useMutation({
+    mutationFn: (nextValue: boolean) => updateJobOwnProcurement(jobId, nextValue),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+        queryClient.invalidateQueries({ queryKey: ['jobs', jobId] })
+      ]);
+    }
+  });
 
   useEffect(() => {
     if (mode) {
@@ -214,6 +223,16 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
             <Button icon={isAgency ? <Star className="h-4 w-4" /> : <Send className="h-4 w-4" />} onClick={() => !isAgency && navigate(`/proposals/new?jobId=${job.id}`)}>
               {isAgency ? labels.openScore : labels.createProposal}
             </Button>
+            {isAgency ? (
+              <Button
+                variant="secondary"
+                icon={job.isOwnProcurement ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                onClick={() => ownProcurementMutation.mutate(!job.isOwnProcurement)}
+                disabled={ownProcurementMutation.isPending}
+              >
+                {job.isOwnProcurement ? '발주 해제' : '발주 확정'}
+              </Button>
+            ) : null}
             <Button variant="secondary" icon={<Pencil className="h-4 w-4" />} onClick={() => navigate(getJobEditPath(job.id))}>
               수정
             </Button>
