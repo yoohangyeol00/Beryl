@@ -29,6 +29,7 @@ export interface CompanyMemberListItem {
   position: string | null;
   email: string | null;
   phone: string | null;
+  memo: string | null;
   memberType: string;
   status: 'invited' | 'active' | 'inactive' | string;
   userId: string | null;
@@ -58,6 +59,7 @@ export interface UpdateCompanyMemberRequest {
   department?: string;
   position?: string;
   phone?: string;
+  memo?: string;
   memberType?: 'employee' | 'reviewer' | 'manager';
 }
 

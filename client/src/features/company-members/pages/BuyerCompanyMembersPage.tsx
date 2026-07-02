@@ -69,6 +69,7 @@ export function BuyerCompanyMembersPage() {
   const [editPhone, setEditPhone] = useState('');
   const [editDepartment, setEditDepartment] = useState('');
   const [editPosition, setEditPosition] = useState('');
+  const [editMemo, setEditMemo] = useState('');
   const [editMemberType, setEditMemberType] = useState<'employee' | 'reviewer' | 'manager'>('employee');
   const [editErrorMessage, setEditErrorMessage] = useState('');
   const membersQuery = useQuery({
@@ -82,6 +83,7 @@ export function BuyerCompanyMembersPage() {
             phone: editPhone || undefined,
             department: editDepartment || undefined,
             position: editPosition || undefined,
+            memo: editMemo || undefined,
             memberType: editMemberType
           })
         : Promise.reject(new Error('선택된 사용자가 없습니다.')),
@@ -92,6 +94,7 @@ export function BuyerCompanyMembersPage() {
           phone: editPhone || null,
           department: editDepartment || null,
           position: editPosition || null,
+          memo: editMemo || null,
           memberType: editMemberType
         });
       }
@@ -139,6 +142,7 @@ export function BuyerCompanyMembersPage() {
     setEditPhone(formatPhoneNumber(selectedMember.phone ?? ''));
     setEditDepartment(selectedMember.department ?? '');
     setEditPosition(selectedMember.position ?? '');
+    setEditMemo(selectedMember.memo ?? '');
     setEditMemberType(getEditableMemberType(selectedMember.memberType));
     setEditErrorMessage('');
     setIsEditing(false);
@@ -304,11 +308,13 @@ export function BuyerCompanyMembersPage() {
             editPhone={editPhone}
             editDepartment={editDepartment}
             editPosition={editPosition}
+            editMemo={editMemo}
             editMemberType={editMemberType}
             errorMessage={editErrorMessage}
             onPhoneChange={handleEditPhoneChange}
             onDepartmentChange={setEditDepartment}
             onPositionChange={setEditPosition}
+            onMemoChange={setEditMemo}
             onMemberTypeChange={setEditMemberType}
             onSubmit={handleEditSubmit}
           />
@@ -324,11 +330,13 @@ function CompanyMemberDetail({
   editPhone,
   editDepartment,
   editPosition,
+  editMemo,
   editMemberType,
   errorMessage,
   onPhoneChange,
   onDepartmentChange,
   onPositionChange,
+  onMemoChange,
   onMemberTypeChange,
   onSubmit
 }: {
@@ -337,11 +345,13 @@ function CompanyMemberDetail({
   editPhone: string;
   editDepartment: string;
   editPosition: string;
+  editMemo: string;
   editMemberType: 'employee' | 'reviewer' | 'manager';
   errorMessage: string;
   onPhoneChange: (value: string) => void;
   onDepartmentChange: (value: string) => void;
   onPositionChange: (value: string) => void;
+  onMemoChange: (value: string) => void;
   onMemberTypeChange: (value: 'employee' | 'reviewer' | 'manager') => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
@@ -399,9 +409,18 @@ function CompanyMemberDetail({
 
       <Card className="bg-primary/5 p-4">
         <h3 className="mb-2 font-headline text-[20px] font-bold text-primary">관리 메모</h3>
-        <p className="text-sm leading-6 text-on-surface-variant">
-          이 사용자는 현재 기업의 내부 구성원입니다. 초대 이력이 있는 경우 초대 수락 상태를 기준으로 계정 사용 가능 여부를 확인할 수 있습니다.
-        </p>
+        {isEditing ? (
+          <textarea
+            className="min-h-28 w-full resize-y rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 text-sm leading-6 text-on-surface outline-none transition placeholder:text-on-surface-variant focus:border-primary focus:ring-2 focus:ring-primary/25"
+            value={editMemo}
+            onChange={(event) => onMemoChange(event.target.value)}
+            placeholder="구성원 관리에 필요한 메모를 입력하세요."
+          />
+        ) : (
+          <p className="whitespace-pre-wrap text-sm leading-6 text-on-surface-variant">
+            {member.memo || '등록된 관리 메모가 없습니다.'}
+          </p>
+        )}
       </Card>
     </form>
   );

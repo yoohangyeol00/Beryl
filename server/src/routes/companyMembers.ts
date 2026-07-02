@@ -31,6 +31,7 @@ interface CompanyMemberRow {
   position: string | null;
   email: string | null;
   phone: string | null;
+  memo: string | null;
   member_type: string;
   status: string;
   user_id: string | null;
@@ -148,6 +149,7 @@ function toCompanyMemberResponse(row: CompanyMemberRow) {
     position: row.position,
     email: row.email,
     phone: row.phone,
+    memo: row.memo,
     memberType: row.member_type,
     status: row.status,
     userId: row.user_id,
@@ -331,6 +333,7 @@ companyMembersRouter.get('/', async (req: Request, res: Response, next) => {
           cm.position,
           cm.email,
           cm.phone,
+          cm.memo,
           cm.member_type,
           cm.status,
           cm.user_id,
@@ -405,6 +408,7 @@ companyMembersRouter.patch('/:memberId', async (req: Request, res: Response, nex
   const department = getString(body.department) || null;
   const position = getString(body.position) || null;
   const phone = getString(body.phone) || null;
+  const memo = getString(body.memo) || null;
   const memberTypeInput = getString(body.memberType);
   const memberType = memberTypeInput ? normalizeMemberType(memberTypeInput) : null;
 
@@ -424,14 +428,15 @@ companyMembersRouter.patch('/:memberId', async (req: Request, res: Response, nex
         set department = $1,
             position = $2,
             phone = $3,
-            member_type = coalesce($6, member_type),
+            memo = $6,
+            member_type = coalesce($7, member_type),
             updated_at = now()
         where id = $4
           and company_id = $5
           and member_type <> 'contact'
         returning id, user_id
       `,
-      [department, position, phone, memberId, currentCompanyId, memberType]
+      [department, position, phone, memberId, currentCompanyId, memo, memberType]
     );
     const member = result.rows[0];
 
