@@ -1,7 +1,7 @@
 import { type Request, type Response } from 'express';
 import { pool } from '../db.js';
 import { getCurrentCompanyId, type AuthenticatedRequest } from '../middleware/auth.js';
-import { rankCandidatesWithGemini, type MatchingCandidateInput } from '../services/aiMatching.js';
+import { rankCandidatesWithOllama, type MatchingCandidateInput } from '../services/aiMatching.js';
 import { sendError, sendSuccess } from '../utils/apiResponse.js';
 import { createCompanyScopedRouter } from './companyScopedRouter.js';
 
@@ -28,6 +28,18 @@ interface JobRow {
   rfp_score: string | null;
   recommended_people_count: number;
   description: string | null;
+  job_requirements: Array<{
+    requirement_type: string;
+    title: string;
+    description: string | null;
+    priority: number | null;
+  }> | null;
+  rfp_analysis_score: string | null;
+  rfp_analysis_summary: string | null;
+  rfp_analysis_required_skills: unknown;
+  rfp_analysis_preferred_skills: unknown;
+  rfp_analysis_risks: unknown;
+  rfp_analysis_keywords: unknown;
   is_own_procurement: boolean | null;
 }
 
@@ -71,6 +83,16 @@ function getString(value: unknown): string {
 
 function getNullableString(value: unknown): string | null {
   return getString(value) || null;
+}
+
+function getJsonArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => (typeof item === 'string' ? item.trim() : ''))
+    .filter(Boolean);
 }
 
 function getSourceType(value: unknown): SourceType {
@@ -199,6 +221,28 @@ function toJobListItem(row: JobRow) {
 }
 
 function toJobDetail(row: JobRow) {
+  const requirements = Array.isArray(row.job_requirements)
+    ? row.job_requirements
+        .map((item) => {
+          const title = getString(item.title);
+          if (!title) {
+            return null;
+          }
+
+          return {
+            type: item.requirement_type,
+            title,
+            description: item.description ?? '',
+            priority: Number.isFinite(Number(item.priority)) ? Number(item.priority) : null
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => Boolean(item))
+    : [];
+  const requiredSkills = getJsonArray(row.rfp_analysis_required_skills);
+  const preferredSkills = getJsonArray(row.rfp_analysis_preferred_skills);
+  const risks = getJsonArray(row.rfp_analysis_risks);
+  const keywords = getJsonArray(row.rfp_analysis_keywords);
+
   return {
     id: row.id,
     noticeNumber: row.notice_number ?? '',
@@ -213,7 +257,20 @@ function toJobDetail(row: JobRow) {
     recommendedPeople: row.recommended_people_count,
     isOwnProcurement: Boolean(row.is_own_procurement),
     description: row.description ?? '',
-    requirements: row.category ? [row.category] : []
+    requirements: requirements.length
+      ? requirements.map((item) => item.title)
+      : row.category
+        ? [row.category]
+        : [],
+    evaluationCriteria: {
+      score: row.rfp_analysis_score ? Number(row.rfp_analysis_score) : row.rfp_score ? Number(row.rfp_score) : 0,
+      summary: row.rfp_analysis_summary ?? '',
+      requirements,
+      requiredSkills,
+      preferredSkills,
+      risks,
+      keywords
+    }
   };
 }
 
@@ -251,20 +308,22 @@ function getAvailabilityScore(status: string): number {
 }
 
 function clampRecommendationScore(value: number): number {
-  return Math.max(45, Math.min(98, Math.round(value)));
+  return Math.max(35, Math.min(96, Math.round(value)));
 }
 
 function getRuleBasedRecommendations(job: ReturnType<typeof toJobDetail>, candidates: MatchingCandidateInput[]) {
-  const requiredSkills = [
-    'React',
-    'TypeScript',
-    'Spring Boot',
-    'PostgreSQL',
-    'MSA',
-    'API',
-    ...job.category.split(',').map((item) => item.trim()).filter(Boolean)
-  ];
   const jobTerms = [job.title, job.category, job.description, ...job.requirements].join(' ').toLowerCase();
+  const categorySkills = job.category
+    .split(/[,/]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const mentionedCandidateSkills = candidates
+    .flatMap((candidate) => candidate.skills)
+    .filter((skill) => {
+      const normalizedSkill = skill.toLowerCase();
+      return normalizedSkill.length >= 2 && jobTerms.includes(normalizedSkill);
+    });
+  const requiredSkills = [...new Set([...categorySkills, ...mentionedCandidateSkills])].slice(0, 10);
 
   return candidates
     .map((candidate) => {
@@ -280,7 +339,8 @@ function getRuleBasedRecommendations(job: ReturnType<typeof toJobDetail>, candid
       const roleScore = getRoleScore(candidate.role, jobTerms);
       const availabilityScore = getAvailabilityScore(candidate.availabilityStatus);
       const loadPenalty = Math.round(candidate.currentManMonths * 8);
-      const fitScore = clampRecommendationScore(35 + skillScore + roleScore + availabilityScore + careerScore - loadPenalty);
+      const requirementPenalty = requiredSkills.length ? 0 : 8;
+      const fitScore = clampRecommendationScore(30 + skillScore + roleScore + availabilityScore + careerScore - loadPenalty - requirementPenalty);
       const skillPercent = Math.min(100, Math.round((skillScore + roleScore + careerScore) * 1.4));
       const publicExperiencePercent = Math.min(100, candidate.skills.some((skill) => ['공공', '조달', 'SI'].some((keyword) => skill.includes(keyword))) ? 86 : 64);
       const availabilityPercent =
@@ -345,9 +405,69 @@ function getRuleBasedRecommendations(job: ReturnType<typeof toJobDetail>, candid
     .slice(0, 8);
 }
 
+async function getMatchingCandidates(currentCompanyId: string): Promise<MatchingCandidateInput[]> {
+  const resumeResult = await pool.query<MatchingResumeRow>(
+    `
+      select
+        r.id,
+        r.name,
+        r.role,
+        r.career_years,
+        r.available_from,
+        r.availability_status,
+        coalesce(array_remove(array_agg(distinct rs.skill_name order by rs.skill_name), null), '{}') as skills,
+        buyer.name as current_client,
+        wp.name as current_project,
+        pa.allocation_rate::text as current_mm
+      from resumes r
+      left join resume_skills rs on rs.resume_id = r.id
+      left join lateral (
+        select *
+        from project_assignments pa
+        where pa.resume_id = r.id
+          and pa.status in ('planned', 'assigned')
+        order by pa.assigned_to nulls last, pa.created_at desc
+        limit 1
+      ) pa on true
+      left join won_projects wp on wp.id = pa.won_project_id
+      left join companies buyer on buyer.id = pa.buyer_company_id
+      where r.owner_company_id = $1
+      group by r.id, buyer.name, wp.name, pa.allocation_rate
+      order by r.created_at desc, r.id desc
+      limit 100
+    `,
+    [currentCompanyId]
+  );
+
+  return resumeResult.rows.map(toMatchingCandidate);
+}
+
+function applyRuleBasedJobScores(rows: JobRow[], candidates: MatchingCandidateInput[]) {
+  if (!candidates.length) {
+    return rows;
+  }
+
+  return rows.map((row) => {
+    const recommendations = getRuleBasedRecommendations(toJobDetail(row), candidates);
+    const topScore = recommendations[0]?.fitScore ?? Number(row.rfp_score ?? 0);
+    const topRecommendations = recommendations.slice(0, 5);
+    const averageTopScore = topRecommendations.length
+      ? topRecommendations.reduce((sum, recommendation) => sum + recommendation.fitScore, 0) / topRecommendations.length
+      : topScore;
+    const depthScore = Math.min(100, recommendations.length * 12);
+    const listScore = Math.max(0, Math.min(96, Math.round(topScore * 0.55 + averageTopScore * 0.35 + depthScore * 0.1)));
+
+    return {
+      ...row,
+      rfp_score: String(listScore),
+      recommended_people_count: recommendations.length
+    };
+  });
+}
+
 function mergeAiRecommendations(
   fallbackRecommendations: ReturnType<typeof getRuleBasedRecommendations>,
-  aiRecommendations: Awaited<ReturnType<typeof rankCandidatesWithGemini>>
+  aiRecommendations: Awaited<ReturnType<typeof rankCandidatesWithOllama>>
 ) {
   if (!aiRecommendations?.length) {
     return fallbackRecommendations;
@@ -469,7 +589,7 @@ function buildJobsFilter(req: Request, currentCompanyId: string) {
     conditions.push(`j.deadline is not null and j.deadline < current_date`);
   }
 
-  if (Number.isFinite(minRfpScore) && minRfpScore > 0) {
+  if (perspective !== 'accessible' && Number.isFinite(minRfpScore) && minRfpScore > 0) {
     values.push(minRfpScore);
     conditions.push(`coalesce(j.rfp_score, 0) >= $${values.length}`);
   }
@@ -631,6 +751,28 @@ async function getJobDetailById(jobId: string, currentCompanyId: string): Promis
         j.rfp_score,
         j.recommended_people_count,
         j.description,
+        (
+          select coalesce(
+            json_agg(
+              json_build_object(
+                'requirement_type', jr.requirement_type,
+                'title', jr.title,
+                'description', jr.description,
+                'priority', jr.priority
+              )
+              order by jr.priority nulls last, jr.created_at asc
+            ),
+            '[]'::json
+          )
+          from job_requirements jr
+          where jr.job_id = j.id
+        ) as job_requirements,
+        ra.score as rfp_analysis_score,
+        ra.summary as rfp_analysis_summary,
+        ra.required_skills as rfp_analysis_required_skills,
+        ra.preferred_skills as rfp_analysis_preferred_skills,
+        ra.risks as rfp_analysis_risks,
+        ra.keywords as rfp_analysis_keywords,
         coalesce(
           (
             select jm.is_own_procurement
@@ -644,6 +786,7 @@ async function getJobDetailById(jobId: string, currentCompanyId: string): Promis
         ) as is_own_procurement
       from jobs j
       join companies c on c.id = j.buyer_company_id
+      left join rfp_analyses ra on ra.job_id = j.id
       where j.id = $1
         and (
           exists (
@@ -685,6 +828,7 @@ jobsRouter.get('/', async (req: Request, res: Response, next) => {
   const offset = (page - 1) * pageSize;
   const sortColumn = getSortColumn(query.sort);
   const sortOrder = getSortOrder(query.order);
+  const perspective = getString(query.perspective);
   const { whereSql, values } = buildJobsFilter(req, currentCompanyId);
 
   try {
@@ -752,14 +896,33 @@ jobsRouter.get('/', async (req: Request, res: Response, next) => {
       avg_rfp_score: null
     };
 
+    const scoredRows =
+      perspective === 'accessible'
+        ? applyRuleBasedJobScores(listResult.rows, await getMatchingCandidates(currentCompanyId))
+        : listResult.rows;
+    const minListRfpScore = Number(getString(query.minRfpScore) || query.minRfpScore);
+    const filteredRows =
+      perspective === 'accessible' && Number.isFinite(minListRfpScore) && minListRfpScore > 0
+        ? scoredRows.filter((row) => Number(row.rfp_score ?? 0) >= minListRfpScore)
+        : scoredRows;
+    const avgRfpScore =
+      perspective === 'accessible' && filteredRows.length
+        ? Math.round(filteredRows.reduce((sum, row) => sum + Number(row.rfp_score ?? 0), 0) / filteredRows.length)
+        : summary.avg_rfp_score
+          ? Math.round(Number(summary.avg_rfp_score))
+          : 0;
+
     sendSuccess(res, {
-      items: listResult.rows.map(toJobListItem),
-      total: Number(summary.total),
+      items: filteredRows.map(toJobListItem),
+      total:
+        perspective === 'accessible' && Number.isFinite(minListRfpScore) && minListRfpScore > 0
+          ? filteredRows.length
+          : Number(summary.total),
       summary: {
         open: Number(summary.open),
         closingSoon: Number(summary.closing_soon),
         awarded: Number(summary.awarded),
-        avgRfpScore: summary.avg_rfp_score ? Math.round(Number(summary.avg_rfp_score)) : 0
+        avgRfpScore
       }
     });
   } catch (error) {
@@ -961,42 +1124,14 @@ jobsRouter.get('/:jobId/recommended-people', async (req: Request, res: Response,
       return;
     }
 
-    const resumeResult = await pool.query<MatchingResumeRow>(
-      `
-        select
-          r.id,
-          r.name,
-          r.role,
-          r.career_years,
-          r.available_from,
-          r.availability_status,
-          coalesce(array_remove(array_agg(distinct rs.skill_name order by rs.skill_name), null), '{}') as skills,
-          buyer.name as current_client,
-          wp.name as current_project,
-          pa.allocation_rate::text as current_mm
-        from resumes r
-        left join resume_skills rs on rs.resume_id = r.id
-        left join lateral (
-          select *
-          from project_assignments pa
-          where pa.resume_id = r.id
-            and pa.status in ('planned', 'assigned')
-          order by pa.assigned_to nulls last, pa.created_at desc
-          limit 1
-        ) pa on true
-        left join won_projects wp on wp.id = pa.won_project_id
-        left join companies buyer on buyer.id = pa.buyer_company_id
-        where r.owner_company_id = $1
-        group by r.id, buyer.name, wp.name, pa.allocation_rate
-        order by r.created_at desc, r.id desc
-        limit 100
-      `,
-      [currentCompanyId]
-    );
     const job = toJobDetail(jobRow);
-    const candidates = resumeResult.rows.map(toMatchingCandidate);
+    const candidates = await getMatchingCandidates(currentCompanyId);
     const fallbackRecommendations = getRuleBasedRecommendations(job, candidates);
-    const aiRecommendations = await rankCandidatesWithGemini(
+    const candidatesByResumeId = new Map(candidates.map((candidate) => [candidate.resumeId, candidate]));
+    const aiCandidates = fallbackRecommendations
+      .map((recommendation) => candidatesByResumeId.get(recommendation.resumeId))
+      .filter((candidate): candidate is MatchingCandidateInput => Boolean(candidate));
+    const aiRecommendations = await rankCandidatesWithOllama(
       {
         title: job.title,
         agency: job.agency,
@@ -1004,12 +1139,12 @@ jobsRouter.get('/:jobId/recommended-people', async (req: Request, res: Response,
         description: job.description,
         requirements: job.requirements
       },
-      candidates
+      aiCandidates
     );
 
     sendSuccess(res, {
       items: mergeAiRecommendations(fallbackRecommendations, aiRecommendations),
-      provider: aiRecommendations?.length ? 'gemini' : 'rule-based'
+      provider: aiRecommendations?.length ? 'ollama' : 'rule-based'
     });
   } catch (error) {
     next(error);

@@ -95,10 +95,10 @@ function normalizeMemberType(value: string): CompanyMemberType {
 }
 
 function getInvitationEmailFailureMessage(error: unknown) {
-  if (!config.resendApiKey || !config.invitationFromEmail) {
+  if (!config.brevoApiKey || !config.brevoSenderEmail) {
     const missingKeys = [
-      !config.resendApiKey ? 'RESEND_API_KEY' : '',
-      !config.invitationFromEmail ? 'INVITATION_FROM_EMAIL' : ''
+      !config.brevoApiKey ? 'BREVO_API_KEY' : '',
+      !config.brevoSenderEmail ? 'BREVO_SENDER_EMAIL' : ''
     ].filter(Boolean);
 
     return `초대 메일 발송 설정이 없습니다. .env에 ${missingKeys.join(', ')} 값을 설정해주세요.`;
@@ -739,7 +739,7 @@ companyMembersRouter.post('/invitations', async (req: Request, res: Response, ne
       const sentResult = await pool.query<InvitationRow>(
         `
           update user_invitations
-          set resend_message_id = $1,
+          set email_message_id = $1,
               sent_at = now(),
               updated_at = now()
           where id = $2

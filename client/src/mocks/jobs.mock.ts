@@ -100,7 +100,35 @@ export const mockJobDetailResponse: ApiResponse<JobDetail> = {
   data: {
     ...mockJobsResponse.data.items[0],
     description: 'RFP 분석, 인력 매칭, 제안 준비 현황을 통합 관리하는 입찰 공고입니다.',
-    requirements: ['전자조달 도메인 경험', 'React 기반 대시보드 구축', 'PostgreSQL 운영 경험']
+    requirements: ['전자조달 도메인 경험', 'React 기반 대시보드 구축', 'PostgreSQL 운영 경험'],
+    evaluationCriteria: {
+      score: 84,
+      summary: '전자조달 업무 이해도와 React 기반 대시보드 구축 경험을 중심으로 평가합니다.',
+      requirements: [
+        {
+          type: 'domain',
+          title: '전자조달 도메인 경험',
+          description: '입찰 공고, 제안 접수, 평가 프로세스에 대한 이해',
+          priority: 1
+        },
+        {
+          type: 'technical',
+          title: 'React 기반 대시보드 구축',
+          description: '운영자가 반복적으로 확인하는 정보 구조와 목록 UX 구성',
+          priority: 2
+        },
+        {
+          type: 'operation',
+          title: 'PostgreSQL 운영 경험',
+          description: '입찰/제안/계약 데이터를 안정적으로 관리할 수 있는 DB 운영 역량',
+          priority: 3
+        }
+      ],
+      requiredSkills: ['React', 'PostgreSQL'],
+      preferredSkills: ['조달 도메인', 'RFP 분석'],
+      risks: ['제안 마감 전 제출 문서 검증 필요'],
+      keywords: ['전자조달', '대시보드', 'RFP']
+    }
   },
   error: null
 };

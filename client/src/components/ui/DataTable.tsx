@@ -24,6 +24,7 @@ type DataTableProps<T> = {
   onRowClick?: (row: T) => void;
   emptyMessage?: string;
   loadingMessage?: string;
+  loadingContent?: ReactNode;
   isLoading?: boolean;
   density?: 'comfortable' | 'compact';
   tableClassName?: string;
@@ -58,6 +59,7 @@ export function DataTable<T extends object>({
   onRowClick,
   emptyMessage = '표시할 데이터가 없습니다.',
   loadingMessage,
+  loadingContent,
   isLoading = false,
   density = 'comfortable',
   tableClassName = 'min-w-full'
@@ -133,7 +135,13 @@ export function DataTable<T extends object>({
             </tr>
           </thead>
           <tbody>
-            {isLoading && loadingMessage ? (
+            {isLoading && loadingContent ? (
+              <tr>
+                <td colSpan={columns.length} className="border-t border-outline-variant px-7 py-14">
+                  {loadingContent}
+                </td>
+              </tr>
+            ) : isLoading && loadingMessage ? (
               <tr>
                 <td colSpan={columns.length} className="border-t border-outline-variant px-7 py-14 text-center font-semibold text-primary">
                   {loadingMessage}

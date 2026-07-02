@@ -111,6 +111,9 @@ export function OfferAnalysisPage() {
     enabled: Boolean(jobId)
   });
   const selectedRecommendation = recommendedPeopleData?.items.find((item) => item.resumeId === resumeId || item.id === offerId);
+  const analysisProvider = recommendedPeopleData?.provider ?? 'rule-based';
+  const analysisTitle = analysisProvider === 'ollama' ? 'AI 추천 요약' : '추천 요약';
+  const analysisStatus = isRecommendationLoading ? '추천 분석 중' : analysisProvider === 'ollama' ? 'AI 분석 반영' : '조건 기반 분석 반영';
   const matchScore = selectedRecommendation?.fitScore ?? Number(fallbackAnalysis.score.replace('%', ''));
   const previousScore = selectedRecommendation ? Math.max(0, matchScore - 12) : Number(fallbackAnalysis.previousScore.replace('%', ''));
   const scoreBreakdown = selectedRecommendation?.scoreBreakdown;
@@ -165,7 +168,6 @@ export function OfferAnalysisPage() {
         description={`대상 사업: ${job?.title ?? '차세대 통합 재난 안전 관리 시스템 구축'} / 추천 후보: ${analysis.name} ${analysis.title}`}
         actions={
           <>
-            <Button variant="secondary">분석 리포트</Button>
             <Button icon={<ShoppingBasket className="h-4 w-4" />} onClick={() => setIsAdded(true)}>{isAdded ? '후보 담김' : '제안 후보로 추가'}</Button>
           </>
         }
@@ -200,9 +202,9 @@ export function OfferAnalysisPage() {
           <div className="mb-8 flex items-center justify-between border-b border-outline-variant pb-7">
             <h2 className="flex items-center gap-3 font-headline text-[28px] font-bold">
               <Sparkles className="h-7 w-7 text-primary" />
-              AI 추천 요약
+              {analysisTitle}
             </h2>
-            <span className="text-sm text-primary">{isRecommendationLoading ? 'AI 분석 중' : 'AI 분석 반영'}</span>
+            <span className="text-sm text-primary">{analysisStatus}</span>
           </div>
           <p className="text-[18px] leading-9 text-on-surface">
             <strong className="text-primary">{analysis.name}</strong> 후보는 {analysis.summary}

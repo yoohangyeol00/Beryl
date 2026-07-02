@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Calendar, CheckCircle2, Download, FileText, Info, Paperclip, Pencil, Send, Sparkles, Star, Target, Trash2, XCircle } from 'lucide-react';
+import { Calendar, CheckCircle2, FileText, Info, Paperclip, Pencil, Send, Sparkles, Star, Target, Trash2, XCircle } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
@@ -213,7 +213,6 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
         title={job.title}
         actions={
           <>
-            <Button variant="secondary" icon={<Download className="h-4 w-4" />}>{labels.downloadRfp}</Button>
             <Button icon={isAgency ? <Star className="h-4 w-4" /> : <Send className="h-4 w-4" />} onClick={() => !isAgency && navigate(`/proposals/new?jobId=${job.id}`)}>
               {isAgency ? labels.openScore : labels.createProposal}
             </Button>
@@ -272,11 +271,11 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
             })}
           </div>
           <div className="p-7 lg:p-9">
-            <TabContent activeTab={activeTab} job={job} />
+            <TabContent activeTab={activeTab} job={job} recommendedPeople={recommendedPeople} />
           </div>
         </Card>
 
-        {isAgency ? <AgencyReviewPanel /> : <SupplierProposalPanel job={job} />}
+        {isAgency ? <AgencyReviewPanel /> : <SupplierProposalPanel job={job} recommendedPeople={recommendedPeople} isLoading={isRecommendedPeopleLoading} />}
       </div>
 
       <Card className="overflow-hidden">
@@ -293,7 +292,8 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
             getRowKey={(row) => row.id}
             onRowClick={(row) => navigate(`/offers/${row.id}/analysis?jobId=${job.id}&resumeId=${row.resumeId}`)}
             isLoading={isRecommendedPeopleLoading}
-            loadingMessage="AI가 추천 인력을 분석 중입니다."
+            loadingMessage="추천 인력을 분석 중입니다."
+            loadingContent={<RecommendationLoadingState />}
             emptyMessage="추천 가능한 인력이 없습니다."
             tableClassName="min-w-[1040px] w-full"
           />
@@ -303,7 +303,35 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
   );
 }
 
-function TabContent({ activeTab, job }: { activeTab: DetailTab; job: JobDetail }) {
+function RecommendationLoadingState() {
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const expectedSeconds = 6;
+  const progress = Math.min(95, Math.round((elapsedSeconds / expectedSeconds) * 100));
+
+  useEffect(() => {
+    const startedAt = Date.now();
+    const intervalId = window.setInterval(() => {
+      setElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000));
+    }, 250);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  return (
+    <div className="mx-auto max-w-xl text-center">
+      <div className="mb-4 flex items-center justify-between gap-4 text-sm font-semibold text-primary">
+        <span>추천 인력을 분석 중입니다.</span>
+        <span>{progress}%</span>
+      </div>
+      <div className="h-3 overflow-hidden rounded-full bg-surface-container">
+        <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+      </div>
+
+    </div>
+  );
+}
+
+function TabContent({ activeTab, job, recommendedPeople }: { activeTab: DetailTab; job: JobDetail; recommendedPeople: JobRecommendedPerson[] }) {
   if (activeTab === 'overview') {
     return (
       <div>
@@ -323,8 +351,8 @@ function TabContent({ activeTab, job }: { activeTab: DetailTab; job: JobDetail }
   }
 
   if (activeTab === 'summary') {
-    const summaryItems = job.description ? job.description.split('\n').filter(Boolean) : ['등록된 RFP 분석 기준이 없습니다.'];
-    return <AnalysisGrid title={labels.summary} left={labels.requirement} right={labels.proposalPoint} leftItems={job.requirements.length ? job.requirements : ['필요 역량 미입력']} rightItems={summaryItems} />;
+    const summary = getRuleBasedSummaryItems(job, recommendedPeople);
+    return <AnalysisGrid title={labels.summary} left={labels.requirement} right={labels.proposalPoint} leftItems={summary.requirements} rightItems={summary.proposalPoints} />;
   }
 
   if (activeTab === 'skills') {
@@ -345,15 +373,31 @@ function TabContent({ activeTab, job }: { activeTab: DetailTab; job: JobDetail }
   }
 
   if (activeTab === 'criteria') {
+    const criteria = buildEvaluationCriteria(job);
+
     return (
       <div>
         <SectionTitle icon={<Star className="h-6 w-6" />} title={labels.criteria} />
+        {criteria.summary ? (
+          <p className="mb-5 rounded-lg border border-outline-variant bg-surface-container-low p-4 text-[15px] leading-7 text-on-surface-variant">
+            {criteria.summary}
+          </p>
+        ) : null}
         <div className="space-y-5">
-          <Criteria label="기술 제안" value={40} />
-          <Criteria label="수행 경험" value={25} />
-          <Criteria label="인력 구성" value={20} />
-          <Criteria label="가격/일정" value={15} />
+          {criteria.items.map((item) => (
+            <Criteria key={item.label} label={item.label} value={item.value} description={item.description} />
+          ))}
         </div>
+        {criteria.notes.length ? (
+          <div className="mt-6 rounded-lg border border-outline-variant bg-surface-container-low p-5">
+            <h3 className="mb-3 font-label text-[16px] font-bold text-primary">평가 참고사항</h3>
+            <ul className="space-y-2 text-[15px] leading-7 text-on-surface-variant">
+              {criteria.notes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -406,10 +450,22 @@ function AgencyReviewPanel() {
   );
 }
 
-function SupplierProposalPanel({ job }: { job: JobDetail }) {
+function SupplierProposalPanel({
+  job,
+  recommendedPeople,
+  isLoading
+}: {
+  job: JobDetail;
+  recommendedPeople: JobRecommendedPerson[];
+  isLoading: boolean;
+}) {
   const daysLeft = getDaysLeft(job.deadline);
-  const urgencyLabel = daysLeft === null ? '마감일 미정' : daysLeft <= 3 ? `마감 ${daysLeft}일 전` : daysLeft <= 7 ? `마감 임박 D-${daysLeft}` : `D-${daysLeft}`;
-  const fitLabel = job.rfpScore >= 85 ? '매우 적합' : job.rfpScore >= 70 ? '검토 적합' : '추가 검토';
+  const topRecommendation = recommendedPeople[0];
+  const analysisScore = topRecommendation?.fitScore ?? job.rfpScore;
+  const recommendedPeopleCount = recommendedPeople.length || job.recommendedPeople;
+  const urgencyLabel =
+    daysLeft === null ? '마감일 미정' : daysLeft <= 0 ? '마감' : daysLeft <= 3 ? `마감 ${daysLeft}일 전` : daysLeft <= 7 ? `마감 임박 D-${daysLeft}` : `D-${daysLeft}`;
+  const fitLabel = isLoading ? '분석 중' : analysisScore >= 85 ? '매우 적합' : analysisScore >= 70 ? '검토 적합' : '추가 검토';
   const skills = job.category
     ? job.category.split(',').map((item) => item.trim()).filter(Boolean).slice(0, 4)
     : [];
@@ -417,20 +473,20 @@ function SupplierProposalPanel({ job }: { job: JobDetail }) {
   return (
     <Card className="p-6">
       <div className="mb-5 border-b border-outline-variant pb-5">
-        <h2 className="font-headline text-[24px] font-bold">AI 분석 정보</h2>
+        <h2 className="font-headline text-[24px] font-bold">추천 분석 정보</h2>
         <p className="mt-2 text-sm leading-6 text-on-surface-variant">RFP 요건과 보유 인력 정보를 기준으로 제안 준비 우선순위를 요약합니다.</p>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <AnalysisMetric label="RFP 적합도" value={`${job.rfpScore}점`} emphasis />
+        <AnalysisMetric label="RFP 적합도" value={isLoading ? '분석 중' : `${analysisScore}점`} emphasis />
         <AnalysisMetric label="판정" value={fitLabel} />
         <AnalysisMetric label="마감 긴급도" value={urgencyLabel} danger={daysLeft !== null && daysLeft <= 7} />
-        <AnalysisMetric label="추천 인력" value={`${job.recommendedPeople}명`} />
+        <AnalysisMetric label="추천 인력" value={isLoading ? '분석 중' : `${recommendedPeopleCount}명`} />
       </div>
       <div className="mt-5 space-y-4">
         <AnalysisNote
           title="제안 포인트"
           items={[
-            `${job.agency} 요구사항에 맞춰 ${skills[0] ?? '핵심 기술'} 경험을 전면에 배치`,
+            topRecommendation?.reason ?? `${job.agency} 요구사항에 맞춰 ${skills[0] ?? '핵심 기술'} 경험을 전면에 배치`,
             `${formatCurrency(job.budget)} 예산 범위 안에서 단계별 투입 계획 제시`
           ]}
         />
@@ -444,6 +500,97 @@ function SupplierProposalPanel({ job }: { job: JobDetail }) {
       </div>
     </Card>
   );
+}
+
+function getRuleBasedSummaryItems(job: JobDetail, recommendedPeople: JobRecommendedPerson[]) {
+  const comparisons = recommendedPeople
+    .flatMap((person) => person.requirementComparisons ?? [])
+    .filter((item) => item.requirement || item.capability);
+  const requirements = comparisons.length
+    ? [...new Set(comparisons.map((item) => item.requirement).filter(Boolean))].slice(0, 5)
+    : [
+        ...(job.requirements.length ? job.requirements : []),
+        ...job.category.split(',').map((item) => item.trim()).filter(Boolean)
+      ].filter(Boolean).slice(0, 5);
+  const proposalPoints = recommendedPeople.length
+    ? buildProposalStrategyPoints(job, recommendedPeople)
+    : job.description
+      ? job.description.split('\n').filter(Boolean).slice(0, 5)
+      : [];
+
+  return {
+    requirements: requirements.length ? requirements : ['필요 역량 미입력'],
+    proposalPoints: proposalPoints.length ? proposalPoints : ['추천 가능한 인력 분석 결과가 없습니다.']
+  };
+}
+
+function buildProposalStrategyPoints(job: JobDetail, recommendedPeople: JobRecommendedPerson[]) {
+  const topPeople = recommendedPeople.slice(0, 5);
+  const roles = [...new Set(topPeople.map((person) => person.role).filter(Boolean))].slice(0, 4);
+  const capabilities = [
+    ...new Set(
+      topPeople
+        .flatMap((person) => person.requirementComparisons ?? [])
+        .map((item) => item.capability)
+        .filter(Boolean)
+    )
+  ].slice(0, 4);
+  const matchCount = topPeople.filter((person) => person.requirementComparisons?.some((item) => item.result === 'match')).length;
+  const availableCount = topPeople.filter((person) => person.currentProject === '대기' || person.reason.includes('즉시')).length;
+  const points = [
+    roles.length ? `${roles.join(', ')} 중심의 수행 조직 구성 역량을 제안 전면에 배치` : '',
+    capabilities.length ? `${capabilities.join(', ')} 기반으로 핵심 요구사항 대응 근거 제시` : '',
+    matchCount ? `상위 추천 인력 ${matchCount}명의 요구사항 매칭 근거를 활용해 기술 적합성 강조` : '',
+    availableCount ? `즉시 또는 단기 투입 가능한 인력을 중심으로 착수 리스크 완화` : '',
+    `${formatCurrency(job.budget)} 예산 범위 안에서 단계별 인력 투입 계획 제시`
+  ].filter(Boolean);
+
+  return points.slice(0, 5);
+}
+
+function buildEvaluationCriteria(job: JobDetail) {
+  const evaluation = job.evaluationCriteria;
+  const requirementItems = evaluation.requirements.map((requirement, index) => ({
+    label: requirement.title,
+    value: scoreFromPriority(requirement.priority, index),
+    description: [requirement.type, requirement.description].filter(Boolean).join(' · ')
+  }));
+  const skillItems = [
+    ...evaluation.requiredSkills.map((skill) => ({
+      label: skill,
+      value: 90,
+      description: '필수 기술'
+    })),
+    ...evaluation.preferredSkills.map((skill) => ({
+      label: skill,
+      value: 70,
+      description: '우대 기술'
+    }))
+  ];
+  const fallbackItems = [
+    { label: '기술 제안 적합도', value: evaluation.score || job.rfpScore || 0, description: 'RFP 분석 점수 기준' },
+    { label: '수행 요구사항 명확도', value: job.requirements.length ? 80 : 45, description: '등록된 요구사항 기준' },
+    { label: '예산/일정 검토 필요도', value: job.budget || job.deadline ? 70 : 40, description: '공고 기본 정보 기준' }
+  ];
+  const items = [...requirementItems, ...skillItems].slice(0, 8);
+  const notes = [
+    ...evaluation.risks.map((risk) => `리스크: ${risk}`),
+    evaluation.keywords.length ? `키워드: ${evaluation.keywords.join(', ')}` : ''
+  ].filter(Boolean);
+
+  return {
+    summary: evaluation.summary,
+    items: items.length ? items : fallbackItems,
+    notes
+  };
+}
+
+function scoreFromPriority(priority: number | null, index: number) {
+  if (priority === null) {
+    return Math.max(55, 85 - index * 8);
+  }
+
+  return Math.max(45, Math.min(95, 100 - priority * 10));
 }
 
 function AnalysisMetric({ label, value, emphasis = false, danger = false }: { label: string; value: string; emphasis?: boolean; danger?: boolean }) {
@@ -516,15 +663,18 @@ function AnalysisSection({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-function Criteria({ label, value }: { label: string; value: number }) {
+function Criteria({ label, value, description }: { label: string; value: number; description?: string }) {
+  const percent = Math.max(0, Math.min(100, Math.round(value)));
+
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
         <strong>{label}</strong>
-        <span className="text-primary">{value}%</span>
+        <span className="text-primary">{percent}%</span>
       </div>
+      {description ? <p className="mb-2 text-sm leading-6 text-on-surface-variant">{description}</p> : null}
       <div className="h-3 rounded-full bg-surface-container">
-        <div className="h-3 rounded-full bg-primary" style={{ width: `${value}%` }} />
+        <div className="h-3 rounded-full bg-primary" style={{ width: `${percent}%` }} />
       </div>
     </div>
   );
