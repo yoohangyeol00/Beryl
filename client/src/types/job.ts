@@ -32,4 +32,18 @@ export type JobList = {
 export type JobDetail = Job & {
   description: string;
   requirements: string[];
+  evaluationCriteria: {
+    score: number;
+    summary: string;
+    requirements: Array<{
+      type: string;
+      title: string;
+      description: string;
+      priority: number | null;
+    }>;
+    requiredSkills: string[];
+    preferredSkills: string[];
+    risks: string[];
+    keywords: string[];
+  };
 };

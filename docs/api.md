@@ -857,8 +857,8 @@ Response data:
       "reason": "Spring Boot, PostgreSQL 역량 보유 · 즉시 투입 가능"
     }
   ],
-  "provider": "gemini"
+  "provider": "ollama"
 }
 ```
 
-`provider`는 Gemini 호출 성공 시 `gemini`, API key 미설정 또는 호출 실패 시 `rule-based`를 반환한다.
+`provider`는 Ollama 호출 성공 시 `ollama`, Ollama 미사용 또는 호출 실패 시 `rule-based`를 반환한다.

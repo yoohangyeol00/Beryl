@@ -175,13 +175,15 @@ CLIENT_ORIGIN=http://localhost:5173
 SERVER_PUBLIC_BASE_URL=http://localhost:3000
 SESSION_COOKIE_NAME=beryl.sid
 SESSION_TTL_HOURS=24
-RESEND_API_KEY=re_xxxxxxxxx
-INVITATION_FROM_EMAIL=BERYL <onboarding@resend.dev>
+BREVO_API_KEY=xkeysib-xxxxxxxxx
+BREVO_SENDER_EMAIL=verified-sender@example.com
+BREVO_SENDER_NAME=BERYL
 INVITATION_TTL_HOURS=72
-AI_PROVIDER=gemini
-GEMINI_API_KEY=AIza_xxxxxxxxx
-GEMINI_MODEL=gemini-3.1-flash-lite
-GEMINI_TIMEOUT_MS=15000
+AI_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=qwen2.5:7b
+OLLAMA_TIMEOUT_MS=6000
+OLLAMA_CANDIDATE_LIMIT=8
 ```
 
 서버 기본값은 `server/src/config.ts`에도 정의되어 있다.

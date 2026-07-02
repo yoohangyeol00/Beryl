@@ -59,7 +59,7 @@ export interface JobRecommendedPerson {
 
 export interface JobRecommendedPeopleResponse {
   items: JobRecommendedPerson[];
-  provider: 'gemini' | 'rule-based';
+  provider: 'ollama' | 'rule-based';
 }
 
 export async function getJobs(params?: GetJobsParams) {

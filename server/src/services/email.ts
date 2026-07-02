@@ -14,12 +14,13 @@ type SendInvitationEmailInput = {
   token: string;
 };
 
-type ResendEmailResponse = {
-  id?: string;
+type BrevoEmailResponse = {
+  messageId?: string;
+  code?: string;
   message?: string;
 };
 
-const resendEmailEndpoint = 'https://api.resend.com/emails';
+const brevoEmailEndpoint = 'https://api.brevo.com/v3/smtp/email';
 
 function escapeHtml(value: string) {
   return value
@@ -31,12 +32,12 @@ function escapeHtml(value: string) {
 }
 
 function assertEmailConfig() {
-  if (!config.resendApiKey) {
-    throw new Error('RESEND_API_KEY is required to send email.');
+  if (!config.brevoApiKey) {
+    throw new Error('BREVO_API_KEY is required to send email.');
   }
 
-  if (!config.invitationFromEmail) {
-    throw new Error('INVITATION_FROM_EMAIL is required to send invitation email.');
+  if (!config.brevoSenderEmail) {
+    throw new Error('BREVO_SENDER_EMAIL is required to send invitation email.');
   }
 }
 
@@ -49,33 +50,36 @@ export function buildInvitationAcceptUrl(token: string) {
 export async function sendEmail({ to, subject, html, text }: SendEmailInput) {
   assertEmailConfig();
 
-  const response = await fetch(resendEmailEndpoint, {
+  const response = await fetch(brevoEmailEndpoint, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${config.resendApiKey}`,
+      'api-key': config.brevoApiKey,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      from: config.invitationFromEmail,
-      to,
+      sender: {
+        name: config.brevoSenderName,
+        email: config.brevoSenderEmail
+      },
+      to: [{ email: to }],
       subject,
-      html,
-      text
+      htmlContent: html,
+      textContent: text
     })
   });
 
-  const result = (await response.json().catch(() => ({}))) as ResendEmailResponse;
+  const result = (await response.json().catch(() => ({}))) as BrevoEmailResponse;
 
   if (!response.ok) {
-    throw new Error(result.message || `Resend email request failed with status ${response.status}.`);
+    throw new Error(result.message || `Brevo email request failed with status ${response.status}.`);
   }
 
-  if (!result.id) {
-    throw new Error('Resend email response did not include message id.');
+  if (!result.messageId) {
+    throw new Error('Brevo email response did not include message id.');
   }
 
   return {
-    messageId: result.id
+    messageId: result.messageId
   };
 }
 
