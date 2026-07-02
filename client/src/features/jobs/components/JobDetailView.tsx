@@ -190,8 +190,11 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
 
     try {
       await deleteJob(jobId);
-      await queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      await queryClient.cancelQueries({ queryKey: ['jobs', jobId], exact: true });
       navigate(getJobsPath(role), { replace: true });
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] === 'jobs' && typeof query.queryKey[1] === 'object'
+      });
     } catch (deleteError) {
       setDeleteErrorMessage(getApiErrorMessage(deleteError, '공고 삭제 중 오류가 발생했습니다.'));
     } finally {

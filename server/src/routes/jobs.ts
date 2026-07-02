@@ -155,6 +155,15 @@ function getSortOrder(value: unknown): 'asc' | 'desc' {
   return getString(value).toLowerCase() === 'asc' ? 'asc' : 'desc';
 }
 
+function getManagementStatusFromJobStatus(status: JobStatus): string {
+  if (status === 'draft') return 'registered';
+  if (status === 'open' || status === 'closingSoon') return 'proposal_receiving';
+  if (status === 'closed') return 'evaluating';
+  if (status === 'awarded') return 'contract_ready';
+
+  return 'reviewing';
+}
+
 function toJobListItem(row: JobRow) {
   return {
     id: row.id,
@@ -210,6 +219,7 @@ function buildJobsFilter(req: Request, currentCompanyId: string) {
   const query = asRecord(req.query);
   const values: unknown[] = [currentCompanyId];
   const perspective = getString(query.perspective);
+  const ownProcurement = getString(query.ownProcurement);
   const conditions =
     perspective === 'buyer'
       ? [
@@ -289,6 +299,17 @@ function buildJobsFilter(req: Request, currentCompanyId: string) {
   if (Number.isFinite(minRfpScore) && minRfpScore > 0) {
     values.push(minRfpScore);
     conditions.push(`coalesce(j.rfp_score, 0) >= $${values.length}`);
+  }
+
+  if (perspective === 'buyer' && ownProcurement === 'true') {
+    conditions.push(`exists (
+      select 1
+      from job_managements jm
+      where jm.job_id = j.id
+        and jm.company_id = $1
+        and jm.perspective = 'buyer'
+        and jm.is_own_procurement = true
+    )`);
   }
 
   return {
@@ -918,7 +939,11 @@ jobsRouter.patch('/:jobId', async (req: Request, res: Response, next) => {
     return;
   }
 
+  const client = await pool.connect();
+
   try {
+    await client.query('begin');
+
     const currentJob = await findManageableJob(jobId, currentCompanyId);
 
     if (!currentJob) {
@@ -927,7 +952,7 @@ jobsRouter.patch('/:jobId', async (req: Request, res: Response, next) => {
     }
 
     if (noticeNumber) {
-      const existingJob = await pool.query('select id from jobs where notice_number = $1 and id <> $2 limit 1', [
+      const existingJob = await client.query('select id from jobs where notice_number = $1 and id <> $2 limit 1', [
         noticeNumber,
         jobId
       ]);
@@ -941,7 +966,7 @@ jobsRouter.patch('/:jobId', async (req: Request, res: Response, next) => {
     const buyerCompany = await findOrCreateBuyerCompany(buyerName);
     await ensureBidRelationship(currentCompanyId, buyerCompany.id);
 
-    const result = await pool.query<JobRow>(
+    const result = await client.query<JobRow>(
       `
         update jobs
         set
@@ -1007,7 +1032,7 @@ jobsRouter.patch('/:jobId', async (req: Request, res: Response, next) => {
       ]
     );
 
-    await pool.query(
+    await client.query(
       `
         update company_relationships
         set last_activity_date = current_date,
@@ -1020,9 +1045,13 @@ jobsRouter.patch('/:jobId', async (req: Request, res: Response, next) => {
       [currentCompanyId, buyerCompany.id]
     );
 
+    await client.query('commit');
     sendSuccess(res, toJobDetail(result.rows[0]));
   } catch (error) {
+    await client.query('rollback').catch(() => undefined);
     next(error);
+  } finally {
+    client.release();
   }
 });
 

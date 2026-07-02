@@ -5,6 +5,7 @@ export function useJobDetail(jobId: string) {
   return useQuery({
     queryKey: ['jobs', jobId],
     queryFn: () => getJobDetail(jobId),
-    enabled: Boolean(jobId)
+    enabled: Boolean(jobId),
+    retry: false
   });
 }

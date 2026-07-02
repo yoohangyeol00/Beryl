@@ -74,7 +74,7 @@ const columns: DataTableColumn<AgencyProjectRow>[] = [
 
 export function BuyerDashboardPage() {
   const navigate = useNavigate();
-  const { data, isLoading, isError, error } = useJobs({ perspective: 'buyer' });
+  const { data, isLoading, isError, error } = useJobs({ perspective: 'buyer', ownProcurement: true });
   const jobs = data?.items ?? [];
   const summary = data?.summary;
   const rows = jobs.map(toAgencyProjectRow).slice(0, 8);

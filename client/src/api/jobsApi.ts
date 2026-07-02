@@ -5,6 +5,7 @@ import type { JobDetail, JobList, JobStatus } from '../types/job';
 
 export interface GetJobsParams {
   perspective?: 'buyer' | 'accessible';
+  ownProcurement?: boolean;
   q?: string;
   status?: JobStatus;
   procurementType?: 'public' | 'private';
