@@ -3,8 +3,7 @@ import { Calendar, CheckCircle2, Download, FileText, Info, Paperclip, Pencil, Se
 import { useEffect, useState, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
-import { deleteJob, updateJobOwnProcurement } from '../../../api/jobsApi';
-import { getResumes } from '../../../api/resumesApi';
+import { deleteJob, getJobRecommendedPeople, updateJobOwnProcurement, type JobRecommendedPerson } from '../../../api/jobsApi';
 import { EmptyState } from '../../../components/common/EmptyState';
 import { LoadingState } from '../../../components/common/LoadingState';
 import { PageTitle } from '../../../components/common/PageTitle';
@@ -15,7 +14,6 @@ import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
 import { getJobEditPath, getJobsPath, type RoleMode } from '../../modes/roleMode';
 import type { JobDetail } from '../../../types/job';
-import type { Resume } from '../../../types/resume';
 import { useJobDetail } from '../hooks/useJobDetail';
 
 type DetailTab = 'overview' | 'summary' | 'skills' | 'criteria' | 'schedule' | 'files';
@@ -31,16 +29,6 @@ type ReceivedProposal = {
   status: ProposalStatus;
 };
 
-type RecommendedPerson = {
-  id: string;
-  resumeId: string;
-  name: string;
-  role: string;
-  currentProject: string;
-  availableFrom: string;
-  fitScore: number;
-  reason: string;
-};
 
 const labels = {
   downloadRfp: 'RFP 다운로드',
@@ -127,12 +115,12 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
       ]);
     }
   });
-  const { data: resumeList } = useQuery({
-    queryKey: ['resumes', 'matching-candidates'],
-    queryFn: () => getResumes({ pageSize: 100 }),
-    enabled: !isAgency
+  const { data: recommendedPeopleData, isLoading: isRecommendedPeopleLoading } = useQuery({
+    queryKey: ['jobs', jobId, 'recommended-people'],
+    queryFn: () => getJobRecommendedPeople(jobId),
+    enabled: !isAgency && Boolean(jobId)
   });
-  const recommendedPeople = job ? getRecommendedPeople(job, resumeList?.items ?? []) : [];
+  const recommendedPeople = recommendedPeopleData?.items ?? [];
 
   useEffect(() => {
     if (mode) {
@@ -167,7 +155,7 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
     }
   ];
 
-  const recommendedColumns: DataTableColumn<RecommendedPerson>[] = [
+  const recommendedColumns: DataTableColumn<JobRecommendedPerson>[] = [
     { key: 'name', header: labels.name, sortable: true, render: (row) => <strong>{row.name}</strong> },
     { key: 'role', header: labels.role, sortable: true },
     { key: 'currentProject', header: labels.current, sortable: true },
@@ -299,90 +287,20 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
         {isAgency ? (
           <DataTable columns={proposalColumns} data={receivedProposals} getRowKey={(row) => row.id} tableClassName="min-w-[1040px] w-full" />
         ) : (
-          <DataTable columns={recommendedColumns} data={recommendedPeople} getRowKey={(row) => row.id} onRowClick={(row) => navigate(`/offers/${row.id}/analysis?resumeId=${row.resumeId}`)} tableClassName="min-w-[1040px] w-full" />
+          <DataTable
+            columns={recommendedColumns}
+            data={recommendedPeople}
+            getRowKey={(row) => row.id}
+            onRowClick={(row) => navigate(`/offers/${row.id}/analysis?jobId=${job.id}&resumeId=${row.resumeId}`)}
+            isLoading={isRecommendedPeopleLoading}
+            loadingMessage="AI가 추천 인력을 분석 중입니다."
+            emptyMessage="추천 가능한 인력이 없습니다."
+            tableClassName="min-w-[1040px] w-full"
+          />
         )}
       </Card>
     </section>
   );
-}
-
-const baseRequiredSkills = ['React', 'TypeScript', 'Spring Boot', 'PostgreSQL', 'MSA', 'API'];
-const publicKeywords = ['공공', '조달', '전자조달', '공공기관', '공공 SI', '공공 데이터'];
-
-function getRecommendedPeople(job: JobDetail, resumes: Resume[]): RecommendedPerson[] {
-  const jobTerms = [job.title, job.category, job.description, ...job.requirements].join(' ');
-  const requiredSkills = [
-    ...baseRequiredSkills,
-    ...job.category.split(',').map((item) => item.trim()).filter(Boolean)
-  ];
-
-  return resumes
-    .map((resume) => toRecommendedPerson(resume, requiredSkills, jobTerms))
-    .sort((a, b) => b.fitScore - a.fitScore || a.availableFrom.localeCompare(b.availableFrom));
-}
-
-function toRecommendedPerson(resume: Resume, requiredSkills: string[], jobTerms: string): RecommendedPerson {
-  const normalizedJobTerms = jobTerms.toLowerCase();
-  const matchedSkills = resume.skills.filter((skill) => {
-    const normalizedSkill = skill.toLowerCase();
-    return requiredSkills.some((requiredSkill) => normalizedSkill.includes(requiredSkill.toLowerCase()) || requiredSkill.toLowerCase().includes(normalizedSkill))
-      || normalizedJobTerms.includes(normalizedSkill);
-  });
-  const publicExperienceCount = resume.skills.filter((skill) => publicKeywords.some((keyword) => skill.includes(keyword))).length;
-  const roleScore = getRoleScore(resume.role, normalizedJobTerms);
-  const availabilityScore = getAvailabilityScore(resume);
-  const careerScore = Math.min(resume.careerYears * 2, 24);
-  const skillScore = Math.min(matchedSkills.length * 8, 32);
-  const publicScore = Math.min(publicExperienceCount * 7, 14);
-  const loadPenalty = Math.round(resume.currentManMonths * 8);
-  const fitScore = clampScore(35 + skillScore + roleScore + publicScore + availabilityScore + careerScore - loadPenalty);
-
-  return {
-    id: `match-${resume.id}`,
-    resumeId: resume.id,
-    name: resume.name,
-    role: resume.role,
-    currentProject: formatCurrentProject(resume),
-    availableFrom: resume.availableFrom,
-    fitScore,
-    reason: buildRecommendationReason(resume, matchedSkills, publicExperienceCount)
-  };
-}
-
-function getRoleScore(role: string, jobTerms: string) {
-  const normalizedRole = role.toLowerCase();
-  if (jobTerms.includes(normalizedRole)) return 12;
-  if (['pm', 'architect', '아키텍트'].some((keyword) => normalizedRole.includes(keyword))) return 10;
-  if (['backend', 'frontend', 'data', 'devops'].some((keyword) => normalizedRole.includes(keyword))) return 8;
-  if (['qa', 'pmo', 'business analyst', 'ui/ux'].some((keyword) => normalizedRole.includes(keyword))) return 6;
-  return 4;
-}
-
-function getAvailabilityScore(resume: Resume) {
-  if (resume.availabilityStatus === 'available') return 14;
-  if (resume.availabilityStatus === 'partiallyAssigned') return 9;
-  if (resume.availabilityStatus === 'assigned') return 4;
-  return 0;
-}
-
-function formatCurrentProject(resume: Resume) {
-  if (resume.availabilityStatus === 'available') return '대기';
-  return resume.currentClient && resume.currentClient !== '-' ? `${resume.currentProject} (${resume.currentClient})` : resume.currentProject;
-}
-
-function buildRecommendationReason(resume: Resume, matchedSkills: string[], publicExperienceCount: number) {
-  const skillText = matchedSkills.slice(0, 3).join(', ');
-  const parts = [
-    skillText ? `${skillText} 역량 보유` : `${resume.role} 역할 경험 보유`,
-    publicExperienceCount ? '공공/조달 유사 경험' : '',
-    resume.availabilityStatus === 'available' ? '즉시 투입 가능' : resume.availabilityStatus === 'partiallyAssigned' ? '부분 투입 가능' : ''
-  ].filter(Boolean);
-
-  return parts.join(' · ');
-}
-
-function clampScore(value: number) {
-  return Math.max(45, Math.min(98, Math.round(value)));
 }
 
 function TabContent({ activeTab, job }: { activeTab: DetailTab; job: JobDetail }) {

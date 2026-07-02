@@ -171,6 +171,17 @@ Copy-Item client/.env.example client/.env
 ```env
 PORT=3000
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/beryl
+CLIENT_ORIGIN=http://localhost:5173
+SERVER_PUBLIC_BASE_URL=http://localhost:3000
+SESSION_COOKIE_NAME=beryl.sid
+SESSION_TTL_HOURS=24
+RESEND_API_KEY=re_xxxxxxxxx
+INVITATION_FROM_EMAIL=BERYL <onboarding@resend.dev>
+INVITATION_TTL_HOURS=72
+AI_PROVIDER=gemini
+GEMINI_API_KEY=AIza_xxxxxxxxx
+GEMINI_MODEL=gemini-3.1-flash-lite
+GEMINI_TIMEOUT_MS=15000
 ```
 
 서버 기본값은 `server/src/config.ts`에도 정의되어 있다.
