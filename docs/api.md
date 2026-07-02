@@ -832,3 +832,33 @@ Request:
   "status": "assigned"
 }
 ```
+
+## 13. AI Matching
+
+공급기업 관점의 입찰공고 상세에서 투입 후보 인력을 추천한다.
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/jobs/:jobId/recommended-people` | 현재 기업의 인력 풀을 기준으로 공고 추천 인력 조회 |
+
+Response data:
+
+```json
+{
+  "items": [
+    {
+      "id": "match-resume-id",
+      "resumeId": "uuid",
+      "name": "김민수",
+      "role": "Backend Developer",
+      "currentProject": "대기",
+      "availableFrom": "2026-07-01",
+      "fitScore": 91,
+      "reason": "Spring Boot, PostgreSQL 역량 보유 · 즉시 투입 가능"
+    }
+  ],
+  "provider": "gemini"
+}
+```
+
+`provider`는 Gemini 호출 성공 시 `gemini`, API key 미설정 또는 호출 실패 시 `rule-based`를 반환한다.

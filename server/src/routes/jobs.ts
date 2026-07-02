@@ -1,6 +1,7 @@
 import { type Request, type Response } from 'express';
 import { pool } from '../db.js';
 import { getCurrentCompanyId, type AuthenticatedRequest } from '../middleware/auth.js';
+import { rankCandidatesWithGemini, type MatchingCandidateInput } from '../services/aiMatching.js';
 import { sendError, sendSuccess } from '../utils/apiResponse.js';
 import { createCompanyScopedRouter } from './companyScopedRouter.js';
 
@@ -41,6 +42,19 @@ interface JobSummaryRow {
 interface JobAccessRow {
   id: string;
   buyer_company_id: string;
+}
+
+interface MatchingResumeRow {
+  id: string;
+  name: string;
+  role: string | null;
+  career_years: number | null;
+  available_from: string | Date | null;
+  availability_status: string;
+  skills: string[] | null;
+  current_client: string | null;
+  current_project: string | null;
+  current_mm: string | null;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -201,6 +215,165 @@ function toJobDetail(row: JobRow) {
     description: row.description ?? '',
     requirements: row.category ? [row.category] : []
   };
+}
+
+function toMatchingCandidate(row: MatchingResumeRow): MatchingCandidateInput {
+  return {
+    resumeId: row.id,
+    name: row.name,
+    role: row.role ?? '',
+    careerYears: row.career_years ?? 0,
+    skills: row.skills ?? [],
+    availableFrom: formatDateValue(row.available_from),
+    availabilityStatus: row.availability_status,
+    currentClient: row.current_client ?? '-',
+    currentProject: row.current_project ?? '대기',
+    currentManMonths: row.current_mm ? Number(row.current_mm) : 0
+  };
+}
+
+function getRoleScore(role: string, jobTerms: string): number {
+  const normalizedRole = role.toLowerCase();
+
+  if (normalizedRole && jobTerms.includes(normalizedRole)) return 12;
+  if (['pm', 'architect', '아키텍트'].some((keyword) => normalizedRole.includes(keyword))) return 10;
+  if (['backend', 'frontend', 'data', 'devops'].some((keyword) => normalizedRole.includes(keyword))) return 8;
+  if (['qa', 'pmo', 'business analyst', 'ui/ux'].some((keyword) => normalizedRole.includes(keyword))) return 6;
+
+  return 4;
+}
+
+function getAvailabilityScore(status: string): number {
+  if (status === 'available') return 14;
+  if (status === 'partiallyAssigned') return 9;
+  if (status === 'assigned') return 4;
+  return 0;
+}
+
+function clampRecommendationScore(value: number): number {
+  return Math.max(45, Math.min(98, Math.round(value)));
+}
+
+function getRuleBasedRecommendations(job: ReturnType<typeof toJobDetail>, candidates: MatchingCandidateInput[]) {
+  const requiredSkills = [
+    'React',
+    'TypeScript',
+    'Spring Boot',
+    'PostgreSQL',
+    'MSA',
+    'API',
+    ...job.category.split(',').map((item) => item.trim()).filter(Boolean)
+  ];
+  const jobTerms = [job.title, job.category, job.description, ...job.requirements].join(' ').toLowerCase();
+
+  return candidates
+    .map((candidate) => {
+      const matchedSkills = candidate.skills.filter((skill) => {
+        const normalizedSkill = skill.toLowerCase();
+        return requiredSkills.some((requiredSkill) => {
+          const normalizedRequiredSkill = requiredSkill.toLowerCase();
+          return normalizedSkill.includes(normalizedRequiredSkill) || normalizedRequiredSkill.includes(normalizedSkill);
+        }) || jobTerms.includes(normalizedSkill);
+      });
+      const careerScore = Math.min(candidate.careerYears * 2, 24);
+      const skillScore = Math.min(matchedSkills.length * 8, 32);
+      const roleScore = getRoleScore(candidate.role, jobTerms);
+      const availabilityScore = getAvailabilityScore(candidate.availabilityStatus);
+      const loadPenalty = Math.round(candidate.currentManMonths * 8);
+      const fitScore = clampRecommendationScore(35 + skillScore + roleScore + availabilityScore + careerScore - loadPenalty);
+      const skillPercent = Math.min(100, Math.round((skillScore + roleScore + careerScore) * 1.4));
+      const publicExperiencePercent = Math.min(100, candidate.skills.some((skill) => ['공공', '조달', 'SI'].some((keyword) => skill.includes(keyword))) ? 86 : 64);
+      const availabilityPercent =
+        candidate.availabilityStatus === 'available'
+          ? 100
+          : candidate.availabilityStatus === 'partiallyAssigned'
+            ? 78
+            : candidate.availabilityStatus === 'assigned'
+              ? 56
+              : 35;
+      const ratePercent = Math.max(45, Math.min(92, 88 - Math.round(candidate.currentManMonths * 12)));
+      const riskPercent = Math.max(40, Math.min(95, availabilityPercent - Math.round(candidate.currentManMonths * 10) + 10));
+      const reasonParts = [
+        matchedSkills.length ? `${matchedSkills.slice(0, 3).join(', ')} 역량 보유` : `${candidate.role || '실무'} 역할 경험 보유`,
+        candidate.availabilityStatus === 'available' ? '즉시 투입 가능' : candidate.availabilityStatus === 'partiallyAssigned' ? '부분 투입 가능' : ''
+      ].filter(Boolean);
+
+      return {
+        id: `match-${candidate.resumeId}`,
+        resumeId: candidate.resumeId,
+        name: candidate.name,
+        role: candidate.role,
+        currentProject:
+          candidate.availabilityStatus === 'available'
+            ? '대기'
+            : candidate.currentClient && candidate.currentClient !== '-'
+              ? `${candidate.currentProject} (${candidate.currentClient})`
+              : candidate.currentProject,
+        availableFrom: candidate.availableFrom,
+        fitScore,
+        reason: reasonParts.join(' · ') || '공고 요구사항과 이력 정보를 기준으로 추천',
+        scoreBreakdown: {
+          skill: skillPercent,
+          publicExperience: publicExperiencePercent,
+          availability: availabilityPercent,
+          rate: ratePercent,
+          risk: riskPercent
+        },
+        requirementComparisons: [
+          {
+            item: '핵심 기술',
+            requirement: requiredSkills.slice(0, 4).join(', ') || '공고 요구 기술',
+            capability: matchedSkills.length ? `${matchedSkills.slice(0, 4).join(', ')} 역량 보유` : `${candidate.skills.slice(0, 4).join(', ') || candidate.role} 기반 수행 경험`,
+            result: matchedSkills.length ? 'match' : 'partial'
+          },
+          {
+            item: '역할 적합도',
+            requirement: job.category || job.title,
+            capability: `${candidate.role || '실무자'} 역할, ${candidate.careerYears}년 경력`,
+            result: roleScore >= 8 ? 'match' : 'partial'
+          },
+          {
+            item: '투입 가능성',
+            requirement: '착수 일정에 맞춘 투입 가능성',
+            capability: `${candidate.availableFrom || '가용일 미정'} 기준 ${candidate.currentProject || '현재 상태 미정'}`,
+            result: candidate.availabilityStatus === 'available' || candidate.availabilityStatus === 'partiallyAssigned' ? 'match' : 'partial'
+          }
+        ]
+      };
+    })
+    .sort((a, b) => b.fitScore - a.fitScore || a.availableFrom.localeCompare(b.availableFrom))
+    .slice(0, 8);
+}
+
+function mergeAiRecommendations(
+  fallbackRecommendations: ReturnType<typeof getRuleBasedRecommendations>,
+  aiRecommendations: Awaited<ReturnType<typeof rankCandidatesWithGemini>>
+) {
+  if (!aiRecommendations?.length) {
+    return fallbackRecommendations;
+  }
+
+  const fallbackByResumeId = new Map(fallbackRecommendations.map((recommendation) => [recommendation.resumeId, recommendation]));
+
+  return aiRecommendations
+    .map((aiRecommendation) => {
+      const fallback = fallbackByResumeId.get(aiRecommendation.resumeId);
+
+      if (!fallback) {
+        return null;
+      }
+
+      return {
+        ...fallback,
+        fitScore: aiRecommendation.fitScore,
+        reason: aiRecommendation.reason || fallback.reason,
+        scoreBreakdown: aiRecommendation.scoreBreakdown ?? fallback.scoreBreakdown,
+        requirementComparisons: aiRecommendation.requirementComparisons ?? fallback.requirementComparisons
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
+    .sort((a, b) => b.fitScore - a.fitScore)
+    .slice(0, 8);
 }
 
 function formatDateValue(value: string | Date | null): string {
@@ -772,6 +945,74 @@ jobsRouter.post('/import', async (req: Request, res: Response, next) => {
     next(error);
   } finally {
     client.release();
+  }
+});
+
+jobsRouter.get('/:jobId/recommended-people', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const jobId = getString(req.params.jobId);
+
+  try {
+    const jobRow = await getJobDetailById(jobId, currentCompanyId);
+
+    if (!jobRow) {
+      sendError(res, 404, 'JOB_NOT_FOUND', '공고 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    const resumeResult = await pool.query<MatchingResumeRow>(
+      `
+        select
+          r.id,
+          r.name,
+          r.role,
+          r.career_years,
+          r.available_from,
+          r.availability_status,
+          coalesce(array_remove(array_agg(distinct rs.skill_name order by rs.skill_name), null), '{}') as skills,
+          buyer.name as current_client,
+          wp.name as current_project,
+          pa.allocation_rate::text as current_mm
+        from resumes r
+        left join resume_skills rs on rs.resume_id = r.id
+        left join lateral (
+          select *
+          from project_assignments pa
+          where pa.resume_id = r.id
+            and pa.status in ('planned', 'assigned')
+          order by pa.assigned_to nulls last, pa.created_at desc
+          limit 1
+        ) pa on true
+        left join won_projects wp on wp.id = pa.won_project_id
+        left join companies buyer on buyer.id = pa.buyer_company_id
+        where r.owner_company_id = $1
+        group by r.id, buyer.name, wp.name, pa.allocation_rate
+        order by r.created_at desc, r.id desc
+        limit 100
+      `,
+      [currentCompanyId]
+    );
+    const job = toJobDetail(jobRow);
+    const candidates = resumeResult.rows.map(toMatchingCandidate);
+    const fallbackRecommendations = getRuleBasedRecommendations(job, candidates);
+    const aiRecommendations = await rankCandidatesWithGemini(
+      {
+        title: job.title,
+        agency: job.agency,
+        category: job.category,
+        description: job.description,
+        requirements: job.requirements
+      },
+      candidates
+    );
+
+    sendSuccess(res, {
+      items: mergeAiRecommendations(fallbackRecommendations, aiRecommendations),
+      provider: aiRecommendations?.length ? 'gemini' : 'rule-based'
+    });
+  } catch (error) {
+    next(error);
   }
 });
 

@@ -1,7 +1,10 @@
 ﻿import { BarChart3, Check, Code2, ShoppingBasket, Sparkles, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { getJobDetail, getJobRecommendedPeople } from '../../../api/jobsApi';
+import { getResume } from '../../../api/resumesApi';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
@@ -88,7 +91,52 @@ const analyses = {
 
 export function OfferAnalysisPage() {
   const { offerId = 'match-8f3a21' } = useParams();
-  const analysis = analyses[offerId as keyof typeof analyses] ?? analyses['match-8f3a21'];
+  const [searchParams] = useSearchParams();
+  const jobId = searchParams.get('jobId') ?? '';
+  const resumeId = searchParams.get('resumeId') ?? '';
+  const fallbackAnalysis = analyses[offerId as keyof typeof analyses] ?? analyses['match-8f3a21'];
+  const { data: job } = useQuery({
+    queryKey: ['jobs', jobId],
+    queryFn: () => getJobDetail(jobId),
+    enabled: Boolean(jobId)
+  });
+  const { data: resume } = useQuery({
+    queryKey: ['resume', resumeId],
+    queryFn: () => getResume(resumeId),
+    enabled: Boolean(resumeId)
+  });
+  const { data: recommendedPeopleData, isLoading: isRecommendationLoading } = useQuery({
+    queryKey: ['jobs', jobId, 'recommended-people'],
+    queryFn: () => getJobRecommendedPeople(jobId),
+    enabled: Boolean(jobId)
+  });
+  const selectedRecommendation = recommendedPeopleData?.items.find((item) => item.resumeId === resumeId || item.id === offerId);
+  const matchScore = selectedRecommendation?.fitScore ?? Number(fallbackAnalysis.score.replace('%', ''));
+  const previousScore = selectedRecommendation ? Math.max(0, matchScore - 12) : Number(fallbackAnalysis.previousScore.replace('%', ''));
+  const scoreBreakdown = selectedRecommendation?.scoreBreakdown;
+  const analysis = {
+    ...fallbackAnalysis,
+    name: selectedRecommendation?.name ?? resume?.name ?? fallbackAnalysis.name,
+    title: selectedRecommendation?.role ?? resume?.role ?? fallbackAnalysis.title,
+    score: `${matchScore}%`,
+    previousScore: `${previousScore}%`,
+    delta: `+${Math.max(0, matchScore - previousScore)}%`,
+    summary: selectedRecommendation?.reason ?? fallbackAnalysis.summary,
+    availability: selectedRecommendation
+      ? `${selectedRecommendation.availableFrom || '가용일 미정'} 기준 투입 가능 여부와 현재 상태를 함께 검토합니다. 현재 상태: ${selectedRecommendation.currentProject || '-'}`
+      : fallbackAnalysis.availability,
+    stack: `${scoreBreakdown?.skill ?? matchScore}%`,
+    publicExp: `${scoreBreakdown?.publicExperience ?? Number(fallbackAnalysis.publicExp.replace('%', ''))}%`,
+    availabilityScore: `${scoreBreakdown?.availability ?? (selectedRecommendation?.currentProject === '대기' ? 100 : Number(fallbackAnalysis.availabilityScore.replace('%', '')))}%`,
+    rate: `${scoreBreakdown?.rate ?? Number(fallbackAnalysis.rate.replace('%', ''))}%`,
+    risk: `${scoreBreakdown?.risk ?? Number(fallbackAnalysis.risk.replace('%', ''))}%`
+  };
+  const comparisonRows = selectedRecommendation?.requirementComparisons?.length
+    ? selectedRecommendation.requirementComparisons.map((item, index) => ({
+        id: `${selectedRecommendation.resumeId}-${index}`,
+        ...item
+      }))
+    : rows;
   const [isAdded, setIsAdded] = useState(false);
 
   const columns: DataTableColumn<CompareRow>[] = [
@@ -114,7 +162,7 @@ export function OfferAnalysisPage() {
       </div>
       <PageTitle
         title="인력추천 분석"
-        description={`대상 사업: 차세대 통합 재난 안전 관리 시스템 구축 / 추천 후보: ${analysis.name} ${analysis.title}`}
+        description={`대상 사업: ${job?.title ?? '차세대 통합 재난 안전 관리 시스템 구축'} / 추천 후보: ${analysis.name} ${analysis.title}`}
         actions={
           <>
             <Button variant="secondary">분석 리포트</Button>
@@ -154,7 +202,7 @@ export function OfferAnalysisPage() {
               <Sparkles className="h-7 w-7 text-primary" />
               AI 추천 요약
             </h2>
-            <span className="text-sm text-primary">Updated 10m ago</span>
+            <span className="text-sm text-primary">{isRecommendationLoading ? 'AI 분석 중' : 'AI 분석 반영'}</span>
           </div>
           <p className="text-[18px] leading-9 text-on-surface">
             <strong className="text-primary">{analysis.name}</strong> 후보는 {analysis.summary}
@@ -178,7 +226,7 @@ export function OfferAnalysisPage() {
 
       <Card className="overflow-hidden">
         <h2 className="p-8 font-headline text-[28px] font-bold">요구사항 vs 보유역량 상세 비교</h2>
-        <DataTable columns={columns} data={rows} getRowKey={(row) => row.id} />
+        <DataTable columns={columns} data={comparisonRows} getRowKey={(row) => row.id} />
       </Card>
     </section>
   );

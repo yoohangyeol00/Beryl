@@ -33,6 +33,35 @@ export interface CreateJobRequest {
   description?: string;
 }
 
+export interface JobRecommendedPerson {
+  id: string;
+  resumeId: string;
+  name: string;
+  role: string;
+  currentProject: string;
+  availableFrom: string;
+  fitScore: number;
+  reason: string;
+  scoreBreakdown?: {
+    skill: number;
+    publicExperience: number;
+    availability: number;
+    rate: number;
+    risk: number;
+  };
+  requirementComparisons?: Array<{
+    item: string;
+    requirement: string;
+    capability: string;
+    result: 'match' | 'partial';
+  }>;
+}
+
+export interface JobRecommendedPeopleResponse {
+  items: JobRecommendedPerson[];
+  provider: 'gemini' | 'rule-based';
+}
+
 export async function getJobs(params?: GetJobsParams) {
   const response = await axiosInstance.get<ApiResponse<JobList>>('/jobs', { params });
   return unwrapApiResponse(response.data);
@@ -40,6 +69,11 @@ export async function getJobs(params?: GetJobsParams) {
 
 export async function getJobDetail(jobId: string) {
   const response = await axiosInstance.get<ApiResponse<JobDetail>>(`/jobs/${jobId}`);
+  return unwrapApiResponse(response.data);
+}
+
+export async function getJobRecommendedPeople(jobId: string) {
+  const response = await axiosInstance.get<ApiResponse<JobRecommendedPeopleResponse>>(`/jobs/${jobId}/recommended-people`);
   return unwrapApiResponse(response.data);
 }
 

@@ -12,5 +12,9 @@ export const config = {
   resendApiKey: process.env.RESEND_API_KEY ?? '',
   invitationFromEmail: process.env.INVITATION_FROM_EMAIL ?? '',
   invitationTtlHours: Number(process.env.INVITATION_TTL_HOURS ?? 72),
+  aiProvider: process.env.AI_PROVIDER ?? 'gemini',
+  geminiApiKey: process.env.GEMINI_API_KEY ?? '',
+  geminiModel: process.env.GEMINI_MODEL ?? 'gemini-3.1-flash-lite',
+  geminiTimeoutMs: Number(process.env.GEMINI_TIMEOUT_MS ?? 15000),
   isProduction: process.env.NODE_ENV === 'production'
 };
