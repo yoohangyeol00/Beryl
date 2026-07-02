@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { KeyRound, MailCheck, Pencil, PlusCircle, Power, PowerOff, RotateCcw, Save, Trash2, UserRound, X } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
 import {
   activateCompanyMember,
@@ -60,9 +60,8 @@ const columns: DataTableColumn<CompanyMemberListItem>[] = [
 
 export function BuyerCompanyMembersPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const queryClient = useQueryClient();
-  const basePath = location.pathname.startsWith('/supplier') ? '/supplier/company-members' : '/buyer/company-members';
+  const basePath = '/company-members';
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
   const [selectedMember, setSelectedMember] = useState<CompanyMemberListItem | null>(null);
@@ -220,7 +219,7 @@ export function BuyerCompanyMembersPage() {
   return (
     <section>
       <PageTitle
-        title="기관 사용자/권한"
+        title="회사 구성원/권한"
         description="현재 기업의 사용자, 부서, 역할, 초대 상태를 관리합니다."
         actions={
           <>

@@ -94,6 +94,23 @@ function normalizeMemberType(value: string): CompanyMemberType {
   return editableMemberTypes.has(value as CompanyMemberType) ? (value as CompanyMemberType) : 'employee';
 }
 
+function getInvitationEmailFailureMessage(error: unknown) {
+  if (!config.resendApiKey || !config.invitationFromEmail) {
+    const missingKeys = [
+      !config.resendApiKey ? 'RESEND_API_KEY' : '',
+      !config.invitationFromEmail ? 'INVITATION_FROM_EMAIL' : ''
+    ].filter(Boolean);
+
+    return `초대 메일 발송 설정이 없습니다. .env에 ${missingKeys.join(', ')} 값을 설정해주세요.`;
+  }
+
+  if (!config.isProduction && error instanceof Error && error.message) {
+    return `초대 메일 발송에 실패했습니다. ${error.message}`;
+  }
+
+  return '초대 메일 발송에 실패했습니다. 메일 설정을 확인해주세요.';
+}
+
 async function ensureCompanyMemberManager(req: AuthenticatedRequest, res: Response): Promise<boolean> {
   if (req.auth?.user.role === 'systemAdmin') return true;
 
@@ -745,7 +762,7 @@ companyMembersRouter.post('/invitations', async (req: Request, res: Response, ne
         [invitation.id]
       );
 
-      sendError(res, 502, 'INVITATION_EMAIL_FAILED', '초대 메일 발송에 실패했습니다. 메일 설정을 확인해주세요.');
+      sendError(res, 502, 'INVITATION_EMAIL_FAILED', getInvitationEmailFailureMessage(error));
     }
   } catch (error) {
     await client.query('rollback').catch(() => undefined);

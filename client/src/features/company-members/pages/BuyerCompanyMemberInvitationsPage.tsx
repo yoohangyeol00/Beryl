@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, MailCheck } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
 import { getCompanyMemberInvitations, type CompanyMemberInvitationHistoryItem } from '../../../api/companyMembersApi';
 import { EmptyState } from '../../../components/common/EmptyState';
@@ -28,8 +28,7 @@ const columns: DataTableColumn<CompanyMemberInvitationHistoryItem>[] = [
 
 export function BuyerCompanyMemberInvitationsPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const basePath = location.pathname.startsWith('/supplier') ? '/supplier/company-members' : '/buyer/company-members';
+  const basePath = '/company-members';
   const [selectedInvitation, setSelectedInvitation] = useState<CompanyMemberInvitationHistoryItem | null>(null);
   const invitationsQuery = useQuery({
     queryKey: ['company-member-invitations'],

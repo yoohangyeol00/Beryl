@@ -1,4 +1,4 @@
-import { Building2, ClipboardList, FileSearch, LayoutDashboard, Plus, RefreshCw, Users, X, type LucideIcon } from 'lucide-react';
+import { Building2, ClipboardList, FileSearch, LayoutDashboard, Plus, RefreshCw, Settings, Users, X, type LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../features/auth/AuthContext';
@@ -20,14 +20,13 @@ const ko = {
   agencyJobs: '\uBC1C\uC8FC \uC0AC\uC5C5 \uAD00\uB9AC',
   agencyExecution: '\uACC4\uC57D/\uC218\uD589 \uAD00\uB9AC',
   agencySuppliers: '\uACF5\uAE09\uAE30\uC5C5 \uD480',
-  agencyUsers: '\uAE30\uAD00 \uC0AC\uC6A9\uC790/\uAD8C\uD55C',
   supplierDashboard: '\uB0B4 \uC0AC\uC5C5 \uB300\uC2DC\uBCF4\uB4DC',
   supplierOpportunities: '\uC785\uCC30\uACF5\uACE0 \uD655\uC778',
   supplierProposals: '\uC81C\uCD9C \uC81C\uC548 \uAD00\uB9AC',
   supplierPeople: '\uC778\uB825/\uC774\uB825 \uAD00\uB9AC',
   supplierProjects: '\uC218\uD589 \uC0AC\uC5C5 \uAD00\uB9AC',
   supplierClients: '\uAC70\uB798\uCC98 \uAD00\uB9AC',
-  supplierUsers: '\uD68C\uC0AC \uAD6C\uC131\uC6D0/\uAD8C\uD55C',
+  companyUsers: '\uD68C\uC0AC \uAD6C\uC131\uC6D0/\uAD8C\uD55C',
   newJob: '\uC2E0\uADDC \uACF5\uACE0 \uB4F1\uB85D',
   mobileMenu: '\uBAA8\uBC14\uC77C \uBA54\uB274',
   closeMenu: '\uBA54\uB274 \uB2EB\uAE30'
@@ -37,17 +36,7 @@ const navItemsByRole: Record<RoleMode, NavItem[]> = {
   agency: [
     { label: ko.agencyDashboard, href: getDashboardPath('agency'), icon: LayoutDashboard, activeMatch: 'exact' },
     { label: ko.agencyJobs, href: getJobsPath('agency'), icon: ClipboardList, activeMatch: 'section' },
-    { label: ko.agencySuppliers, href: getSupplierPoolPath(), icon: Building2, activeMatch: 'section' },
-    {
-      label: ko.agencyUsers,
-      href: '/buyer/company-members',
-      icon: Users,
-      activeMatch: 'section',
-      children: [
-        { label: '사용자 초대', href: '/buyer/company-members/new' },
-        { label: '초대 내역', href: '/buyer/company-members/invitations' }
-      ]
-    }
+    { label: ko.agencySuppliers, href: getSupplierPoolPath(), icon: Building2, activeMatch: 'section' }
   ],
   supplier: [
     { label: ko.supplierDashboard, href: getDashboardPath('supplier'), icon: LayoutDashboard, activeMatch: 'exact' },
@@ -55,17 +44,7 @@ const navItemsByRole: Record<RoleMode, NavItem[]> = {
     { label: ko.supplierProposals, href: getBidParticipationPath(), icon: FileSearch, activeMatch: 'exact' },
     { label: ko.supplierPeople, href: getManpowerPath(), icon: Users, activeMatch: 'exact' },
     { label: ko.supplierProjects, href: getProjectsPath(), icon: RefreshCw, activeMatch: 'section' },
-    { label: ko.supplierClients, href: getSupplierClientsPath(), icon: Building2, activeMatch: 'exact' },
-    {
-      label: ko.supplierUsers,
-      href: '/supplier/company-members',
-      icon: Users,
-      activeMatch: 'section',
-      children: [
-        { label: '사용자 초대', href: '/supplier/company-members/new' },
-        { label: '초대 이력', href: '/supplier/company-members/invitations' }
-      ]
-    }
+    { label: ko.supplierClients, href: getSupplierClientsPath(), icon: Building2, activeMatch: 'exact' }
   ]
 };
 
@@ -90,10 +69,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const [role, setRole] = useState<RoleMode>(() => getRoleMode(location.pathname));
   const [collapsedNavHref, setCollapsedNavHref] = useState<string | null>(null);
   const canManageCompanyMembers = session?.user.role === 'systemAdmin' || session?.member?.memberType === 'manager';
-  const navItems = navItemsByRole[role].filter((item) => {
-    if (item.href.endsWith('/company-members')) return canManageCompanyMembers;
-    return true;
-  });
+  const navItems = navItemsByRole[role];
   const meta = roleMeta[role];
 
   useEffect(() => {
@@ -182,6 +158,25 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
           );
         })}
       </nav>
+      {canManageCompanyMembers ? (
+        <div className="mt-6 border-t border-outline-variant px-5 pt-4">
+          <Link
+            to="/company-members"
+            aria-label={ko.companyUsers}
+            title={ko.companyUsers}
+            onClick={onClose}
+            className={[
+              'flex h-12 items-center gap-3 rounded-lg px-4 font-label text-[15px] font-semibold transition-colors',
+              location.pathname === '/company-members' || location.pathname.startsWith('/company-members/')
+                ? 'bg-primary/10 text-primary'
+                : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+            ].join(' ')}
+          >
+            <Settings className="h-5 w-5" aria-hidden />
+            <span>{ko.companyUsers}</span>
+          </Link>
+        </div>
+      ) : null}
     </>
   );
 

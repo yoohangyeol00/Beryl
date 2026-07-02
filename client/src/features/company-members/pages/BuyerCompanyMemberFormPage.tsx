@@ -1,6 +1,6 @@
 import { ArrowLeft, BriefcaseBusiness, Building2, Mail, PlusCircle, Phone, UserRound } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
 import { createCompanyMemberInvitation } from '../../../api/companyMembersApi';
 import { PageTitle } from '../../../components/common/PageTitle';
@@ -19,8 +19,7 @@ function RequiredLabel({ children }: { children: string }) {
 
 export function BuyerCompanyMemberFormPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const basePath = location.pathname.startsWith('/supplier') ? '/supplier/company-members' : '/buyer/company-members';
+  const basePath = '/company-members';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [department, setDepartment] = useState('');
@@ -56,7 +55,7 @@ export function BuyerCompanyMemberFormPage() {
   return (
     <section>
       <PageTitle
-        title="기관 사용자 등록"
+        title="회사 구성원 등록"
         description="현재 기업 소속 사용자를 초대하고, 부서와 직책, 연락처 정보를 함께 등록합니다."
         actions={
           <>
