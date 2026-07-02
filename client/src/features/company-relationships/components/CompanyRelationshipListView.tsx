@@ -9,13 +9,12 @@ import { LoadingState } from '../../../components/common/LoadingState';
 import { MetricCard } from '../../../components/common/MetricCard';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { PageToolbar } from '../../../components/common/PageToolbar';
-import { ActionMenu } from '../../../components/ui/ActionMenu';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
 import { Modal } from '../../../components/ui/Modal';
-import { getSupplierFormPath, type RoleMode } from '../../modes/roleMode';
+import { getSupplierClientFormPath, getSupplierFormPath, type RoleMode } from '../../modes/roleMode';
 import { useSupplierRelationships } from '../hooks/useSupplierRelationships';
 import { supplierLabels, supplierStatusLabel } from '../labels';
 import type { SupplierAttachment, SupplierCompany } from '../types';
@@ -39,6 +38,7 @@ export function CompanyRelationshipListView({ mode }: CompanyRelationshipListVie
     q: searchValue.trim() || undefined
   });
   const suppliers = (data?.items ?? []).map(mapSupplierRelationshipToCompany);
+  const getRelationshipFormPath = (relationshipId?: string) => (isAgency ? getSupplierFormPath(relationshipId) : getSupplierClientFormPath(relationshipId));
 
   useEffect(() => {
     if (mode) {
@@ -62,17 +62,17 @@ export function CompanyRelationshipListView({ mode }: CompanyRelationshipListVie
   }, [mode]);
 
   async function handleDeleteSupplier(supplier: SupplierCompany) {
-    if (!window.confirm(`${supplier.name} 공급기업 관계를 삭제하시겠습니까?`)) return;
+    if (!window.confirm(`${supplier.name} ${isAgency ? '공급기업 관계' : '거래처 관계'}를 삭제하시겠습니까?`)) return;
 
     setDeleteErrorMessage('');
     setIsDeleting(true);
 
     try {
-      await deleteSupplierRelationship(supplier.id);
+      await deleteSupplierRelationship(supplier.id, { perspective: isAgency ? 'buyer' : 'supplier' });
       await queryClient.invalidateQueries({ queryKey: ['supplier-relationships'] });
       setSelectedSupplier(null);
     } catch (deleteError) {
-      setDeleteErrorMessage(getApiErrorMessage(deleteError, '공급기업 삭제 중 오류가 발생했습니다.'));
+      setDeleteErrorMessage(getApiErrorMessage(deleteError, isAgency ? '공급기업 삭제 중 오류가 발생했습니다.' : '거래처 삭제 중 오류가 발생했습니다.'));
     } finally {
       setIsDeleting(false);
     }
@@ -90,26 +90,35 @@ export function CompanyRelationshipListView({ mode }: CompanyRelationshipListVie
     { key: 'grade', header: supplierLabels.grade, align: 'center', sortable: true },
     {
       key: 'proposalCount',
-      header: supplierLabels.proposalCount,
+      header: isAgency ? supplierLabels.proposalCount : '수행 사업',
       align: 'right',
       sortable: true,
-      render: (row) => `${row.proposalCount}${supplierLabels.cases}`
+      sortValue: (row) => isAgency ? row.proposalCount : row.projectCount,
+      render: (row) => `${isAgency ? row.proposalCount : row.projectCount}${supplierLabels.cases}`
     },
     {
       key: 'winRate',
-      header: supplierLabels.winRate,
+      header: isAgency ? supplierLabels.winRate : '진행 사업',
       align: 'right',
       sortable: true,
-      render: (row) => `${row.winRate}${supplierLabels.percent}`
+      sortValue: (row) => isAgency ? row.winRate : row.activeProjectCount,
+      render: (row) => isAgency ? `${row.winRate}${supplierLabels.percent}` : `${row.activeProjectCount}${supplierLabels.cases}`
     },
     {
       key: 'evaluation',
-      header: supplierLabels.evaluation,
+      header: isAgency ? supplierLabels.evaluation : '계약 합계',
       align: 'right',
       sortable: true,
-      render: (row) => `${row.evaluation}${supplierLabels.point}`
+      sortValue: (row) => isAgency ? row.evaluation : row.totalContractAmount,
+      render: (row) => isAgency ? `${row.evaluation}${supplierLabels.point}` : formatCurrency(row.totalContractAmount)
     },
     { key: 'tags', header: supplierLabels.tags, cellClassName: 'whitespace-normal min-w-[180px]' },
+    {
+      key: 'updatedAt',
+      header: '갱신일',
+      sortable: true,
+      render: (row) => formatDate(row.updatedAt)
+    },
     {
       key: 'status',
       header: supplierLabels.status,
@@ -127,7 +136,7 @@ export function CompanyRelationshipListView({ mode }: CompanyRelationshipListVie
         title={isAgency ? supplierLabels.agencyTitle : supplierLabels.supplierTitle}
         description={isAgency ? supplierLabels.agencyDesc : supplierLabels.supplierDesc}
         actions={
-          <Button icon={<PlusCircle className="h-4 w-4" />} onClick={() => navigate(getSupplierFormPath())}>
+          <Button icon={<PlusCircle className="h-4 w-4" />} onClick={() => navigate(getRelationshipFormPath())}>
             {isAgency ? supplierLabels.addAgency : supplierLabels.addSupplier}
           </Button>
         }
@@ -211,22 +220,20 @@ export function CompanyRelationshipListView({ mode }: CompanyRelationshipListVie
         onClose={() => setSelectedSupplier(null)}
         actions={
           selectedSupplier ? (
-            <ActionMenu
-              label="공급기업 관리"
-              items={[
-                {
-                  label: '수정',
-                  icon: <Pencil className="h-4 w-4" />,
-                  onClick: () => navigate(getSupplierFormPath(selectedSupplier.id))
-                },
-                {
-                  label: isDeleting ? '삭제 중...' : '삭제',
-                  icon: <Trash2 className="h-4 w-4" />,
-                  tone: 'danger',
-                  onClick: () => handleDeleteSupplier(selectedSupplier)
-                }
-              ]}
-            />
+            <div className="flex items-center gap-2">
+              <Button variant="secondary" icon={<Pencil className="h-4 w-4" />} onClick={() => navigate(getRelationshipFormPath(selectedSupplier.id))}>
+                수정
+              </Button>
+              <Button
+                variant="secondary"
+                className="!border-error !text-error hover:!bg-error/5"
+                icon={<Trash2 className="h-4 w-4" />}
+                onClick={() => handleDeleteSupplier(selectedSupplier)}
+                disabled={isDeleting}
+              >
+                {isDeleting ? '삭제 중...' : '삭제'}
+              </Button>
+            </div>
           ) : null
         }
         footer={
@@ -241,19 +248,16 @@ export function CompanyRelationshipListView({ mode }: CompanyRelationshipListVie
   );
 }
 
-const projectRows = [
-  { label: '차세대 통합 재난 안전 관리', value: '평가중 / 8.6억원' },
-  { label: '현장 대응 모바일 관제', value: '수행중 / 16.4억원' },
-  { label: '소방 데이터 통합 분석', value: '검수대기 / 21.8억원' }
-];
 
 function SupplierDetailContent({ supplier }: { supplier: SupplierCompany }) {
+  const projectRows = getSupplierProjectRows(supplier);
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-3">
         <SummaryBox label={supplierLabels.grade} value={supplier.grade} />
-        <SummaryBox label={supplierLabels.proposalCount} value={`${supplier.proposalCount}${supplierLabels.cases}`} />
-        <SummaryBox label={supplierLabels.evaluation} value={`${supplier.evaluation}${supplierLabels.point}`} />
+        <SummaryBox label="수행 사업" value={`${supplier.projectCount}${supplierLabels.cases}`} />
+        <SummaryBox label="계약 합계" value={formatCurrency(supplier.totalContractAmount)} />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
@@ -264,6 +268,7 @@ function SupplierDetailContent({ supplier }: { supplier: SupplierCompany }) {
             <DetailLine label={supplierLabels.contact} value={supplier.contact} />
             <DetailLine label={supplierLabels.tags} value={supplier.tags} />
             <DetailLine label={supplierLabels.status} value={supplierStatusLabel[supplier.status]} />
+            <DetailLine label="갱신일" value={formatDateTime(supplier.updatedAt)} />
           </dl>
           <h4 className="mb-3 mt-3 font-headline text-[18px] font-bold">첨부 파일</h4>
           <SupplierAttachmentList files={supplier.certificationFiles} />
@@ -342,4 +347,68 @@ function DetailLine({ label, value }: { label: string; value: string }) {
       <dd className="text-right font-semibold text-on-surface">{value}</dd>
     </div>
   );
+}
+
+function getSupplierProjectRows(supplier: SupplierCompany) {
+  if (supplier.projectCount === 0) {
+    return [
+      {
+        label: '연결된 수행사업 없음',
+        value: '수행사업이 등록되면 거래처와 자동으로 연결됩니다.'
+      }
+    ];
+  }
+
+  return [
+    {
+      label: supplier.latestProjectName || '최근 수행사업',
+      value: `${formatProjectStatus(supplier.latestProjectStatus)} / ${formatCurrency(supplier.totalContractAmount)}`
+    },
+    {
+      label: '수행사업 요약',
+      value: `총 ${supplier.projectCount}건 · 진행 ${supplier.activeProjectCount}건`
+    }
+  ];
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW', maximumFractionDigits: 0 }).format(value);
+}
+
+function formatDate(value: string) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value.slice(0, 10) || '-';
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(date);
+}
+
+function formatDateTime(value: string) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value || '-';
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date);
+}
+
+function formatProjectStatus(value: string) {
+  const labels: Record<string, string> = {
+    preparing: '계약준비',
+    inProgress: '수행중',
+    atRisk: '위험',
+    completed: '완료',
+    cancelled: '취소'
+  };
+
+  return (labels[value] ?? value) || '-';
 }

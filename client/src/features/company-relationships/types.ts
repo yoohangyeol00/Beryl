@@ -21,4 +21,10 @@ export type SupplierCompany = {
   tags: string;
   status: SupplierStatus;
   certificationFiles: SupplierAttachment[];
+  projectCount: number;
+  activeProjectCount: number;
+  totalContractAmount: number;
+  latestProjectName: string;
+  latestProjectStatus: string;
+  updatedAt: string;
 };

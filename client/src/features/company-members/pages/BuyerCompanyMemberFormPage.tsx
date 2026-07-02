@@ -1,6 +1,6 @@
 import { ArrowLeft, BriefcaseBusiness, Building2, Mail, PlusCircle, Phone, UserRound } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
 import { createCompanyMemberInvitation } from '../../../api/companyMembersApi';
 import { PageTitle } from '../../../components/common/PageTitle';
@@ -19,11 +19,14 @@ function RequiredLabel({ children }: { children: string }) {
 
 export function BuyerCompanyMemberFormPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.startsWith('/supplier') ? '/supplier/company-members' : '/buyer/company-members';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [department, setDepartment] = useState('');
   const [position, setPosition] = useState('');
   const [phone, setPhone] = useState('');
+  const [memberType, setMemberType] = useState<'employee' | 'reviewer' | 'manager'>('employee');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -39,9 +42,10 @@ export function BuyerCompanyMemberFormPage() {
         department: department || undefined,
         position: position || undefined,
         phone: phone || undefined,
-        role: 'companyUser'
+        role: 'companyUser',
+        memberType
       });
-      navigate('/buyer/company-members', { replace: true });
+      navigate(basePath, { replace: true });
     } catch (error) {
       setErrorMessage(getApiErrorMessage(error, '사용자 등록 중 오류가 발생했습니다.'));
     } finally {
@@ -122,6 +126,18 @@ export function BuyerCompanyMemberFormPage() {
               onChange={(event) => setPhone(event.target.value)}
               autoComplete="tel"
             />
+            <label className="block">
+              <span className="mb-2 block font-label text-label-sm text-on-surface-variant">권한 레벨</span>
+              <select
+                className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body text-[16px] text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+                value={memberType}
+                onChange={(event) => setMemberType(event.target.value as 'employee' | 'reviewer' | 'manager')}
+              >
+                <option value="employee">실무자</option>
+                <option value="reviewer">검토자/상급자</option>
+                <option value="manager">관리자</option>
+              </select>
+            </label>
           </div>
         </Card>
       </form>

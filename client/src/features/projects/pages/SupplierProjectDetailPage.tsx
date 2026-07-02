@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { History, Pencil, Plus } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { addWonProjectLog, getWonProject, updateWonProject } from '../../../api/wonProjectsApi';
+import { getWonProject, updateWonProject } from '../../../api/wonProjectsApi';
 import { EmptyState } from '../../../components/common/EmptyState';
 import { LoadingState } from '../../../components/common/LoadingState';
 import { MetricCard } from '../../../components/common/MetricCard';
@@ -13,7 +13,7 @@ import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
 import { Input } from '../../../components/ui/Input';
 import { Modal } from '../../../components/ui/Modal';
-import type { ProjectAssignment, ProjectHealthStatus, ProjectLogPayload, WonProjectDetail, WonProjectMutationPayload, WonProjectStatus } from '../../../types/wonProject';
+import type { ProjectAssignment, ProjectHealthStatus, WonProjectDetail, WonProjectMutationPayload, WonProjectStatus } from '../../../types/wonProject';
 
 const statusLabel: Record<WonProjectStatus, string> = {
   preparing: '계약준비',
@@ -45,7 +45,6 @@ export function SupplierProjectDetailPage() {
   const queryClient = useQueryClient();
   const { projectId = '' } = useParams();
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isLogOpen, setIsLogOpen] = useState(false);
   const projectQuery = useQuery({
     queryKey: ['won-project', projectId],
     queryFn: () => getWonProject(projectId),
@@ -53,19 +52,10 @@ export function SupplierProjectDetailPage() {
   });
   const project = projectQuery.data;
   const [editForm, setEditForm] = useState<WonProjectMutationPayload>({ name: '' });
-  const [logForm, setLogForm] = useState<ProjectLogPayload>({ logType: 'progress', title: '', body: '' });
 
   useEffect(() => {
     if (!project) return;
     setEditForm(toEditForm(project));
-    setLogForm({
-      logType: 'progress',
-      title: '진행 상태 업데이트',
-      body: '',
-      progressRate: project.progressRate,
-      healthStatus: project.healthStatus,
-      nextAction: project.nextAction
-    });
   }, [project]);
 
   const updateMutation = useMutation({
@@ -74,14 +64,6 @@ export function SupplierProjectDetailPage() {
       await queryClient.invalidateQueries({ queryKey: ['won-project', projectId] });
       await queryClient.invalidateQueries({ queryKey: ['won-projects'] });
       setIsEditOpen(false);
-    }
-  });
-  const logMutation = useMutation({
-    mutationFn: (payload: ProjectLogPayload) => addWonProjectLog(projectId, payload),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['won-project', projectId] });
-      await queryClient.invalidateQueries({ queryKey: ['won-projects'] });
-      setIsLogOpen(false);
     }
   });
 
@@ -101,11 +83,6 @@ export function SupplierProjectDetailPage() {
     });
   };
 
-  const handleLogSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    logMutation.mutate(logForm);
-  };
-
   return (
     <section>
       <PageTitle
@@ -114,7 +91,6 @@ export function SupplierProjectDetailPage() {
         actions={
           <>
             <Button variant="secondary" onClick={() => navigate('/supplier/projects')}>목록</Button>
-            <Button variant="secondary" icon={<History className="h-4 w-4" />} onClick={() => setIsLogOpen(true)}>로그 추가</Button>
             <Button icon={<Pencil className="h-4 w-4" />} onClick={() => setIsEditOpen(true)}>진행 수정</Button>
           </>
         }
@@ -178,19 +154,6 @@ export function SupplierProjectDetailPage() {
       >
         <ProjectEditForm id="won-project-edit-form" form={editForm} setForm={setEditForm} onSubmit={handleEditSubmit} />
       </Modal>
-      <Modal
-        open={isLogOpen}
-        title="진행 로그 추가"
-        onClose={() => setIsLogOpen(false)}
-        footer={
-          <div className="flex gap-2">
-            <Button type="button" variant="secondary" onClick={() => setIsLogOpen(false)}>취소</Button>
-            <Button type="submit" form="won-project-log-form" disabled={logMutation.isPending}>{logMutation.isPending ? '저장 중...' : '로그 저장'}</Button>
-          </div>
-        }
-      >
-        <ProjectLogForm id="won-project-log-form" form={logForm} setForm={setLogForm} onSubmit={handleLogSubmit} />
-      </Modal>
     </section>
   );
 }
@@ -225,39 +188,6 @@ function ProjectEditForm({ id, form, setForm, onSubmit }: { id: string; form: Wo
       <label className="md:col-span-2">
         <span className="mb-2 block font-label text-label-sm text-on-surface-variant">수정 로그 메모</span>
         <textarea className="min-h-24 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3" value={form.logBody ?? ''} onChange={(event) => update('logBody', event.target.value)} />
-      </label>
-    </form>
-  );
-}
-
-function ProjectLogForm({ id, form, setForm, onSubmit }: { id: string; form: ProjectLogPayload; setForm: (form: ProjectLogPayload) => void; onSubmit: (event: FormEvent) => void }) {
-  const update = (key: keyof ProjectLogPayload, value: string) => setForm({ ...form, [key]: value });
-  return (
-    <form id={id} className="grid gap-4 pb-6 md:grid-cols-2" onSubmit={onSubmit}>
-      <Input label="제목" value={form.title} onChange={(event) => update('title', event.target.value)} required />
-      <Input label="진행률(%)" type="number" min={0} max={100} value={form.progressRate ?? ''} onChange={(event) => update('progressRate', event.target.value)} />
-      <label className="block">
-        <span className="mb-2 block font-label text-label-sm text-on-surface-variant">로그 유형</span>
-        <select className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4" value={form.logType ?? 'progress'} onChange={(event) => update('logType', event.target.value)}>
-          <option value="progress">진행</option>
-          <option value="risk">리스크</option>
-          <option value="inspection">검수</option>
-          <option value="memo">메모</option>
-        </select>
-      </label>
-      <label className="block">
-        <span className="mb-2 block font-label text-label-sm text-on-surface-variant">수행 리스크</span>
-        <select className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4" value={form.healthStatus ?? 'normal'} onChange={(event) => update('healthStatus', event.target.value)}>
-          {Object.entries(healthLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-        </select>
-      </label>
-      <label className="md:col-span-2">
-        <span className="mb-2 block font-label text-label-sm text-on-surface-variant">내용</span>
-        <textarea className="min-h-28 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3" value={form.body ?? ''} onChange={(event) => update('body', event.target.value)} />
-      </label>
-      <label className="md:col-span-2">
-        <span className="mb-2 block font-label text-label-sm text-on-surface-variant">다음 조치</span>
-        <textarea className="min-h-24 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3" value={form.nextAction ?? ''} onChange={(event) => update('nextAction', event.target.value)} />
       </label>
     </form>
   );

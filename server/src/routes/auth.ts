@@ -41,6 +41,7 @@ interface UserRow {
   member_position: string | null;
   member_email: string | null;
   member_phone: string | null;
+  member_type: string | null;
 }
 
 interface CompanyResponse {
@@ -65,6 +66,7 @@ interface MemberResponse {
   position: string | null;
   email: string | null;
   phone: string | null;
+  memberType: string;
 }
 
 interface UserResponse {
@@ -142,7 +144,8 @@ function toAuthResponse(row: UserRow): AuthResponse {
           department: row.member_department,
           position: row.member_position,
           email: row.member_email,
-          phone: row.member_phone
+          phone: row.member_phone,
+          memberType: row.member_type ?? 'employee'
         }
       : null
   };
@@ -175,7 +178,8 @@ async function findUserForAuthResponse(userId: string): Promise<UserRow | null> 
         cm.department as member_department,
         cm.position as member_position,
         cm.email as member_email,
-        cm.phone as member_phone
+        cm.phone as member_phone,
+        cm.member_type
       from users u
       left join companies c on c.id = u.company_id
       left join company_members cm on cm.user_id = u.id
@@ -559,7 +563,8 @@ authRouter.post('/login', async (req, res, next) => {
           cm.department as member_department,
           cm.position as member_position,
           cm.email as member_email,
-          cm.phone as member_phone
+          cm.phone as member_phone,
+          cm.member_type
         from users u
         left join companies c on c.id = u.company_id
         left join company_members cm on cm.user_id = u.id

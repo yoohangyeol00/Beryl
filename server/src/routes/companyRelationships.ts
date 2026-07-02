@@ -59,6 +59,12 @@ interface CompanyRelationshipRow {
     mimeType: string | null;
     fileSize: string | number | null;
   }> | null;
+  project_count: string | null;
+  active_project_count: string | null;
+  total_contract_amount: string | null;
+  latest_project_name: string | null;
+  latest_project_status: string | null;
+  updated_at: string | Date;
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -117,6 +123,7 @@ function getRelationshipPayload(bodyValue: unknown) {
     managementStatus: getManagementStatus(relationship.managementStatus) ?? 'active',
     tags: getString(relationship.tags) || null,
     memo: getString(relationship.memo) || null,
+    sourcePerspective: getString(relationship.sourcePerspective) === 'supplier' ? 'supplier' : 'buyer',
     relationshipType: getString(relationship.relationshipType) || 'preferred_partner'
   };
 }
@@ -134,6 +141,7 @@ function toRelationshipResponse(row: CompanyRelationshipRow) {
     managementStatus: row.management_status,
     tags: row.tags,
     memo: row.memo,
+    updatedAt: formatDateTimeValue(row.updated_at),
     targetCompany: {
       id: row.target_company_id,
       name: row.target_company_name,
@@ -157,8 +165,97 @@ function toRelationshipResponse(row: CompanyRelationshipRow) {
       : null,
     capabilities: row.capabilities ?? [],
     certifications: row.certifications ?? [],
-    certificationFiles: row.certification_files ?? []
+    certificationFiles: row.certification_files ?? [],
+    projectSummary: {
+      total: Number(row.project_count ?? 0),
+      active: Number(row.active_project_count ?? 0),
+      totalContractAmount: Number(row.total_contract_amount ?? 0),
+      latestProjectName: row.latest_project_name,
+      latestProjectStatus: row.latest_project_status
+    }
   };
+}
+
+function formatDateTimeValue(value: string | Date): string {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  return value;
+}
+
+async function syncSupplierWonProjectRelationships(currentCompanyId: string) {
+  await pool.query(
+    `
+      with project_clients as (
+        select
+          wp.buyer_company_id as target_company_id,
+          min(coalesce(wp.started_at, wp.created_at::date)) as first_activity_date,
+          max(coalesce(wp.ended_at, wp.updated_at::date, wp.created_at::date)) as last_activity_date
+        from won_projects wp
+        where wp.supplier_company_id = $1
+        group by wp.buyer_company_id
+      )
+      update company_relationships cr
+      set relationship_type = 'won_project',
+          first_activity_date = coalesce(cr.first_activity_date, project_clients.first_activity_date),
+          last_activity_date = greatest(
+            coalesce(cr.last_activity_date, project_clients.last_activity_date),
+            project_clients.last_activity_date
+          ),
+          updated_at = now()
+      from project_clients
+      where cr.source_company_id = $1
+        and cr.target_company_id = project_clients.target_company_id
+        and cr.source_perspective = 'supplier'
+        and cr.target_perspective = 'buyer'
+        and cr.status = 'active'
+    `,
+    [currentCompanyId]
+  );
+
+  await pool.query(
+    `
+      with project_clients as (
+        select
+          wp.buyer_company_id as target_company_id,
+          min(coalesce(wp.started_at, wp.created_at::date)) as first_activity_date,
+          max(coalesce(wp.ended_at, wp.updated_at::date, wp.created_at::date)) as last_activity_date
+        from won_projects wp
+        where wp.supplier_company_id = $1
+        group by wp.buyer_company_id
+      )
+      insert into company_relationships (
+        source_company_id,
+        target_company_id,
+        source_perspective,
+        target_perspective,
+        relationship_type,
+        status,
+        first_activity_date,
+        last_activity_date
+      )
+      select
+        $1,
+        project_clients.target_company_id,
+        'supplier',
+        'buyer',
+        'won_project',
+        'active',
+        project_clients.first_activity_date,
+        project_clients.last_activity_date
+      from project_clients
+      where not exists (
+        select 1
+        from company_relationships cr
+        where cr.source_company_id = $1
+          and cr.target_company_id = project_clients.target_company_id
+          and cr.source_perspective = 'supplier'
+          and cr.target_perspective = 'buyer'
+      )
+    `,
+    [currentCompanyId]
+  );
 }
 
 async function upsertCompanyContact(
@@ -236,7 +333,13 @@ async function upsertCompanyContact(
   return createdContact.rows[0].id;
 }
 
-async function findRelationship(relationshipId: string, currentCompanyId: string) {
+async function findRelationship(relationshipId: string, currentCompanyId: string, perspective?: 'buyer' | 'supplier') {
+  const values: unknown[] = [relationshipId, currentCompanyId];
+  const perspectiveFilter = perspective ? 'and cr.source_perspective = $3' : '';
+  if (perspective) {
+    values.push(perspective);
+  }
+
   const result = await pool.query<CompanyRelationshipRow>(
     `
       select
@@ -251,6 +354,7 @@ async function findRelationship(relationshipId: string, currentCompanyId: string
         cr.management_status,
         cr.tags,
         cr.memo,
+        cr.updated_at,
         c.name as target_company_name,
         c.business_registration_no as target_company_business_registration_no,
         c.company_type as target_company_type,
@@ -279,7 +383,12 @@ async function findRelationship(relationshipId: string, currentCompanyId: string
             )
           ) filter (where cert.storage_key is not null),
           '[]'::jsonb
-        ) as certification_files
+        ) as certification_files,
+        coalesce(project_stats.project_count, '0') as project_count,
+        coalesce(project_stats.active_project_count, '0') as active_project_count,
+        coalesce(project_stats.total_contract_amount, '0') as total_contract_amount,
+        project_stats.latest_project_name,
+        project_stats.latest_project_status
       from company_relationships cr
       join companies c on c.id = cr.target_company_id
       left join company_contacts ct
@@ -287,12 +396,32 @@ async function findRelationship(relationshipId: string, currentCompanyId: string
        and ct.status = 'active'
       left join company_capabilities cc on cc.company_id = c.id
       left join company_certifications cert on cert.company_id = c.id
-      where cr.id = $1
+      left join lateral (
+        select
+          count(*)::text as project_count,
+          count(*) filter (where wp.status in ('preparing', 'inProgress', 'atRisk'))::text as active_project_count,
+          coalesce(sum(contract.contract_amount), 0)::text as total_contract_amount,
+          (array_agg(wp.name order by coalesce(wp.ended_at, wp.updated_at::date, wp.created_at::date) desc))[1] as latest_project_name,
+          (array_agg(wp.status order by coalesce(wp.ended_at, wp.updated_at::date, wp.created_at::date) desc))[1] as latest_project_status
+        from won_projects wp
+        left join contracts contract on contract.id = wp.contract_id
+        where (
+          cr.source_perspective = 'supplier'
+          and wp.supplier_company_id = cr.source_company_id
+          and wp.buyer_company_id = cr.target_company_id
+        ) or (
+          cr.source_perspective = 'buyer'
+          and wp.buyer_company_id = cr.source_company_id
+          and wp.supplier_company_id = cr.target_company_id
+        )
+      ) project_stats on true
+      where (cr.id = $1 or cr.target_company_id = $1)
         and cr.source_company_id = $2
-      group by cr.id, c.id, ct.id, ct.name, ct.department, ct.position, ct.email, ct.phone
+        ${perspectiveFilter}
+      group by cr.id, c.id, ct.id, ct.name, ct.department, ct.position, ct.email, ct.phone, project_stats.project_count, project_stats.active_project_count, project_stats.total_contract_amount, project_stats.latest_project_name, project_stats.latest_project_status
       limit 1
     `,
-    [relationshipId, currentCompanyId]
+    values
   );
 
   return result.rows[0] ?? null;
@@ -320,8 +449,10 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
     managementStatus,
     tags,
     memo,
+    sourcePerspective,
     relationshipType
   } = getRelationshipPayload(req.body);
+  const targetPerspective = sourcePerspective === 'supplier' ? 'buyer' : 'supplier';
 
   if (!companyName) {
     sendError(res, 400, 'VALIDATION_ERROR', '공급기업명은 필수입니다.');
@@ -373,11 +504,24 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
               address = $6,
               contact_phone = $7,
               contact_email = $8,
-              supports_supplier = true,
+              supports_buyer = supports_buyer or $9,
+              supports_supplier = supports_supplier or $10,
               updated_at = now()
-          where id = $9
+          where id = $11
         `,
-        [companyName, businessRegistrationNo, companyType, representativeName, websiteUrl, address, contactPhone, contactEmail, targetCompanyId]
+        [
+          companyName,
+          businessRegistrationNo,
+          companyType,
+          representativeName,
+          websiteUrl,
+          address,
+          contactPhone,
+          contactEmail,
+          targetPerspective === 'buyer',
+          targetPerspective === 'supplier',
+          targetCompanyId
+        ]
       );
     } else {
       const createdCompany = await client.query<{ id: string }>(
@@ -395,10 +539,21 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
             supports_supplier,
             status
           )
-          values ($1, $2, $3, $4, $5, $6, $7, $8, false, true, 'active')
+          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'active')
           returning id
         `,
-        [companyName, businessRegistrationNo, companyType, representativeName, websiteUrl, address, contactPhone, contactEmail]
+        [
+          companyName,
+          businessRegistrationNo,
+          companyType,
+          representativeName,
+          websiteUrl,
+          address,
+          contactPhone,
+          contactEmail,
+          targetPerspective === 'buyer',
+          targetPerspective === 'supplier'
+        ]
       );
       targetCompanyId = createdCompany.rows[0].id;
     }
@@ -412,28 +567,30 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
       phone: contactPhone
     });
 
-    await client.query('delete from company_capabilities where company_id = $1', [targetCompanyId]);
-    for (const capability of capabilities) {
-      await client.query(
-        `
-          insert into company_capabilities (company_id, name, capability_type)
-          values ($1, $2, 'technology')
-          on conflict (company_id, name) do nothing
-        `,
-        [targetCompanyId, capability]
-      );
-    }
+    if (targetPerspective === 'supplier') {
+      await client.query('delete from company_capabilities where company_id = $1', [targetCompanyId]);
+      for (const capability of capabilities) {
+        await client.query(
+          `
+            insert into company_capabilities (company_id, name, capability_type)
+            values ($1, $2, 'technology')
+            on conflict (company_id, name) do nothing
+          `,
+          [targetCompanyId, capability]
+        );
+      }
 
-    await client.query('delete from company_certifications where company_id = $1 and storage_key is null', [targetCompanyId]);
-    for (const certification of certifications) {
-      await client.query(
-        `
-          insert into company_certifications (company_id, name)
-          values ($1, $2)
-          on conflict (company_id, name) do nothing
-        `,
-        [targetCompanyId, certification]
-      );
+      await client.query('delete from company_certifications where company_id = $1 and storage_key is null', [targetCompanyId]);
+      for (const certification of certifications) {
+        await client.query(
+          `
+            insert into company_certifications (company_id, name)
+            values ($1, $2)
+            on conflict (company_id, name) do nothing
+          `,
+          [targetCompanyId, certification]
+        );
+      }
     }
 
     const ownerMember = await client.query<{ id: string }>('select id from company_members where user_id = $1 limit 1', [currentUserId]);
@@ -445,11 +602,11 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
         from company_relationships
         where source_company_id = $1
           and target_company_id = $2
-          and source_perspective = 'buyer'
-          and target_perspective = 'supplier'
+          and source_perspective = $3
+          and target_perspective = $4
         limit 1
       `,
-      [currentCompanyId, targetCompanyId]
+      [currentCompanyId, targetCompanyId, sourcePerspective, targetPerspective]
     );
 
     let relationshipId: string;
@@ -492,10 +649,22 @@ companyRelationshipsRouter.post('/', async (req: Request, res: Response, next) =
             internal_owner_member_id,
             contact_id
           )
-          values ($1, $2, 'buyer', 'supplier', $3, 'active', current_date, current_date, $4, $5, $6, $7, $8, $9)
+          values ($1, $2, $3, $4, $5, 'active', current_date, current_date, $6, $7, $8, $9, $10, $11)
           returning id
         `,
-        [currentCompanyId, targetCompanyId, relationshipType, internalGrade, managementStatus, tags, memo, internalOwnerMemberId, contactId]
+        [
+          currentCompanyId,
+          targetCompanyId,
+          sourcePerspective,
+          targetPerspective,
+          relationshipType,
+          internalGrade,
+          managementStatus,
+          tags,
+          memo,
+          internalOwnerMemberId,
+          contactId
+        ]
       );
       relationshipId = createdRelationship.rows[0].id;
     }
@@ -522,6 +691,8 @@ companyRelationshipsRouter.get('/:relationshipId', async (req: Request, res: Res
   const authReq = req as AuthenticatedRequest;
   const currentCompanyId = getCurrentCompanyId(authReq);
   const relationshipId = getString(req.params.relationshipId);
+  const query = asRecord(req.query);
+  const perspective = getString(query.perspective) === 'supplier' ? 'supplier' : getString(query.perspective) === 'buyer' ? 'buyer' : undefined;
 
   if (!relationshipId) {
     sendError(res, 400, 'VALIDATION_ERROR', '공급기업 관계 ID가 필요합니다.');
@@ -529,10 +700,14 @@ companyRelationshipsRouter.get('/:relationshipId', async (req: Request, res: Res
   }
 
   try {
-    const relationship = await findRelationship(relationshipId, currentCompanyId);
+    if (perspective === 'supplier') {
+      await syncSupplierWonProjectRelationships(currentCompanyId);
+    }
+
+    const relationship = await findRelationship(relationshipId, currentCompanyId, perspective);
 
     if (!relationship) {
-      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', '공급기업 관계 정보를 찾을 수 없습니다.');
+      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', perspective === 'supplier' ? '거래처 관계 정보를 찾을 수 없습니다.' : '공급기업 관계 정보를 찾을 수 없습니다.');
       return;
     }
 
@@ -565,8 +740,10 @@ companyRelationshipsRouter.patch('/:relationshipId', async (req: Request, res: R
     managementStatus,
     tags,
     memo,
+    sourcePerspective,
     relationshipType
   } = getRelationshipPayload(req.body);
+  const targetPerspective = sourcePerspective === 'supplier' ? 'buyer' : 'supplier';
 
   if (!relationshipId) {
     sendError(res, 400, 'VALIDATION_ERROR', '공급기업 관계 ID가 필요합니다.');
@@ -594,19 +771,19 @@ companyRelationshipsRouter.patch('/:relationshipId', async (req: Request, res: R
         from company_relationships
         where id = $1
           and source_company_id = $2
-          and source_perspective = 'buyer'
-          and target_perspective = 'supplier'
+          and source_perspective = $3
+          and target_perspective = $4
           and status = 'active'
         limit 1
       `,
-      [relationshipId, currentCompanyId]
+      [relationshipId, currentCompanyId, sourcePerspective, targetPerspective]
     );
 
     const targetCompanyId = relationshipResult.rows[0]?.target_company_id;
 
     if (!targetCompanyId) {
       await client.query('rollback');
-      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', '공급기업 관계 정보를 찾을 수 없습니다.');
+      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', sourcePerspective === 'supplier' ? '거래처 관계 정보를 찾을 수 없습니다.' : '공급기업 관계 정보를 찾을 수 없습니다.');
       return;
     }
 
@@ -621,11 +798,24 @@ companyRelationshipsRouter.patch('/:relationshipId', async (req: Request, res: R
             address = $6,
             contact_phone = $7,
             contact_email = $8,
-            supports_supplier = true,
+            supports_buyer = supports_buyer or $9,
+            supports_supplier = supports_supplier or $10,
             updated_at = now()
-        where id = $9
+        where id = $11
       `,
-      [companyName, businessRegistrationNo, companyType, representativeName, websiteUrl, address, contactPhone, contactEmail, targetCompanyId]
+      [
+        companyName,
+        businessRegistrationNo,
+        companyType,
+        representativeName,
+        websiteUrl,
+        address,
+        contactPhone,
+        contactEmail,
+        targetPerspective === 'buyer',
+        targetPerspective === 'supplier',
+        targetCompanyId
+      ]
     );
 
     const contactId = await upsertCompanyContact(client, {
@@ -637,28 +827,30 @@ companyRelationshipsRouter.patch('/:relationshipId', async (req: Request, res: R
       phone: contactPhone
     });
 
-    await client.query('delete from company_capabilities where company_id = $1', [targetCompanyId]);
-    for (const capability of capabilities) {
-      await client.query(
-        `
-          insert into company_capabilities (company_id, name, capability_type)
-          values ($1, $2, 'technology')
-          on conflict (company_id, name) do nothing
-        `,
-        [targetCompanyId, capability]
-      );
-    }
+    if (targetPerspective === 'supplier') {
+      await client.query('delete from company_capabilities where company_id = $1', [targetCompanyId]);
+      for (const capability of capabilities) {
+        await client.query(
+          `
+            insert into company_capabilities (company_id, name, capability_type)
+            values ($1, $2, 'technology')
+            on conflict (company_id, name) do nothing
+          `,
+          [targetCompanyId, capability]
+        );
+      }
 
-    await client.query('delete from company_certifications where company_id = $1 and storage_key is null', [targetCompanyId]);
-    for (const certification of certifications) {
-      await client.query(
-        `
-          insert into company_certifications (company_id, name)
-          values ($1, $2)
-          on conflict (company_id, name) do nothing
-        `,
-        [targetCompanyId, certification]
-      );
+      await client.query('delete from company_certifications where company_id = $1 and storage_key is null', [targetCompanyId]);
+      for (const certification of certifications) {
+        await client.query(
+          `
+            insert into company_certifications (company_id, name)
+            values ($1, $2)
+            on conflict (company_id, name) do nothing
+          `,
+          [targetCompanyId, certification]
+        );
+      }
     }
 
     const ownerMember = await client.query<{ id: string }>('select id from company_members where user_id = $1 limit 1', [currentUserId]);
@@ -684,10 +876,10 @@ companyRelationshipsRouter.patch('/:relationshipId', async (req: Request, res: R
 
     await client.query('commit');
 
-    const savedRelationship = await findRelationship(relationshipId, currentCompanyId);
+    const savedRelationship = await findRelationship(relationshipId, currentCompanyId, sourcePerspective === 'supplier' ? 'supplier' : 'buyer');
 
     if (!savedRelationship) {
-      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', '수정된 공급기업 정보를 찾을 수 없습니다.');
+      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', sourcePerspective === 'supplier' ? '수정된 거래처 정보를 찾을 수 없습니다.' : '수정된 공급기업 정보를 찾을 수 없습니다.');
       return;
     }
 
@@ -704,6 +896,9 @@ companyRelationshipsRouter.delete('/:relationshipId', async (req: Request, res: 
   const authReq = req as AuthenticatedRequest;
   const currentCompanyId = getCurrentCompanyId(authReq);
   const relationshipId = getString(req.params.relationshipId);
+  const query = asRecord(req.query);
+  const sourcePerspective = getString(query.perspective) === 'supplier' ? 'supplier' : 'buyer';
+  const targetPerspective = sourcePerspective === 'supplier' ? 'buyer' : 'supplier';
 
   if (!relationshipId) {
     sendError(res, 400, 'VALIDATION_ERROR', '공급기업 관계 ID가 필요합니다.');
@@ -718,15 +913,15 @@ companyRelationshipsRouter.delete('/:relationshipId', async (req: Request, res: 
             updated_at = now()
         where id = $1
           and source_company_id = $2
-          and source_perspective = 'buyer'
-          and target_perspective = 'supplier'
+          and source_perspective = $3
+          and target_perspective = $4
           and status = 'active'
       `,
-      [relationshipId, currentCompanyId]
+      [relationshipId, currentCompanyId, sourcePerspective, targetPerspective]
     );
 
     if ((result.rowCount ?? 0) === 0) {
-      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', '공급기업 관계 정보를 찾을 수 없습니다.');
+      sendError(res, 404, 'RELATIONSHIP_NOT_FOUND', sourcePerspective === 'supplier' ? '거래처 관계 정보를 찾을 수 없습니다.' : '공급기업 관계 정보를 찾을 수 없습니다.');
       return;
     }
 
@@ -936,11 +1131,31 @@ companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) =>
           where search_cert.company_id = c.id
             and search_cert.name ilike $${values.length}
         )
+        or exists (
+          select 1
+          from won_projects search_wp
+          where search_wp.name ilike $${values.length}
+            and (
+              (
+                cr.source_perspective = 'supplier'
+                and search_wp.supplier_company_id = cr.source_company_id
+                and search_wp.buyer_company_id = cr.target_company_id
+              ) or (
+                cr.source_perspective = 'buyer'
+                and search_wp.buyer_company_id = cr.source_company_id
+                and search_wp.supplier_company_id = cr.target_company_id
+              )
+            )
+        )
       )
     `);
   }
 
   try {
+    if (perspective === 'supplier') {
+      await syncSupplierWonProjectRelationships(currentCompanyId);
+    }
+
     const result = await pool.query<CompanyRelationshipRow>(
       `
         select
@@ -955,6 +1170,7 @@ companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) =>
           cr.management_status,
           cr.tags,
           cr.memo,
+          cr.updated_at,
           c.name as target_company_name,
           c.business_registration_no as target_company_business_registration_no,
           c.company_type as target_company_type,
@@ -981,9 +1197,14 @@ companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) =>
                 'mimeType', cert.mime_type,
                 'fileSize', cert.file_size
               )
-            ) filter (where cert.storage_key is not null),
+          ) filter (where cert.storage_key is not null),
             '[]'::jsonb
-          ) as certification_files
+          ) as certification_files,
+          coalesce(project_stats.project_count, '0') as project_count,
+          coalesce(project_stats.active_project_count, '0') as active_project_count,
+          coalesce(project_stats.total_contract_amount, '0') as total_contract_amount,
+          project_stats.latest_project_name,
+          project_stats.latest_project_status
         from company_relationships cr
         join companies c on c.id = cr.target_company_id
         left join lateral (
@@ -996,8 +1217,27 @@ companyRelationshipsRouter.get('/', async (req: Request, res: Response, next) =>
         ) ct on true
         left join company_capabilities cc on cc.company_id = c.id
         left join company_certifications cert on cert.company_id = c.id
+        left join lateral (
+          select
+            count(*)::text as project_count,
+            count(*) filter (where wp.status in ('preparing', 'inProgress', 'atRisk'))::text as active_project_count,
+            coalesce(sum(contract.contract_amount), 0)::text as total_contract_amount,
+            (array_agg(wp.name order by coalesce(wp.ended_at, wp.updated_at::date, wp.created_at::date) desc))[1] as latest_project_name,
+            (array_agg(wp.status order by coalesce(wp.ended_at, wp.updated_at::date, wp.created_at::date) desc))[1] as latest_project_status
+          from won_projects wp
+          left join contracts contract on contract.id = wp.contract_id
+          where (
+            cr.source_perspective = 'supplier'
+            and wp.supplier_company_id = cr.source_company_id
+            and wp.buyer_company_id = cr.target_company_id
+          ) or (
+            cr.source_perspective = 'buyer'
+            and wp.buyer_company_id = cr.source_company_id
+            and wp.supplier_company_id = cr.target_company_id
+          )
+        ) project_stats on true
         where ${conditions.join('\n          and ')}
-        group by cr.id, c.id, ct.id, ct.name, ct.department, ct.position, ct.email, ct.phone
+        group by cr.id, c.id, ct.id, ct.name, ct.department, ct.position, ct.email, ct.phone, project_stats.project_count, project_stats.active_project_count, project_stats.total_contract_amount, project_stats.latest_project_name, project_stats.latest_project_status
         order by cr.updated_at desc
       `,
       values

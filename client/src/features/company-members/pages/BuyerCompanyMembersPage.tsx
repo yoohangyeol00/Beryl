@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { KeyRound, MailCheck, Pencil, PlusCircle, Power, PowerOff, RotateCcw, Save, Trash2, UserRound, X } from 'lucide-react';
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
 import {
   activateCompanyMember,
@@ -60,7 +60,9 @@ const columns: DataTableColumn<CompanyMemberListItem>[] = [
 
 export function BuyerCompanyMembersPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
+  const basePath = location.pathname.startsWith('/supplier') ? '/supplier/company-members' : '/buyer/company-members';
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
   const [selectedMember, setSelectedMember] = useState<CompanyMemberListItem | null>(null);
@@ -68,6 +70,7 @@ export function BuyerCompanyMembersPage() {
   const [editPhone, setEditPhone] = useState('');
   const [editDepartment, setEditDepartment] = useState('');
   const [editPosition, setEditPosition] = useState('');
+  const [editMemberType, setEditMemberType] = useState<'employee' | 'reviewer' | 'manager'>('employee');
   const [editErrorMessage, setEditErrorMessage] = useState('');
   const membersQuery = useQuery({
     queryKey: ['company-members', { q: query, status }],
@@ -79,7 +82,8 @@ export function BuyerCompanyMembersPage() {
         ? updateCompanyMember(selectedMember.id, {
             phone: editPhone || undefined,
             department: editDepartment || undefined,
-            position: editPosition || undefined
+            position: editPosition || undefined,
+            memberType: editMemberType
           })
         : Promise.reject(new Error('선택된 사용자가 없습니다.')),
     onSuccess: async () => {
@@ -88,7 +92,8 @@ export function BuyerCompanyMembersPage() {
           ...selectedMember,
           phone: editPhone || null,
           department: editDepartment || null,
-          position: editPosition || null
+          position: editPosition || null,
+          memberType: editMemberType
         });
       }
 
@@ -135,6 +140,7 @@ export function BuyerCompanyMembersPage() {
     setEditPhone(formatPhoneNumber(selectedMember.phone ?? ''));
     setEditDepartment(selectedMember.department ?? '');
     setEditPosition(selectedMember.position ?? '');
+    setEditMemberType(getEditableMemberType(selectedMember.memberType));
     setEditErrorMessage('');
     setIsEditing(false);
   }, [selectedMember]);
@@ -221,11 +227,11 @@ export function BuyerCompanyMembersPage() {
             <Button
               variant="secondary"
               icon={<MailCheck className="h-4 w-4" />}
-              onClick={() => navigate('/buyer/company-members/invitations')}
+              onClick={() => navigate(`${basePath}/invitations`)}
             >
               초대 내역
             </Button>
-            <Button icon={<PlusCircle className="h-4 w-4" />} onClick={() => navigate('/buyer/company-members/new')}>
+            <Button icon={<PlusCircle className="h-4 w-4" />} onClick={() => navigate(`${basePath}/new`)}>
               사용자 초대
             </Button>
           </>
@@ -299,10 +305,12 @@ export function BuyerCompanyMembersPage() {
             editPhone={editPhone}
             editDepartment={editDepartment}
             editPosition={editPosition}
+            editMemberType={editMemberType}
             errorMessage={editErrorMessage}
             onPhoneChange={handleEditPhoneChange}
             onDepartmentChange={setEditDepartment}
             onPositionChange={setEditPosition}
+            onMemberTypeChange={setEditMemberType}
             onSubmit={handleEditSubmit}
           />
         ) : null}
@@ -317,10 +325,12 @@ function CompanyMemberDetail({
   editPhone,
   editDepartment,
   editPosition,
+  editMemberType,
   errorMessage,
   onPhoneChange,
   onDepartmentChange,
   onPositionChange,
+  onMemberTypeChange,
   onSubmit
 }: {
   member: CompanyMemberListItem;
@@ -328,10 +338,12 @@ function CompanyMemberDetail({
   editPhone: string;
   editDepartment: string;
   editPosition: string;
+  editMemberType: 'employee' | 'reviewer' | 'manager';
   errorMessage: string;
   onPhoneChange: (value: string) => void;
   onDepartmentChange: (value: string) => void;
   onPositionChange: (value: string) => void;
+  onMemberTypeChange: (value: 'employee' | 'reviewer' | 'manager') => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
@@ -359,6 +371,7 @@ function CompanyMemberDetail({
                 <EditableDetailInput label="연락처" value={editPhone} onChange={onPhoneChange} inputMode="numeric" />
                 <EditableDetailInput label="소속 부서" value={editDepartment} onChange={onDepartmentChange} />
                 <EditableDetailInput label="직책" value={editPosition} onChange={onPositionChange} />
+                <EditableDetailSelect label="권한 레벨" value={editMemberType} onChange={onMemberTypeChange} />
               </>
             ) : (
               <>
@@ -367,6 +380,7 @@ function CompanyMemberDetail({
                 <DetailLine label="연락처" value={formatPhoneNumber(member.phone ?? '') || '-'} />
                 <DetailLine label="소속 부서" value={member.department ?? '-'} />
                 <DetailLine label="직책" value={member.position ?? '-'} />
+                <DetailLine label="권한 레벨" value={getMemberTypeLabel(member.memberType)} />
               </>
             )}
           </dl>
@@ -436,15 +450,46 @@ function EditableDetailInput({
   );
 }
 
+function EditableDetailSelect({
+  label,
+  value,
+  onChange
+}: {
+  label: string;
+  value: 'employee' | 'reviewer' | 'manager';
+  onChange: (value: 'employee' | 'reviewer' | 'manager') => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <label className="text-sm text-on-surface-variant">{label}</label>
+      <select
+        className="h-12 w-[70%] min-w-0 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-right font-semibold text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+        value={value}
+        onChange={(event) => onChange(event.target.value as 'employee' | 'reviewer' | 'manager')}
+      >
+        <option value="employee">실무자</option>
+        <option value="reviewer">검토자/상급자</option>
+        <option value="manager">관리자</option>
+      </select>
+    </div>
+  );
+}
+
 function MemberStatus({ member }: { member: CompanyMemberListItem }) {
   const status = getDisplayStatus(member);
 
   return status.tone ? <Badge tone={status.tone}>{status.label}</Badge> : status.label;
 }
 
+function getEditableMemberType(memberType: string): 'employee' | 'reviewer' | 'manager' {
+  if (memberType === 'manager' || memberType === 'reviewer' || memberType === 'employee') return memberType;
+  return 'employee';
+}
+
 function getMemberTypeLabel(memberType: string) {
   if (memberType === 'manager') return '관리자';
-  if (memberType === 'employee') return '구성원';
+  if (memberType === 'reviewer') return '검토자/상급자';
+  if (memberType === 'employee') return '실무자';
   return memberType;
 }
 

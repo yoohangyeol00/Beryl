@@ -13,6 +13,7 @@ export type Resume = {
   currentProject: string;
   currentManMonths: number;
   currentEndDate: string;
+  profileImageUrl?: string | null;
 };
 
 export type ResumeProject = {

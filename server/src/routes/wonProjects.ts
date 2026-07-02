@@ -494,6 +494,21 @@ wonProjectsRouter.post('/', async (req: Request, res: Response, next) => {
     );
     await client.query(
       `
+        update company_relationships
+        set relationship_type = 'won_project',
+            status = 'active',
+            first_activity_date = coalesce(first_activity_date, current_date),
+            last_activity_date = current_date,
+            updated_at = now()
+        where source_company_id = $1
+          and target_company_id = $2
+          and source_perspective = 'supplier'
+          and target_perspective = 'buyer'
+      `,
+      [currentCompanyId, buyerId]
+    );
+    await client.query(
+      `
         insert into company_relationships (
           source_company_id,
           target_company_id,
@@ -512,7 +527,6 @@ wonProjectsRouter.post('/', async (req: Request, res: Response, next) => {
             and target_company_id = $2
             and source_perspective = 'supplier'
             and target_perspective = 'buyer'
-            and relationship_type = 'won_project'
         )
       `,
       [currentCompanyId, buyerId]

@@ -97,6 +97,7 @@ export function JobListView({ mode }: JobListViewProps = {}) {
 
   const totalCount = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const manualJobFormPath = isAgency ? '/buyer/jobs/new' : '/supplier/jobs/new';
 
   const agencyColumns: DataTableColumn<Job>[] = [
     {
@@ -196,7 +197,7 @@ export function JobListView({ mode }: JobListViewProps = {}) {
             : '수집한 입찰 공고를 확인하고 RFP 분석과 인력 추천 대상으로 관리합니다.'
         }
         actions={
-          <Button icon={<FilePlus2 className="h-4 w-4" />} onClick={() => navigate('/buyer/jobs/new')}>
+          <Button icon={<FilePlus2 className="h-4 w-4" />} onClick={() => navigate(manualJobFormPath)}>
             {isAgency ? '신규 공고 등록' : '수동 공고 입력'}
           </Button>
         }
@@ -233,7 +234,7 @@ export function JobListView({ mode }: JobListViewProps = {}) {
                   variant="ghost"
                   icon={<FilePlus2 className="h-5 w-5" />}
                   aria-label={isAgency ? '신규 공고 등록' : '수동 공고 입력'}
-                  onClick={() => navigate('/buyer/jobs/new')}
+                  onClick={() => navigate(manualJobFormPath)}
                 />
                 <Button variant="ghost" icon={<Download className="h-5 w-5" />} aria-label="다운로드" />
                 <Button variant="ghost" icon={<Printer className="h-5 w-5" />} aria-label="인쇄" />

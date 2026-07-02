@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, FileText, History, Save, Send, Sparkles, Users } from 'lucide-react';
+import { Download, FileText, History, MessageSquarePlus, Save, Send, Sparkles, Users } from 'lucide-react';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
+import { getCompanyMemberAssignees } from '../../../api/companyMembersApi';
 import { getJobDetail, getJobs } from '../../../api/jobsApi';
 import { createOffer, getOffer, recordOfferSubmission, updateOffer } from '../../../api/offersApi';
 import { getResumes } from '../../../api/resumesApi';
@@ -33,6 +34,27 @@ type SubmissionFormState = {
   receiptNo: string;
   submittedByName: string;
   memo: string;
+};
+
+type ReviewHistoryStatus = 'reviewRequested' | 'revisionRequested' | 'resolved' | 'approved';
+
+type ReviewHistoryItem = {
+  id: string;
+  createdAt: string;
+  authorName: string;
+  roleLabel: string;
+  assigneeMemberId: string;
+  assigneeName: string;
+  status: ReviewHistoryStatus;
+  body: string;
+};
+
+type ReviewHistoryFormState = {
+  authorName: string;
+  roleLabel: string;
+  assigneeMemberId: string;
+  status: ReviewHistoryStatus;
+  body: string;
 };
 
 type ProposalDisplayJob = {
@@ -94,6 +116,20 @@ const offerStatusTones: Record<OfferStatus, 'success' | 'info' | 'neutral' | 'da
 
 const checklistItems = ['RFP 원문 별도 확인', '제안 인력 가용일 확인', '제안 금액 확인', '제출 마감 전 최종 검토'];
 
+const reviewStatusLabels: Record<ReviewHistoryStatus, string> = {
+  reviewRequested: '검토 요청',
+  revisionRequested: '보완 요청',
+  resolved: '반영 완료',
+  approved: '최종 확인'
+};
+
+const reviewStatusTones: Record<ReviewHistoryStatus, 'success' | 'info' | 'neutral' | 'danger'> = {
+  reviewRequested: 'info',
+  revisionRequested: 'danger',
+  resolved: 'neutral',
+  approved: 'success'
+};
+
 function getNowInputValue() {
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -117,6 +153,15 @@ export function ProposalCreatePage() {
     submittedByName: '',
     memo: ''
   });
+  const [isReviewHistoryFormOpen, setIsReviewHistoryFormOpen] = useState(false);
+  const [reviewHistory, setReviewHistory] = useState<ReviewHistoryItem[]>([]);
+  const [reviewHistoryForm, setReviewHistoryForm] = useState<ReviewHistoryFormState>({
+    authorName: '',
+    roleLabel: '실무자',
+    assigneeMemberId: '',
+    status: 'reviewRequested',
+    body: ''
+  });
   const [errorMessage, setErrorMessage] = useState('');
   const offerQuery = useQuery({
     queryKey: ['offer', offerId],
@@ -135,6 +180,10 @@ export function ProposalCreatePage() {
   const resumesQuery = useQuery({
     queryKey: ['resumes', { pageSize: 100 }],
     queryFn: () => getResumes({ pageSize: 100 })
+  });
+  const companyMembersQuery = useQuery({
+    queryKey: ['company-member-assignees', { usage: 'proposal-review' }],
+    queryFn: getCompanyMemberAssignees
   });
   const selectedJob = useMemo(() => jobsQuery.data?.items.find((job) => job.id === form.jobId), [form.jobId, jobsQuery.data?.items]);
   const currentUserName = session?.member?.name || session?.user.name || '';
@@ -161,6 +210,8 @@ export function ProposalCreatePage() {
   } : null);
   const shouldRenderSelectedJobOption = Boolean(!isEdit && displayJob && form.jobId && !jobsQuery.data?.items.some((job) => job.id === form.jobId));
   const selectedResumes = resumesQuery.data?.items.filter((resume) => form.selectedResumeIds.includes(resume.id)) ?? [];
+  const companyMembers = companyMembersQuery.data?.items ?? [];
+  const reviewHistoryStorageKey = offerId ? `beryl-offer-review-history:${offerId}` : '';
 
   useEffect(() => {
     if (!offerQuery.data) return;
@@ -183,6 +234,38 @@ export function ProposalCreatePage() {
       current.submittedByName ? current : { ...current, submittedByName: currentUserName }
     ));
   }, [currentUserName, isSubmissionFormOpen]);
+
+  useEffect(() => {
+    if (!reviewHistoryStorageKey) {
+      setReviewHistory([]);
+      return;
+    }
+
+    try {
+      const saved = window.localStorage.getItem(reviewHistoryStorageKey);
+      const parsed = saved ? JSON.parse(saved) as Partial<ReviewHistoryItem>[] : [];
+      setReviewHistory(parsed.map((item) => ({
+        id: item.id ?? `review-${Date.now()}`,
+        createdAt: item.createdAt ?? new Date().toISOString(),
+        authorName: item.authorName ?? '-',
+        roleLabel: item.roleLabel ?? '검토자',
+        assigneeMemberId: item.assigneeMemberId ?? '',
+        assigneeName: item.assigneeName ?? '',
+        status: item.status ?? 'reviewRequested',
+        body: item.body ?? ''
+      })));
+    } catch {
+      setReviewHistory([]);
+    }
+  }, [reviewHistoryStorageKey]);
+
+  useEffect(() => {
+    if (!isReviewHistoryFormOpen || !currentUserName) return;
+
+    setReviewHistoryForm((current) => (
+      current.authorName ? current : { ...current, authorName: currentUserName }
+    ));
+  }, [currentUserName, isReviewHistoryFormOpen]);
 
   const saveMutation = useMutation({
     mutationFn: (status: OfferStatus) =>
@@ -235,6 +318,56 @@ export function ProposalCreatePage() {
 
   const updateSubmissionField = (key: keyof SubmissionFormState, value: string) => {
     setSubmissionForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const updateReviewHistoryField = (key: keyof ReviewHistoryFormState, value: string) => {
+    setReviewHistoryForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const persistReviewHistory = (items: ReviewHistoryItem[]) => {
+    setReviewHistory(items);
+    if (reviewHistoryStorageKey) {
+      window.localStorage.setItem(reviewHistoryStorageKey, JSON.stringify(items));
+    }
+  };
+
+  const handleReviewHistorySubmit = () => {
+    const body = reviewHistoryForm.body.trim();
+    const assignee = companyMembers.find((member) => member.id === reviewHistoryForm.assigneeMemberId);
+
+    if (!body) {
+      setErrorMessage('검토/보완 내용을 입력해주세요.');
+      return;
+    }
+
+    setErrorMessage('');
+    persistReviewHistory([
+      {
+        id: `review-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        authorName: reviewHistoryForm.authorName.trim() || currentUserName || '-',
+        roleLabel: reviewHistoryForm.roleLabel.trim() || '검토자',
+        assigneeMemberId: assignee?.id ?? '',
+        assigneeName: assignee?.name ?? '',
+        status: reviewHistoryForm.status,
+        body
+      },
+      ...reviewHistory
+    ]);
+    setReviewHistoryForm({
+      authorName: currentUserName,
+      roleLabel: '실무자',
+      assigneeMemberId: '',
+      status: 'reviewRequested',
+      body: ''
+    });
+    setIsReviewHistoryFormOpen(false);
+  };
+
+  const updateReviewHistoryStatus = (reviewId: string, status: ReviewHistoryStatus) => {
+    persistReviewHistory(reviewHistory.map((item) => (
+      item.id === reviewId ? { ...item, status } : item
+    )));
   };
 
   const handleResumeToggle = (resumeId: string) => {
@@ -458,10 +591,56 @@ export function ProposalCreatePage() {
                 ) : null}
             </Card>
               <Card className="p-6">
-                <h3 className="mb-4 font-headline text-[22px] font-bold">보완 요청 이력</h3>
-                <div className="rounded-lg border border-dashed border-outline-variant bg-surface-container-low p-4 text-sm leading-6 text-on-surface-variant">
-                  등록된 보완 요청이 없습니다.
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <h3 className="font-headline text-[22px] font-bold">검토/보완 이력</h3>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="h-10 px-3 text-[13px]"
+                    icon={<MessageSquarePlus className="h-4 w-4" />}
+                    onClick={() => setIsReviewHistoryFormOpen(true)}
+                  >
+                    메모 추가
+                  </Button>
                 </div>
+                {reviewHistory.length ? (
+                  <div className="space-y-3">
+                    {reviewHistory.map((item) => (
+                      <div key={item.id} className="rounded-lg border border-outline-variant bg-surface-container-low p-4 text-sm leading-6">
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <div>
+                            <strong>{item.authorName}</strong>
+                            <span className="ml-2 text-on-surface-variant">{item.roleLabel}</span>
+                          </div>
+                          <Badge tone={reviewStatusTones[item.status]}>{reviewStatusLabels[item.status]}</Badge>
+                        </div>
+                        <p className="whitespace-pre-line text-on-surface-variant">{item.body}</p>
+                        {item.assigneeName ? (
+                          <p className="mt-2 text-xs font-semibold text-primary">요청 대상자: {item.assigneeName}</p>
+                        ) : null}
+                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-xs text-on-surface-variant">{formatDateTime(item.createdAt)}</span>
+                          <div className="flex gap-2">
+                            {item.status === 'revisionRequested' ? (
+                              <Button type="button" variant="secondary" className="h-8 px-2 text-xs" onClick={() => updateReviewHistoryStatus(item.id, 'resolved')}>
+                                반영 완료
+                              </Button>
+                            ) : null}
+                            {item.status === 'resolved' ? (
+                              <Button type="button" variant="secondary" className="h-8 px-2 text-xs" onClick={() => updateReviewHistoryStatus(item.id, 'approved')}>
+                                최종 확인
+                              </Button>
+                            ) : null}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-dashed border-outline-variant bg-surface-container-low p-4 text-sm leading-6 text-on-surface-variant">
+                    등록된 검토/보완 이력이 없습니다.
+                  </div>
+                )}
               </Card>
               </>
             ) : null}
@@ -508,6 +687,63 @@ export function ProposalCreatePage() {
             value={submissionForm.memo}
             onChange={(event) => updateSubmissionField('memo', event.target.value)}
             placeholder="나라장터 최종 제출 완료, 접수증 확인"
+          />
+        </div>
+      </Modal>
+
+      <Modal
+        open={isReviewHistoryFormOpen}
+        title="검토/보완 메모 추가"
+        onClose={() => setIsReviewHistoryFormOpen(false)}
+        footer={
+          <div className="flex gap-2">
+            <Button type="button" variant="secondary" onClick={() => setIsReviewHistoryFormOpen(false)}>
+              취소
+            </Button>
+            <Button type="button" onClick={handleReviewHistorySubmit}>
+              이력 추가
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4 pb-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input label="작성자" value={reviewHistoryForm.authorName} onChange={(event) => updateReviewHistoryField('authorName', event.target.value)} placeholder="이름" />
+            <Input label="역할" value={reviewHistoryForm.roleLabel} onChange={(event) => updateReviewHistoryField('roleLabel', event.target.value)} placeholder="실무자 / 상급자 / 검토자" />
+          </div>
+          <label className="block">
+            <span className="mb-2 block font-label text-label-sm text-on-surface-variant">요청 대상자</span>
+            <select
+              className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body text-[16px] text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+              value={reviewHistoryForm.assigneeMemberId}
+              onChange={(event) => updateReviewHistoryField('assigneeMemberId', event.target.value)}
+            >
+              <option value="">지정 안 함</option>
+              {companyMembers.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}{member.position ? ` / ${member.position}` : ''}{member.department ? ` / ${member.department}` : ''}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-2 block font-label text-label-sm text-on-surface-variant">상태</span>
+            <select
+              className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body text-[16px] text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+              value={reviewHistoryForm.status}
+              onChange={(event) => updateReviewHistoryField('status', event.target.value)}
+            >
+              <option value="reviewRequested">검토 요청</option>
+              <option value="revisionRequested">보완 요청</option>
+              <option value="resolved">반영 완료</option>
+              <option value="approved">최종 확인</option>
+            </select>
+          </label>
+          <textarea
+            className="min-h-36 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 font-body text-[15px] text-on-surface outline-none transition placeholder:text-on-surface-variant focus:border-primary focus:ring-2 focus:ring-primary/25"
+            value={reviewHistoryForm.body}
+            onChange={(event) => updateReviewHistoryField('body', event.target.value)}
+            placeholder="예: 가격 산출 근거를 상세화하고, 투입 인력 역할별 책임 범위를 보완해주세요."
           />
         </div>
       </Modal>

@@ -9,6 +9,7 @@ export interface CreateCompanyMemberInvitationRequest {
   position?: string;
   phone?: string;
   role?: 'companyUser';
+  memberType?: 'employee' | 'reviewer' | 'manager';
 }
 
 export interface CompanyMemberInvitation {
@@ -57,10 +58,24 @@ export interface UpdateCompanyMemberRequest {
   department?: string;
   position?: string;
   phone?: string;
+  memberType?: 'employee' | 'reviewer' | 'manager';
 }
 
 export interface CompanyMemberListResponse {
   items: CompanyMemberListItem[];
+  total: number;
+}
+
+export interface CompanyMemberAssignee {
+  id: string;
+  name: string;
+  department: string | null;
+  position: string | null;
+  memberType: string;
+}
+
+export interface CompanyMemberAssigneeResponse {
+  items: CompanyMemberAssignee[];
   total: number;
 }
 
@@ -93,6 +108,11 @@ export async function getCompanyMembers(params?: GetCompanyMembersParams) {
   const response = await axiosInstance.get<ApiResponse<CompanyMemberListResponse>>('/company-members', {
     params
   });
+  return unwrapApiResponse(response.data);
+}
+
+export async function getCompanyMemberAssignees() {
+  const response = await axiosInstance.get<ApiResponse<CompanyMemberAssigneeResponse>>('/company-members/assignees');
   return unwrapApiResponse(response.data);
 }
 

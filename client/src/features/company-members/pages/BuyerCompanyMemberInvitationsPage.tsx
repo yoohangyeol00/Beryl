@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, MailCheck } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
 import { getCompanyMemberInvitations, type CompanyMemberInvitationHistoryItem } from '../../../api/companyMembersApi';
 import { EmptyState } from '../../../components/common/EmptyState';
@@ -28,6 +28,8 @@ const columns: DataTableColumn<CompanyMemberInvitationHistoryItem>[] = [
 
 export function BuyerCompanyMemberInvitationsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const basePath = location.pathname.startsWith('/supplier') ? '/supplier/company-members' : '/buyer/company-members';
   const [selectedInvitation, setSelectedInvitation] = useState<CompanyMemberInvitationHistoryItem | null>(null);
   const invitationsQuery = useQuery({
     queryKey: ['company-member-invitations'],
@@ -40,7 +42,7 @@ export function BuyerCompanyMemberInvitationsPage() {
         title="사용자 초대 내역"
         description="현재 기업에서 발송한 사용자 초대와 수락 상태를 확인합니다."
         actions={
-          <Button variant="secondary" icon={<ArrowLeft className="h-4 w-4" />} onClick={() => navigate('/buyer/company-members')}>
+          <Button variant="secondary" icon={<ArrowLeft className="h-4 w-4" />} onClick={() => navigate(basePath)}>
             목록으로
           </Button>
         }

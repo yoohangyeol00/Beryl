@@ -25,6 +25,7 @@ export interface CreateSupplierRelationshipRequest {
   capabilities?: string[];
   certifications?: string[];
   relationship?: {
+    sourcePerspective?: 'buyer' | 'supplier';
     relationshipType?: 'preferred_partner' | 'bid_participation' | 'contract' | 'won_project';
     internalGrade?: string;
     managementStatus?: SupplierManagementStatus;
@@ -45,6 +46,7 @@ export interface SupplierRelationship {
   managementStatus: SupplierManagementStatus | null;
   tags: string | null;
   memo: string | null;
+  updatedAt: string;
   targetCompany: {
     id: string;
     name: string;
@@ -74,6 +76,13 @@ export interface SupplierRelationship {
     mimeType: string | null;
     fileSize: string | number | null;
   }>;
+  projectSummary?: {
+    total: number;
+    active: number;
+    totalContractAmount: number;
+    latestProjectName: string | null;
+    latestProjectStatus: string | null;
+  };
 }
 
 export interface SupplierRelationshipList {
@@ -91,8 +100,8 @@ export async function getSupplierRelationships(params?: GetSupplierRelationships
   return unwrapApiResponse(response.data);
 }
 
-export async function getSupplierRelationship(relationshipId: string) {
-  const response = await axiosInstance.get<ApiResponse<SupplierRelationship>>(`/company-relationships/${relationshipId}`);
+export async function getSupplierRelationship(relationshipId: string, params?: GetSupplierRelationshipsParams) {
+  const response = await axiosInstance.get<ApiResponse<SupplierRelationship>>(`/company-relationships/${relationshipId}`, { params });
   return unwrapApiResponse(response.data);
 }
 
@@ -106,8 +115,8 @@ export async function updateSupplierRelationship(relationshipId: string, payload
   return unwrapApiResponse(response.data);
 }
 
-export async function deleteSupplierRelationship(relationshipId: string) {
-  const response = await axiosInstance.delete<ApiResponse<{ id: string }>>(`/company-relationships/${relationshipId}`);
+export async function deleteSupplierRelationship(relationshipId: string, params?: GetSupplierRelationshipsParams) {
+  const response = await axiosInstance.delete<ApiResponse<{ id: string }>>(`/company-relationships/${relationshipId}`, { params });
   return unwrapApiResponse(response.data);
 }
 

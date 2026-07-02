@@ -1,8 +1,9 @@
 ﻿import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { ReactElement } from 'react';
 import { Navigate, RouterProvider, createBrowserRouter, useParams } from 'react-router-dom';
 import { AuthLayout } from './layouts/AuthLayout';
 import { MainLayout } from './layouts/MainLayout';
-import { AuthProvider } from './features/auth/AuthContext';
+import { AuthProvider, useAuth } from './features/auth/AuthContext';
 import { ProtectedRoute, PublicOnlyRoute } from './features/auth/routes/AuthRouteGuards';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { SignupPage } from './features/auth/pages/SignupPage';
@@ -44,6 +45,17 @@ function RedirectWithParam({ to, param }: { to: (value: string) => string; param
   return <Navigate to={value ? to(value) : '/buyer/dashboard'} replace />;
 }
 
+function CompanyMemberAdminRoute({ children }: { children: ReactElement }) {
+  const { session } = useAuth();
+  const canManageCompanyMembers = session?.user.role === 'systemAdmin' || session?.member?.memberType === 'manager';
+
+  if (!canManageCompanyMembers) {
+    return <Navigate to="/supplier/dashboard" replace />;
+  }
+
+  return children;
+}
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -76,14 +88,20 @@ const router = createBrowserRouter([
           { path: 'buyer/suppliers', element: <BuyerSupplierPoolPage /> },
           { path: 'buyer/suppliers/new', element: <BuyerSupplierFormPage /> },
           { path: 'buyer/suppliers/:supplierId/edit', element: <BuyerSupplierFormPage /> },
-          { path: 'buyer/company-members', element: <BuyerCompanyMembersPage /> },
-          { path: 'buyer/company-members/invitations', element: <BuyerCompanyMemberInvitationsPage /> },
-          { path: 'buyer/company-members/new', element: <BuyerCompanyMemberFormPage /> },
+          { path: 'buyer/company-members', element: <CompanyMemberAdminRoute><BuyerCompanyMembersPage /></CompanyMemberAdminRoute> },
+          { path: 'buyer/company-members/invitations', element: <CompanyMemberAdminRoute><BuyerCompanyMemberInvitationsPage /></CompanyMemberAdminRoute> },
+          { path: 'buyer/company-members/new', element: <CompanyMemberAdminRoute><BuyerCompanyMemberFormPage /></CompanyMemberAdminRoute> },
           { path: 'supplier/dashboard', element: <SupplierDashboardPage /> },
           { path: 'supplier/jobs', element: <SupplierJobListPage /> },
+          { path: 'supplier/jobs/new', element: <BuyerJobFormPage /> },
           { path: 'supplier/jobs/:jobId', element: <SupplierJobDetailPage /> },
           { path: 'supplier/bid-participation', element: <SupplierBidParticipationPage /> },
+          { path: 'supplier/company-members', element: <CompanyMemberAdminRoute><BuyerCompanyMembersPage /></CompanyMemberAdminRoute> },
+          { path: 'supplier/company-members/invitations', element: <CompanyMemberAdminRoute><BuyerCompanyMemberInvitationsPage /></CompanyMemberAdminRoute> },
+          { path: 'supplier/company-members/new', element: <CompanyMemberAdminRoute><BuyerCompanyMemberFormPage /></CompanyMemberAdminRoute> },
           { path: 'supplier/clients', element: <SupplierClientListPage /> },
+          { path: 'supplier/clients/new', element: <BuyerSupplierFormPage /> },
+          { path: 'supplier/clients/:supplierId/edit', element: <BuyerSupplierFormPage /> },
           { path: 'supplier/manpower', element: <SupplierManpowerPage /> },
           { path: 'supplier/projects', element: <SupplierProjectsPage /> },
           { path: 'supplier/projects/:projectId', element: <SupplierProjectDetailPage /> },

@@ -1,14 +1,18 @@
-import { useQuery } from '@tanstack/react-query';
-import { UserPlus } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Pencil, Trash2, UserPlus } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { getResumes } from '../../../api/resumesApi';
+import { getApiErrorMessage } from '../../../api/apiResponse';
+import { deleteResume, getResume, getResumes } from '../../../api/resumesApi';
 import { PageTitle } from '../../../components/common/PageTitle';
 import { MetricCard } from '../../../components/common/MetricCard';
 import { PageToolbar } from '../../../components/common/PageToolbar';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
+import { Modal } from '../../../components/ui/Modal';
 import type { AvailabilityStatus, Resume } from '../../../types/resume';
+import { ResumeDetailContent } from '../../resumes/pages/ResumeDetailPage';
 
 const statusLabels: Record<AvailabilityStatus, string> = {
   available: '가용',
@@ -55,7 +59,10 @@ function isAvailabilityStatus(value: string): value is AvailabilityStatus {
 
 export function SupplierManpowerPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
+  const [detailErrorMessage, setDetailErrorMessage] = useState('');
   const status = searchParams.get('status') ?? 'all';
   const query = searchParams.get('q') ?? '';
   const availabilityStatus = isAvailabilityStatus(status) ? status : undefined;
@@ -67,6 +74,22 @@ export function SupplierManpowerPage() {
 
   const rows = resumesQuery.data?.items ?? [];
   const summary = resumesQuery.data?.summary;
+  const selectedResumeQuery = useQuery({
+    queryKey: ['resume', selectedResumeId],
+    queryFn: () => getResume(selectedResumeId ?? ''),
+    enabled: Boolean(selectedResumeId)
+  });
+  const selectedResume = selectedResumeQuery.data;
+  const deleteMutation = useMutation({
+    mutationFn: (resumeId: string) => deleteResume(resumeId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['resumes'] });
+      setSelectedResumeId(null);
+    },
+    onError: (error) => {
+      setDetailErrorMessage(getApiErrorMessage(error, '인력 정보를 삭제하지 못했습니다.'));
+    }
+  });
 
   const handleQueryChange = (value: string) => {
     const next = new URLSearchParams(searchParams);
@@ -80,6 +103,15 @@ export function SupplierManpowerPage() {
     if (value === 'all') next.delete('status');
     else next.set('status', value);
     setSearchParams(next);
+  };
+
+  const handleDeleteSelectedResume = () => {
+    if (!selectedResume || !window.confirm(`${selectedResume.name} 인력 정보를 삭제할까요?`)) {
+      return;
+    }
+
+    setDetailErrorMessage('');
+    deleteMutation.mutate(selectedResume.id);
   };
 
   return (
@@ -129,10 +161,49 @@ export function SupplierManpowerPage() {
         columns={columns}
         data={rows}
         getRowKey={(row) => row.id}
-        onRowClick={(row) => navigate(`/resumes/${row.id}`)}
+        onRowClick={(row) => {
+          setDetailErrorMessage('');
+          setSelectedResumeId(row.id);
+        }}
         emptyMessage={resumesQuery.isError ? '인력 정보를 불러오지 못했습니다.' : '조건에 맞는 인력이 없습니다.'}
         isLoading={resumesQuery.isLoading}
       />
+
+      <Modal
+        open={selectedResumeId !== null}
+        title={selectedResume ? `${selectedResume.name} 인력 상세` : '인력 상세'}
+        onClose={() => setSelectedResumeId(null)}
+        actions={
+          selectedResume ? (
+            <div className="flex items-center gap-2">
+              <Button variant="secondary" icon={<Pencil className="h-4 w-4" />} onClick={() => navigate(`/resumes/${selectedResume.id}/edit`)}>
+                수정
+              </Button>
+              <Button
+                variant="secondary"
+                className="!border-error !text-error hover:!bg-error/5"
+                icon={<Trash2 className="h-4 w-4" />}
+                onClick={handleDeleteSelectedResume}
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? '삭제 중...' : '삭제'}
+              </Button>
+            </div>
+          ) : undefined
+        }
+        footer={
+          <Button variant="secondary" type="button" onClick={() => setSelectedResumeId(null)}>
+            닫기
+          </Button>
+        }
+      >
+        <ResumeDetailContent
+          profile={selectedResume}
+          isLoading={selectedResumeQuery.isLoading}
+          isError={selectedResumeQuery.isError}
+          errorMessage={detailErrorMessage}
+        />
+      </Modal>
     </section>
   );
 }

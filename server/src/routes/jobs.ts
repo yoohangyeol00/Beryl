@@ -705,8 +705,7 @@ jobsRouter.post('/import', async (req: Request, res: Response, next) => {
             status,
             rfp_score,
             recommended_people_count,
-            description,
-            false as is_own_procurement
+            description
           )
           values ($1, null, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
           on conflict (notice_number)
@@ -741,7 +740,8 @@ jobsRouter.post('/import', async (req: Request, res: Response, next) => {
             status,
             rfp_score,
             recommended_people_count,
-            description
+            description,
+            false as is_own_procurement
         `,
         [
           buyerCompany.id,

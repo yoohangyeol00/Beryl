@@ -48,6 +48,11 @@ export async function createJob(payload: CreateJobRequest) {
   return unwrapApiResponse(response.data);
 }
 
+export async function importJobs(payload: CreateJobRequest[]) {
+  const response = await axiosInstance.post<ApiResponse<JobList>>('/jobs/import', { items: payload });
+  return unwrapApiResponse(response.data);
+}
+
 export async function updateJob(jobId: string, payload: CreateJobRequest) {
   const response = await axiosInstance.patch<ApiResponse<JobDetail>>(`/jobs/${jobId}`, payload);
   return unwrapApiResponse(response.data);

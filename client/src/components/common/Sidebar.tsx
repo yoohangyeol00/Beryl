@@ -1,6 +1,7 @@
 import { Building2, ClipboardList, FileSearch, LayoutDashboard, Plus, RefreshCw, Users, X, type LucideIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../features/auth/AuthContext';
 import { getBidParticipationPath, getDashboardPath, getJobsPath, getManpowerPath, getProjectsPath, getRoleMode, getSupplierClientsPath, getSupplierPoolPath, type RoleMode } from '../../features/modes/roleMode';
 
 type NavItem = {
@@ -26,6 +27,7 @@ const ko = {
   supplierPeople: '\uC778\uB825/\uC774\uB825 \uAD00\uB9AC',
   supplierProjects: '\uC218\uD589 \uC0AC\uC5C5 \uAD00\uB9AC',
   supplierClients: '\uAC70\uB798\uCC98 \uAD00\uB9AC',
+  supplierUsers: '\uD68C\uC0AC \uAD6C\uC131\uC6D0/\uAD8C\uD55C',
   newJob: '\uC2E0\uADDC \uACF5\uACE0 \uB4F1\uB85D',
   mobileMenu: '\uBAA8\uBC14\uC77C \uBA54\uB274',
   closeMenu: '\uBA54\uB274 \uB2EB\uAE30'
@@ -53,7 +55,17 @@ const navItemsByRole: Record<RoleMode, NavItem[]> = {
     { label: ko.supplierProposals, href: getBidParticipationPath(), icon: FileSearch, activeMatch: 'exact' },
     { label: ko.supplierPeople, href: getManpowerPath(), icon: Users, activeMatch: 'exact' },
     { label: ko.supplierProjects, href: getProjectsPath(), icon: RefreshCw, activeMatch: 'section' },
-    { label: ko.supplierClients, href: getSupplierClientsPath(), icon: Building2, activeMatch: 'exact' }
+    { label: ko.supplierClients, href: getSupplierClientsPath(), icon: Building2, activeMatch: 'exact' },
+    {
+      label: ko.supplierUsers,
+      href: '/supplier/company-members',
+      icon: Users,
+      activeMatch: 'section',
+      children: [
+        { label: '사용자 초대', href: '/supplier/company-members/new' },
+        { label: '초대 이력', href: '/supplier/company-members/invitations' }
+      ]
+    }
   ]
 };
 
@@ -74,9 +86,14 @@ function isNavItemActive(pathname: string, item: NavItem) {
 
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const location = useLocation();
+  const { session } = useAuth();
   const [role, setRole] = useState<RoleMode>(() => getRoleMode(location.pathname));
   const [collapsedNavHref, setCollapsedNavHref] = useState<string | null>(null);
-  const navItems = navItemsByRole[role];
+  const canManageCompanyMembers = session?.user.role === 'systemAdmin' || session?.member?.memberType === 'manager';
+  const navItems = navItemsByRole[role].filter((item) => {
+    if (item.href.endsWith('/company-members')) return canManageCompanyMembers;
+    return true;
+  });
   const meta = roleMeta[role];
 
   useEffect(() => {
@@ -105,12 +122,14 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
 
   const nav = (
     <>
-      <div className="px-5 pb-8">
-        <Link to={meta.ctaHref} className="flex h-16 w-full items-center justify-center gap-3 rounded-lg bg-primary px-5 font-label text-[18px] font-semibold text-on-primary shadow-sm" onClick={onClose}>
-          <Plus className="h-6 w-6" />
-          {meta.ctaLabel}
-        </Link>
-      </div>
+      {role === 'agency' ? (
+        <div className="px-5 pb-8">
+          <Link to={meta.ctaHref} className="flex h-16 w-full items-center justify-center gap-3 rounded-lg bg-primary px-5 font-label text-[18px] font-semibold text-on-primary shadow-sm" onClick={onClose}>
+            <Plus className="h-6 w-6" />
+            {meta.ctaLabel}
+          </Link>
+        </div>
+      ) : null}
 
       <nav className="flex-grow space-y-3 overflow-y-auto px-5">
         {navItems.map((item) => {

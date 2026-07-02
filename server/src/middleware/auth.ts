@@ -36,6 +36,7 @@ export interface AuthenticatedMember {
   position: string | null;
   email: string | null;
   phone: string | null;
+  memberType: string;
 }
 
 export interface AuthContext {
@@ -85,6 +86,7 @@ interface AuthSessionRow {
   member_position: string | null;
   member_email: string | null;
   member_phone: string | null;
+  member_type: string | null;
 }
 
 export async function attachAuthContext(req: AuthenticatedRequest, _res: Response, next: NextFunction): Promise<void> {
@@ -121,7 +123,8 @@ export async function attachAuthContext(req: AuthenticatedRequest, _res: Respons
           cm.department as member_department,
           cm.position as member_position,
           cm.email as member_email,
-          cm.phone as member_phone
+          cm.phone as member_phone,
+          cm.member_type
         from auth_sessions s
         join users u on u.id = s.user_id
         left join companies c on c.id = u.company_id
@@ -176,7 +179,8 @@ export async function attachAuthContext(req: AuthenticatedRequest, _res: Respons
             department: row.member_department,
             position: row.member_position,
             email: row.member_email,
-            phone: row.member_phone
+            phone: row.member_phone,
+            memberType: row.member_type ?? 'employee'
           }
         : null
     };

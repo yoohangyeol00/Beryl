@@ -10,6 +10,9 @@ import { createCompanyScopedRouter } from './companyScopedRouter.js';
 export const companyMembersRouter = createCompanyScopedRouter();
 
 type InvitationRole = 'companyUser';
+type CompanyMemberType = 'employee' | 'reviewer' | 'manager';
+
+const editableMemberTypes = new Set<CompanyMemberType>(['employee', 'reviewer', 'manager']);
 
 interface InvitationRow {
   id: string;
@@ -59,6 +62,14 @@ interface CompanyMemberInvitationHistoryRow {
   canceled_at: string | null;
 }
 
+interface CompanyMemberAssigneeRow {
+  id: string;
+  name: string;
+  department: string | null;
+  position: string | null;
+  member_type: string;
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return {};
@@ -77,6 +88,19 @@ function normalizeEmail(email: string): string {
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function normalizeMemberType(value: string): CompanyMemberType {
+  return editableMemberTypes.has(value as CompanyMemberType) ? (value as CompanyMemberType) : 'employee';
+}
+
+async function ensureCompanyMemberManager(req: AuthenticatedRequest, res: Response): Promise<boolean> {
+  if (req.auth?.user.role === 'systemAdmin') return true;
+
+  if (req.auth?.member?.memberType === 'manager') return true;
+
+  sendError(res, 403, 'COMPANY_MEMBER_MANAGER_REQUIRED', '회사 구성원/권한 관리는 관리자만 사용할 수 있습니다.');
+  return false;
 }
 
 function createInvitationToken() {
@@ -149,8 +173,52 @@ function toCompanyMemberInvitationHistoryResponse(row: CompanyMemberInvitationHi
   };
 }
 
+function toCompanyMemberAssigneeResponse(row: CompanyMemberAssigneeRow) {
+  return {
+    id: row.id,
+    name: row.name,
+    department: row.department,
+    position: row.position,
+    memberType: row.member_type
+  };
+}
+
+companyMembersRouter.get('/assignees', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+
+  try {
+    const result = await pool.query<CompanyMemberAssigneeRow>(
+      `
+        select id, name, department, position, member_type
+        from company_members
+        where company_id = $1
+          and status = 'active'
+          and member_type in ('employee', 'reviewer', 'manager')
+        order by
+          case member_type
+            when 'manager' then 0
+            when 'reviewer' then 1
+            else 2
+          end,
+          name asc
+      `,
+      [currentCompanyId]
+    );
+
+    sendSuccess(res, {
+      items: result.rows.map(toCompanyMemberAssigneeResponse),
+      total: result.rowCount ?? result.rows.length
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 companyMembersRouter.get('/invitations', async (req: Request, res: Response, next) => {
   const authReq = req as AuthenticatedRequest;
+  if (!(await ensureCompanyMemberManager(authReq, res))) return;
+
   const currentCompanyId = getCurrentCompanyId(authReq);
 
   try {
@@ -189,6 +257,8 @@ companyMembersRouter.get('/invitations', async (req: Request, res: Response, nex
 
 companyMembersRouter.get('/', async (req: Request, res: Response, next) => {
   const authReq = req as AuthenticatedRequest;
+  if (!(await ensureCompanyMemberManager(authReq, res))) return;
+
   const currentCompanyId = getCurrentCompanyId(authReq);
   const query = asRecord(req.query);
   const q = getString(query.q);
@@ -310,12 +380,16 @@ companyMembersRouter.get('/', async (req: Request, res: Response, next) => {
 
 companyMembersRouter.patch('/:memberId', async (req: Request, res: Response, next) => {
   const authReq = req as AuthenticatedRequest;
+  if (!(await ensureCompanyMemberManager(authReq, res))) return;
+
   const currentCompanyId = getCurrentCompanyId(authReq);
   const memberId = getString(req.params.memberId);
   const body = asRecord(req.body);
   const department = getString(body.department) || null;
   const position = getString(body.position) || null;
   const phone = getString(body.phone) || null;
+  const memberTypeInput = getString(body.memberType);
+  const memberType = memberTypeInput ? normalizeMemberType(memberTypeInput) : null;
 
   if (!memberId) {
     sendError(res, 400, 'VALIDATION_ERROR', '사용자 ID가 필요합니다.');
@@ -333,13 +407,14 @@ companyMembersRouter.patch('/:memberId', async (req: Request, res: Response, nex
         set department = $1,
             position = $2,
             phone = $3,
+            member_type = coalesce($6, member_type),
             updated_at = now()
         where id = $4
           and company_id = $5
           and member_type <> 'contact'
         returning id, user_id
       `,
-      [department, position, phone, memberId, currentCompanyId]
+      [department, position, phone, memberId, currentCompanyId, memberType]
     );
     const member = result.rows[0];
 
@@ -361,6 +436,8 @@ companyMembersRouter.patch('/:memberId', async (req: Request, res: Response, nex
 
 companyMembersRouter.patch('/:memberId/cancel-invitation', async (req: Request, res: Response, next) => {
   const authReq = req as AuthenticatedRequest;
+  if (!(await ensureCompanyMemberManager(authReq, res))) return;
+
   const currentCompanyId = getCurrentCompanyId(authReq);
   const memberId = getString(req.params.memberId);
 
@@ -419,6 +496,8 @@ companyMembersRouter.patch('/:memberId/cancel-invitation', async (req: Request, 
 
 companyMembersRouter.patch('/:memberId/deactivate', async (req: Request, res: Response, next) => {
   const authReq = req as AuthenticatedRequest;
+  if (!(await ensureCompanyMemberManager(authReq, res))) return;
+
   const currentCompanyId = getCurrentCompanyId(authReq);
   const memberId = getString(req.params.memberId);
 
@@ -456,6 +535,8 @@ companyMembersRouter.patch('/:memberId/deactivate', async (req: Request, res: Re
 
 companyMembersRouter.patch('/:memberId/activate', async (req: Request, res: Response, next) => {
   const authReq = req as AuthenticatedRequest;
+  if (!(await ensureCompanyMemberManager(authReq, res))) return;
+
   const currentCompanyId = getCurrentCompanyId(authReq);
   const memberId = getString(req.params.memberId);
 
@@ -494,6 +575,8 @@ companyMembersRouter.patch('/:memberId/activate', async (req: Request, res: Resp
 
 companyMembersRouter.post('/invitations', async (req: Request, res: Response, next) => {
   const authReq = req as AuthenticatedRequest;
+  if (!(await ensureCompanyMemberManager(authReq, res))) return;
+
   const body = asRecord(req.body);
   const name = getString(body.name);
   const email = normalizeEmail(getString(body.email));
@@ -502,6 +585,7 @@ companyMembersRouter.post('/invitations', async (req: Request, res: Response, ne
   const phone = getString(body.phone) || null;
   const roleInput = getString(body.role);
   const role: InvitationRole = 'companyUser';
+  const memberType = normalizeMemberType(getString(body.memberType));
 
   if (roleInput && roleInput !== role) {
     sendError(res, 400, 'INVALID_INVITATION_ROLE', '회사 사용자 초대는 companyUser 권한만 사용할 수 있습니다.');
@@ -565,13 +649,13 @@ companyMembersRouter.post('/invitations', async (req: Request, res: Response, ne
                 department = $2,
                 position = $3,
                 phone = $4,
-                member_type = 'employee',
+                member_type = $6,
                 status = 'invited',
                 updated_at = now()
             where id = $5
             returning id
           `,
-          [name, department, position, phone, existingMember.rows[0].id]
+          [name, department, position, phone, existingMember.rows[0].id, memberType]
         )
       : await client.query<{ id: string }>(
           `
@@ -585,10 +669,10 @@ companyMembersRouter.post('/invitations', async (req: Request, res: Response, ne
               member_type,
               status
             )
-            values ($1, $2, $3, $4, $5, $6, 'employee', 'invited')
+            values ($1, $2, $3, $4, $5, $6, $7, 'invited')
             returning id
           `,
-          [currentCompanyId, name, department, position, email, phone]
+          [currentCompanyId, name, department, position, email, phone, memberType]
         );
 
     const companyMemberId = memberResult.rows[0].id;

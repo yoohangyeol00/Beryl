@@ -53,6 +53,10 @@ export function getSupplierClientsPath() {
   return '/supplier/clients';
 }
 
+export function getSupplierClientFormPath(clientId?: string) {
+  return clientId ? `/supplier/clients/${clientId}/edit` : '/supplier/clients/new';
+}
+
 export function getProjectsPath() {
   return '/supplier/projects';
 }
