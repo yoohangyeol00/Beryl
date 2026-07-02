@@ -2,7 +2,7 @@ import { axiosInstance, requestWithMockFallback } from './axios';
 import type { ApiResponse } from './apiResponse';
 import { unwrapApiResponse } from './apiResponse';
 import { mockOffersResponse } from '../mocks/offers.mock';
-import type { Offer, OfferDetail, OfferListParams, OfferListResponse, OfferMatch, OfferMutationPayload, OfferSubmission, OfferSubmissionPayload } from '../types/offer';
+import type { Offer, OfferDetail, OfferListParams, OfferListResponse, OfferMatch, OfferMutationPayload, OfferSubmission, OfferSubmissionPayload, ReceivedOfferPayload } from '../types/offer';
 
 function toListResponse(items: Offer[]): OfferListResponse {
   return {
@@ -35,6 +35,11 @@ export async function getOffer(offerId: string) {
 
 export async function createOffer(payload: OfferMutationPayload) {
   const response = await axiosInstance.post<ApiResponse<Offer>>('/offers', payload);
+  return unwrapApiResponse(response.data);
+}
+
+export async function createReceivedOffer(payload: ReceivedOfferPayload) {
+  const response = await axiosInstance.post<ApiResponse<Offer>>('/offers/received', payload);
   return unwrapApiResponse(response.data);
 }
 

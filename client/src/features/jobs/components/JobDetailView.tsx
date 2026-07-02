@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Calendar, CheckCircle2, FileText, Info, Paperclip, Pencil, Send, Sparkles, Star, Target, Trash2, XCircle } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
+import { Calendar, CheckCircle2, FileText, Info, Paperclip, Pencil, PlusCircle, Send, Sparkles, Star, Target, Trash2, XCircle } from 'lucide-react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getApiErrorMessage } from '../../../api/apiResponse';
 import { deleteJob, getJobRecommendedPeople, updateJobOwnProcurement, type JobRecommendedPerson } from '../../../api/jobsApi';
+import { createReceivedOffer, getOffers } from '../../../api/offersApi';
 import { EmptyState } from '../../../components/common/EmptyState';
 import { LoadingState } from '../../../components/common/LoadingState';
 import { PageTitle } from '../../../components/common/PageTitle';
@@ -12,23 +13,14 @@ import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DataTable, type DataTableColumn } from '../../../components/ui/DataTable';
+import { Input } from '../../../components/ui/Input';
+import { Modal } from '../../../components/ui/Modal';
 import { getJobEditPath, getJobsPath, type RoleMode } from '../../modes/roleMode';
 import type { JobDetail } from '../../../types/job';
+import type { Offer, OfferStatus } from '../../../types/offer';
 import { useJobDetail } from '../hooks/useJobDetail';
 
 type DetailTab = 'overview' | 'summary' | 'skills' | 'criteria' | 'schedule' | 'files';
-type ProposalStatus = 'received' | 'reviewing' | 'revision' | 'preferred';
-
-type ReceivedProposal = {
-  id: string;
-  supplier: string;
-  people: string;
-  proposedAmount: string;
-  techScore: number;
-  priceScore: number;
-  status: ProposalStatus;
-};
-
 
 const labels = {
   downloadRfp: 'RFP 다운로드',
@@ -57,10 +49,6 @@ const labels = {
   fit: '적합도',
   reason: '추천 사유',
   point: '점',
-  received: '접수',
-  reviewing: '평가중',
-  revision: '보완요청',
-  preferred: '우선협상',
   reviewPanel: '제안 평가 현황',
   reviewPanelDesc: '접수 제안 중 평가와 보완 요청 상태를 확인합니다.',
   candidatePanel: '제안 준비',
@@ -69,19 +57,12 @@ const labels = {
   proposalPoint: '제안 포인트'
 };
 
-const statusLabel: Record<ProposalStatus, string> = {
-  received: labels.received,
-  reviewing: labels.reviewing,
-  revision: labels.revision,
-  preferred: labels.preferred
+const offerStatusLabel: Record<OfferStatus, string> = {
+  draft: '등록',
+  submitted: '접수',
+  awarded: '우선협상',
+  rejected: '제외'
 };
-
-const receivedProposals: ReceivedProposal[] = [
-  { id: 'proposal-1', supplier: '테크브리지코리아', people: '김도윤, 이서연, 박지훈', proposedAmount: '8,650,000,000원', techScore: 92, priceScore: 84, status: 'reviewing' },
-  { id: 'proposal-2', supplier: '넥스트소프트', people: '오지훈, 최민서 외 2명', proposedAmount: '8,420,000,000원', techScore: 86, priceScore: 88, status: 'received' },
-  { id: 'proposal-3', supplier: '도시정보기술', people: '정하늘 외 3명', proposedAmount: '8,780,000,000원', techScore: 78, priceScore: 81, status: 'revision' },
-  { id: 'proposal-4', supplier: '에이아이랩스', people: '강서준 외 4명', proposedAmount: '8,590,000,000원', techScore: 89, priceScore: 86, status: 'preferred' }
-];
 
 const tabs: { id: DetailTab; label: string; icon: typeof Info }[] = [
   { id: 'overview', label: labels.overview, icon: Info },
@@ -105,6 +86,17 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
   const [role, setRole] = useState<RoleMode>(mode ?? 'agency');
   const [deleteErrorMessage, setDeleteErrorMessage] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isReceivedOfferModalOpen, setIsReceivedOfferModalOpen] = useState(false);
+  const [receivedOfferForm, setReceivedOfferForm] = useState({
+    supplierName: '',
+    proposalTitle: '',
+    proposalManagerName: '',
+    proposalAmount: '',
+    technicalScore: '',
+    priceScore: '',
+    status: 'submitted' as OfferStatus,
+    strategyMemo: ''
+  });
   const isAgency = role === 'agency';
   const ownProcurementMutation = useMutation({
     mutationFn: (nextValue: boolean) => updateJobOwnProcurement(jobId, nextValue),
@@ -121,6 +113,33 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
     enabled: !isAgency && Boolean(jobId)
   });
   const recommendedPeople = recommendedPeopleData?.items ?? [];
+  const receivedOffersQuery = useQuery({
+    queryKey: ['offers', { perspective: 'buyer', jobId }],
+    queryFn: () => getOffers({ perspective: 'buyer', jobId, pageSize: 100 }),
+    enabled: isAgency && Boolean(jobId)
+  });
+  const receivedOffers = receivedOffersQuery.data?.items ?? [];
+  const createReceivedOfferMutation = useMutation({
+    mutationFn: () =>
+      createReceivedOffer({
+        jobId,
+        ...receivedOfferForm
+      }),
+    onSuccess: async () => {
+      setIsReceivedOfferModalOpen(false);
+      setReceivedOfferForm({
+        supplierName: '',
+        proposalTitle: '',
+        proposalManagerName: '',
+        proposalAmount: '',
+        technicalScore: '',
+        priceScore: '',
+        status: 'submitted',
+        strategyMemo: ''
+      });
+      await queryClient.invalidateQueries({ queryKey: ['offers'] });
+    }
+  });
 
   useEffect(() => {
     if (mode) {
@@ -142,16 +161,16 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
     };
   }, [mode]);
 
-  const proposalColumns: DataTableColumn<ReceivedProposal>[] = [
-    { key: 'supplier', header: labels.supplier, sortable: true, render: (row) => <strong>{row.supplier}</strong> },
-    { key: 'people', header: labels.people, sortable: true },
-    { key: 'proposedAmount', header: labels.amount, align: 'right' },
-    { key: 'techScore', header: labels.techScore, align: 'right', sortable: true, render: (row) => `${row.techScore}${labels.point}` },
-    { key: 'priceScore', header: labels.priceScore, align: 'right', sortable: true, render: (row) => `${row.priceScore}${labels.point}` },
+  const proposalColumns: DataTableColumn<Offer>[] = [
+    { key: 'supplierName', header: labels.supplier, sortable: true, render: (row) => <strong>{row.supplierName}</strong> },
+    { key: 'people', header: labels.people, sortable: true, render: (row) => row.proposedPeople.length ? row.proposedPeople.join(', ') : row.proposalManagerName || '-' },
+    { key: 'proposalAmount', header: labels.amount, align: 'right', render: (row) => formatCurrency(row.proposalAmount) },
+    { key: 'technicalScore', header: labels.techScore, align: 'right', sortable: true, render: (row) => `${row.technicalScore || 0}${labels.point}` },
+    { key: 'priceScore', header: labels.priceScore, align: 'right', sortable: true, render: (row) => `${row.priceScore || 0}${labels.point}` },
     {
       key: 'status',
       header: labels.progress,
-      render: (row) => <Badge tone={row.status === 'revision' ? 'danger' : row.status === 'preferred' ? 'success' : 'info'}>{statusLabel[row.status]}</Badge>
+      render: (row) => <Badge tone={row.status === 'rejected' ? 'danger' : row.status === 'awarded' ? 'success' : 'info'}>{offerStatusLabel[row.status]}</Badge>
     }
   ];
 
@@ -169,6 +188,18 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
     },
     { key: 'reason', header: labels.reason, cellClassName: 'whitespace-normal min-w-[320px]' }
   ];
+
+  function updateReceivedOfferForm(name: keyof typeof receivedOfferForm, value: string) {
+    setReceivedOfferForm((current) => ({
+      ...current,
+      [name]: value
+    }));
+  }
+
+  function handleReceivedOfferSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    createReceivedOfferMutation.mutate();
+  }
 
   async function handleDelete() {
     if (!jobId || !window.confirm('공고를 삭제하시겠습니까?')) return;
@@ -279,12 +310,26 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
       </div>
 
       <Card className="overflow-hidden">
-        <div className="border-b border-outline-variant p-8">
-          <h2 className="font-headline text-[28px] font-bold">{isAgency ? labels.receivedCompare : labels.recommendedPeople}</h2>
-          <p className="mt-2 text-on-surface-variant">{isAgency ? labels.agencyCompareDesc : labels.supplierDesc}</p>
+        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-outline-variant p-8">
+          <div>
+            <h2 className="font-headline text-[28px] font-bold">{isAgency ? labels.receivedCompare : labels.recommendedPeople}</h2>
+            <p className="mt-2 text-on-surface-variant">{isAgency ? labels.agencyCompareDesc : labels.supplierDesc}</p>
+          </div>
+          {isAgency ? (
+            <Button icon={<PlusCircle className="h-4 w-4" />} onClick={() => setIsReceivedOfferModalOpen(true)}>
+              접수 제안 등록
+            </Button>
+          ) : null}
         </div>
         {isAgency ? (
-          <DataTable columns={proposalColumns} data={receivedProposals} getRowKey={(row) => row.id} tableClassName="min-w-[1040px] w-full" />
+          <DataTable
+            columns={proposalColumns}
+            data={receivedOffers}
+            getRowKey={(row) => row.id}
+            isLoading={receivedOffersQuery.isLoading}
+            emptyMessage="등록된 접수 제안이 없습니다."
+            tableClassName="min-w-[1040px] w-full"
+          />
         ) : (
           <DataTable
             columns={recommendedColumns}
@@ -299,6 +344,90 @@ export function JobDetailView({ mode }: JobDetailViewProps = {}) {
           />
         )}
       </Card>
+
+      <Modal
+        open={isReceivedOfferModalOpen}
+        title="접수 제안 등록"
+        onClose={() => setIsReceivedOfferModalOpen(false)}
+        footer={
+          <div className="flex gap-2">
+            <Button variant="secondary" type="button" onClick={() => setIsReceivedOfferModalOpen(false)}>
+              취소
+            </Button>
+            <Button type="submit" form="received-offer-form" disabled={createReceivedOfferMutation.isPending}>
+              {createReceivedOfferMutation.isPending ? '등록 중...' : '등록'}
+            </Button>
+          </div>
+        }
+      >
+        <form id="received-offer-form" className="space-y-5 pb-4" onSubmit={handleReceivedOfferSubmit}>
+          {createReceivedOfferMutation.isError ? (
+            <div className="rounded-lg border border-error/30 bg-error-container px-5 py-4 font-semibold text-on-error-container">
+              {getApiErrorMessage(createReceivedOfferMutation.error, '접수 제안을 등록하지 못했습니다.')}
+            </div>
+          ) : null}
+          <div className="grid gap-4 md:grid-cols-2">
+            <Input
+              label="공급기업명"
+              value={receivedOfferForm.supplierName}
+              onChange={(event) => updateReceivedOfferForm('supplierName', event.target.value)}
+              required
+            />
+            <Input
+              label="제안명"
+              value={receivedOfferForm.proposalTitle}
+              onChange={(event) => updateReceivedOfferForm('proposalTitle', event.target.value)}
+              placeholder="예: 차세대 시스템 구축 제안"
+            />
+            <Input
+              label="담당자"
+              value={receivedOfferForm.proposalManagerName}
+              onChange={(event) => updateReceivedOfferForm('proposalManagerName', event.target.value)}
+            />
+            <Input
+              label="제안 금액"
+              value={receivedOfferForm.proposalAmount}
+              onChange={(event) => updateReceivedOfferForm('proposalAmount', event.target.value)}
+              inputMode="numeric"
+              placeholder="숫자만 입력"
+            />
+            <Input
+              label="기술 평가 점수"
+              value={receivedOfferForm.technicalScore}
+              onChange={(event) => updateReceivedOfferForm('technicalScore', event.target.value)}
+              inputMode="numeric"
+            />
+            <Input
+              label="가격 평가 점수"
+              value={receivedOfferForm.priceScore}
+              onChange={(event) => updateReceivedOfferForm('priceScore', event.target.value)}
+              inputMode="numeric"
+            />
+          </div>
+          <label className="block">
+            <span className="mb-2 block font-label text-label-sm text-on-surface-variant">진행상태</span>
+            <select
+              className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 font-body text-[16px] text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25"
+              value={receivedOfferForm.status}
+              onChange={(event) => updateReceivedOfferForm('status', event.target.value)}
+            >
+              <option value="submitted">접수</option>
+              <option value="draft">등록</option>
+              <option value="awarded">우선협상</option>
+              <option value="rejected">제외</option>
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-2 block font-label text-label-sm text-on-surface-variant">메모</span>
+            <textarea
+              className="min-h-28 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 py-3 font-body text-[15px] text-on-surface outline-none transition placeholder:text-on-surface-variant focus:border-primary focus:ring-2 focus:ring-primary/25"
+              value={receivedOfferForm.strategyMemo}
+              onChange={(event) => updateReceivedOfferForm('strategyMemo', event.target.value)}
+              placeholder="평가 의견이나 보완 요청 내용을 입력하세요."
+            />
+          </label>
+        </form>
+      </Modal>
     </section>
   );
 }

@@ -16,8 +16,8 @@ export function Modal({ open, title, children, onClose, actions, footer }: Modal
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-inverse-surface/30 p-6">
-      <section className="flex max-h-[calc(100vh-3rem)] w-full max-w-3xl flex-col rounded-lg border border-outline-variant bg-surface-container-lowest shadow-ambient">
+    <div className="modal-overlay fixed inset-0 z-50 grid place-items-center bg-inverse-surface/30 p-6">
+      <section className="modal-panel flex max-h-[calc(100vh-3rem)] w-full max-w-3xl flex-col rounded-lg border border-outline-variant bg-surface-container-lowest shadow-ambient">
         <div className="flex shrink-0 items-center justify-between px-6 py-4">
           <h2 className="font-headline text-headline-md text-on-surface">{title}</h2>
           {actions ?? (

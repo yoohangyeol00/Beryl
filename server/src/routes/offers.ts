@@ -24,6 +24,8 @@ interface OfferRow {
   proposal_title: string | null;
   proposal_manager_name: string | null;
   proposal_amount: string | null;
+  technical_score: string | null;
+  price_score: string | null;
   expected_start_date: string | Date | null;
   expected_duration_months: number | null;
   strategy_memo: string | null;
@@ -195,6 +197,8 @@ function toOffer(row: OfferRow) {
     proposalTitle: row.proposal_title ?? '',
     proposalManagerName: row.proposal_manager_name ?? '',
     proposalAmount: row.proposal_amount ? Number(row.proposal_amount) : 0,
+    technicalScore: row.technical_score ? Number(row.technical_score) : row.total_match_score ? Number(row.total_match_score) : 0,
+    priceScore: row.price_score ? Number(row.price_score) : 0,
     expectedStartDate: formatDateValue(row.expected_start_date),
     expectedDurationMonths: row.expected_duration_months ?? 0,
     strategyMemo: row.strategy_memo ?? '',
@@ -258,6 +262,8 @@ function buildOfferSelect(whereSql: string) {
       o.proposal_title,
       o.proposal_manager_name,
       o.proposal_amount,
+      o.technical_score,
+      o.price_score,
       o.expected_start_date,
       o.expected_duration_months,
       o.strategy_memo,
@@ -341,6 +347,24 @@ async function findAccessibleJob(jobId: string, currentCompanyId: string): Promi
               and cr.status = 'active'
           )
         )
+      limit 1
+    `,
+    [jobId, currentCompanyId]
+  );
+
+  return result.rows[0] ?? null;
+}
+
+async function findBuyerOwnedJob(
+  jobId: string,
+  currentCompanyId: string
+): Promise<{ id: string; buyer_company_id: string; title: string } | null> {
+  const result = await pool.query<{ id: string; buyer_company_id: string; title: string }>(
+    `
+      select id, buyer_company_id, title
+      from jobs
+      where id = $1
+        and buyer_company_id = $2
       limit 1
     `,
     [jobId, currentCompanyId]
@@ -443,6 +467,7 @@ offersRouter.get('/', async (req: Request, res: Response, next) => {
         : ['o.supplier_company_id = $1'];
   const q = getString(query.q);
   const status = getString(query.status);
+  const jobId = getString(query.jobId);
 
   if (q) {
     values.push(`%${q}%`);
@@ -452,6 +477,11 @@ offersRouter.get('/', async (req: Request, res: Response, next) => {
   if (status === 'draft' || status === 'submitted' || status === 'awarded' || status === 'rejected') {
     values.push(status);
     conditions.push(`o.status = $${values.length}`);
+  }
+
+  if (jobId) {
+    values.push(jobId);
+    conditions.push(`o.job_id = $${values.length}`);
   }
 
   const whereSql = conditions.join('\n and ');
@@ -649,6 +679,156 @@ offersRouter.post('/', async (req: Request, res: Response, next) => {
     sendSuccess(res, toOffer(created ?? result.rows[0]), 201);
   } catch (error) {
     await client.query('rollback');
+    next(error);
+  } finally {
+    client.release();
+  }
+});
+
+offersRouter.post('/received', async (req: Request, res: Response, next) => {
+  const authReq = req as AuthenticatedRequest;
+  const currentCompanyId = getCurrentCompanyId(authReq);
+  const body = asRecord(req.body);
+  const jobId = getString(body.jobId);
+  const supplierName = getString(body.supplierName);
+  const status = getOfferStatus(body.status, 'submitted');
+
+  if (!jobId || !supplierName) {
+    sendError(res, 400, 'VALIDATION_ERROR', '공고와 공급기업명은 필수입니다.');
+    return;
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('begin');
+
+    const job = await findBuyerOwnedJob(jobId, currentCompanyId);
+
+    if (!job) {
+      await client.query('rollback');
+      sendError(res, 403, 'JOB_BUYER_FORBIDDEN', '접수 제안은 본인 기업이 발주한 공고에만 등록할 수 있습니다.');
+      return;
+    }
+
+    const existingCompany = await client.query<{ id: string }>('select id from companies where lower(name) = lower($1) limit 1', [
+      supplierName
+    ]);
+    const supplierCompanyId =
+      existingCompany.rows[0]?.id ??
+      (
+        await client.query<{ id: string }>(
+          `
+            insert into companies (name, company_type, supports_supplier, status)
+            values ($1, 'supplier', true, 'active')
+            returning id
+          `,
+          [supplierName]
+        )
+      ).rows[0].id;
+
+    const duplicate = await client.query<{ id: string }>(
+      'select id from offers where job_id = $1 and supplier_company_id = $2 limit 1',
+      [jobId, supplierCompanyId]
+    );
+
+    if (duplicate.rowCount) {
+      await client.query('rollback');
+      sendError(res, 409, 'OFFER_ALREADY_EXISTS', '이미 등록된 공급기업 제안입니다.');
+      return;
+    }
+
+    const result = await client.query<{ id: string }>(
+      `
+        insert into offers (
+          job_id,
+          supplier_company_id,
+          status,
+          submitted_at,
+          proposal_title,
+          proposal_manager_name,
+          proposal_amount,
+          total_match_score,
+          technical_score,
+          price_score,
+          strategy_memo
+        )
+        values (
+          $1::uuid,
+          $2::uuid,
+          $3::varchar,
+          case when $3::varchar = 'draft' then null else current_date end,
+          $4::varchar,
+          $5::varchar,
+          $6::numeric,
+          $7::numeric,
+          $7::numeric,
+          $8::numeric,
+          $9::text
+        )
+        returning id
+      `,
+      [
+        jobId,
+        supplierCompanyId,
+        status,
+        getNullableString(body.proposalTitle),
+        getNullableString(body.proposalManagerName),
+        getNumber(body.proposalAmount),
+        getNumber(body.technicalScore),
+        getNumber(body.priceScore),
+        getNullableString(body.strategyMemo)
+      ]
+    );
+
+    await client.query(
+      `
+        insert into company_relationships (
+          source_company_id,
+          target_company_id,
+          source_perspective,
+          target_perspective,
+          relationship_type,
+          status,
+          first_activity_date,
+          last_activity_date
+        )
+        values ($1, $2, 'buyer', 'supplier', 'bid_participation', 'active', current_date, current_date)
+        on conflict do nothing
+      `,
+      [currentCompanyId, supplierCompanyId]
+    );
+
+    await client.query('commit');
+
+    sendSuccess(
+      res,
+      {
+        id: result.rows[0].id,
+        jobId: job.id,
+        jobTitle: job.title,
+        buyerCompanyId: job.buyer_company_id,
+        buyerName: authReq.auth?.company?.name ?? '',
+        supplierCompanyId: supplierCompanyId,
+        supplierName,
+        status,
+        totalMatchScore: getNumber(body.technicalScore) ?? 0,
+        submittedAt: status === 'draft' ? '' : new Date().toISOString().slice(0, 10),
+        proposalTitle: getNullableString(body.proposalTitle) ?? '',
+        proposalManagerName: getNullableString(body.proposalManagerName) ?? '',
+        proposalAmount: getNumber(body.proposalAmount) ?? 0,
+        technicalScore: getNumber(body.technicalScore) ?? 0,
+        priceScore: getNumber(body.priceScore) ?? 0,
+        expectedStartDate: '',
+        expectedDurationMonths: 0,
+        strategyMemo: getNullableString(body.strategyMemo) ?? '',
+        proposedPeople: [],
+        latestSubmission: null
+      },
+      201
+    );
+  } catch (error) {
+    await client.query('rollback').catch(() => undefined);
     next(error);
   } finally {
     client.release();

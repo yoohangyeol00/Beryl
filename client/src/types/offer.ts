@@ -26,6 +26,8 @@ export type Offer = {
   proposalTitle: string;
   proposalManagerName: string;
   proposalAmount: number;
+  technicalScore: number;
+  priceScore: number;
   expectedStartDate: string;
   expectedDurationMonths: number;
   strategyMemo: string;
@@ -69,6 +71,7 @@ export type OfferListParams = {
   q?: string;
   status?: OfferStatus;
   perspective?: 'supplier' | 'buyer' | 'all';
+  jobId?: string;
   page?: number;
   pageSize?: number;
 };
@@ -79,10 +82,24 @@ export type OfferMutationPayload = {
   proposalTitle?: string;
   proposalManagerName?: string;
   proposalAmount?: number | string;
+  technicalScore?: number | string;
+  priceScore?: number | string;
   expectedStartDate?: string;
   expectedDurationMonths?: number | string;
   strategyMemo?: string;
   resumeIds?: string[];
+};
+
+export type ReceivedOfferPayload = {
+  jobId: string;
+  supplierName: string;
+  status?: OfferStatus;
+  proposalTitle?: string;
+  proposalManagerName?: string;
+  proposalAmount?: number | string;
+  technicalScore?: number | string;
+  priceScore?: number | string;
+  strategyMemo?: string;
 };
 
 export type OfferSubmissionPayload = {
