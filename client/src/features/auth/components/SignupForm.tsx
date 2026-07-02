@@ -11,6 +11,9 @@ interface SignupFormProps {
   passwordConfirm: string;
   companyName: string;
   businessRegistrationNo: string;
+  businessRegistrationNoVerified: boolean;
+  businessVerificationMessage: string;
+  isBusinessVerifying: boolean;
   supportsBuyer: boolean;
   supportsSupplier: boolean;
   isSubmitting: boolean;
@@ -21,6 +24,7 @@ interface SignupFormProps {
   onPasswordConfirmChange: (value: string) => void;
   onCompanyNameChange: (value: string) => void;
   onBusinessRegistrationNoChange: (value: string) => void;
+  onVerifyBusinessRegistrationNo: () => void;
   onSupportsBuyerChange: (value: boolean) => void;
   onSupportsSupplierChange: (value: boolean) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -33,6 +37,9 @@ export function SignupForm({
   passwordConfirm,
   companyName,
   businessRegistrationNo,
+  businessRegistrationNoVerified,
+  businessVerificationMessage,
+  isBusinessVerifying,
   supportsBuyer,
   supportsSupplier,
   isSubmitting,
@@ -43,6 +50,7 @@ export function SignupForm({
   onPasswordConfirmChange,
   onCompanyNameChange,
   onBusinessRegistrationNoChange,
+  onVerifyBusinessRegistrationNo,
   onSupportsBuyerChange,
   onSupportsSupplierChange,
   onSubmit
@@ -122,13 +130,39 @@ export function SignupForm({
             autoComplete="organization"
             required
           />
-          <Input
-            label="사업자등록번호"
-            icon={<IdCard className="h-5 w-5" />}
-            placeholder="123-45-67890"
-            value={businessRegistrationNo}
-            onChange={(event) => onBusinessRegistrationNoChange(event.target.value)}
-          />
+          <div>
+            <div className="flex gap-3">
+              <div className="min-w-0 flex-1">
+                <Input
+                  label="사업자등록번호"
+                  icon={<IdCard className="h-5 w-5" />}
+                  placeholder="123-45-67890"
+                  value={businessRegistrationNo}
+                  onChange={(event) => onBusinessRegistrationNoChange(event.target.value)}
+                  required
+                />
+              </div>
+              <Button
+                type="button"
+                variant={businessRegistrationNoVerified ? 'secondary' : 'primary'}
+                className="mt-7 h-12 shrink-0 px-4"
+                disabled={isSubmitting || isBusinessVerifying}
+                onClick={onVerifyBusinessRegistrationNo}
+              >
+                {isBusinessVerifying ? '인증중' : businessRegistrationNoVerified ? '인증완료' : '인증하기'}
+              </Button>
+            </div>
+            {businessVerificationMessage ? (
+              <p
+                className={[
+                  'mt-2 text-sm font-semibold',
+                  businessRegistrationNoVerified ? 'text-primary' : 'text-error'
+                ].join(' ')}
+              >
+                {businessVerificationMessage}
+              </p>
+            ) : null}
+          </div>
 
           <fieldset className="rounded-lg border border-outline-variant bg-surface-container-lowest p-5">
             <legend className="px-1 font-label text-label-sm text-on-surface-variant">기업 이용 모드</legend>

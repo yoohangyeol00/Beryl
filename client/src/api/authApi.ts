@@ -56,6 +56,7 @@ export interface SignupRequest {
   company: {
     name: string;
     businessRegistrationNo?: string;
+    businessRegistrationNoVerified?: boolean;
     supportsBuyer: boolean;
     supportsSupplier: boolean;
   };

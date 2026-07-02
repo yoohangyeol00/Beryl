@@ -12,6 +12,9 @@ export const config = {
   resendApiKey: process.env.RESEND_API_KEY ?? '',
   invitationFromEmail: process.env.INVITATION_FROM_EMAIL ?? '',
   invitationTtlHours: Number(process.env.INVITATION_TTL_HOURS ?? 72),
+  odcloudServiceKey: process.env.ODCLOUD_SERVICE_KEY ?? '',
+  odcloudBusinessStatusUrl:
+    process.env.ODCLOUD_BUSINESS_STATUS_URL ?? 'https://api.odcloud.kr/api/nts-businessman/v1/status',
   aiProvider: process.env.AI_PROVIDER ?? 'gemini',
   geminiApiKey: process.env.GEMINI_API_KEY ?? '',
   geminiModel: process.env.GEMINI_MODEL ?? 'gemini-3.1-flash-lite',

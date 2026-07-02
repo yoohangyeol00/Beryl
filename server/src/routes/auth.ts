@@ -12,6 +12,7 @@ import {
 import { config } from '../config.js';
 import { pool } from '../db.js';
 import { requireAuth, type AuthenticatedRequest, type AuthRole } from '../middleware/auth.js';
+import { normalizeBusinessNumber, verifyBusinessStatus } from '../services/businessVerification.js';
 import { sendError, sendSuccess } from '../utils/apiResponse.js';
 
 export const authRouter = Router();
@@ -222,12 +223,14 @@ authRouter.post('/signup', async (req, res, next) => {
   const passwordConfirm = getString(body.passwordConfirm);
   const company = asRecord(body.company);
   const companyName = getString(company.name);
-  const businessRegistrationNo = getString(company.businessRegistrationNo) || null;
+  const businessRegistrationNoInput = getString(company.businessRegistrationNo);
+  const businessRegistrationNo = businessRegistrationNoInput ? normalizeBusinessNumber(businessRegistrationNoInput) : null;
+  const businessRegistrationNoVerified = getBoolean(company.businessRegistrationNoVerified);
   const supportsBuyer = getBoolean(company.supportsBuyer);
   const supportsSupplier = getBoolean(company.supportsSupplier);
 
-  if (!name || !email || !password || !passwordConfirm || !companyName) {
-    sendError(res, 400, 'VALIDATION_ERROR', '이름, 이메일, 비밀번호, 기업명은 필수입니다.');
+  if (!name || !email || !password || !passwordConfirm || !companyName || !businessRegistrationNo) {
+    sendError(res, 400, 'VALIDATION_ERROR', '이름, 이메일, 비밀번호, 기업명, 사업자등록번호는 필수입니다.');
     return;
   }
 
@@ -251,6 +254,38 @@ authRouter.post('/signup', async (req, res, next) => {
     return;
   }
 
+  if (businessRegistrationNo.length !== 10) {
+    sendError(res, 400, 'INVALID_BUSINESS_REGISTRATION_NO', '사업자등록번호는 숫자 10자리로 입력해주세요.');
+    return;
+  }
+
+  if (!businessRegistrationNoVerified) {
+    sendError(res, 400, 'BUSINESS_REGISTRATION_NOT_VERIFIED', '사업자등록번호 인증을 완료해주세요.');
+    return;
+  }
+
+  try {
+    const verification = await verifyBusinessStatus(businessRegistrationNo);
+
+    if (!verification.verified) {
+      sendError(
+        res,
+        400,
+        'BUSINESS_REGISTRATION_NOT_ACTIVE',
+        verification.statusMessage || '유효한 사업자등록번호가 아닙니다.'
+      );
+      return;
+    }
+  } catch (error) {
+    sendError(
+      res,
+      error instanceof Error && error.message.includes('서비스 키') ? 400 : 502,
+      'BUSINESS_REGISTRATION_VERIFICATION_FAILED',
+      error instanceof Error ? error.message : '사업자등록번호 인증에 실패했습니다.'
+    );
+    return;
+  }
+
   const client = await pool.connect();
 
   try {
@@ -266,7 +301,7 @@ authRouter.post('/signup', async (req, res, next) => {
 
     if (businessRegistrationNo) {
       const existingCompany = await client.query('select id from companies where business_registration_no = $1 limit 1', [
-        businessRegistrationNo
+      businessRegistrationNo
       ]);
 
       if (existingCompany.rowCount) {
